@@ -10,6 +10,8 @@ public class PlayerController : MonoBehaviour
     [Header("Collision")]
     [SerializeField] private LayerMask solidObjectsLayer;
 
+    [SerializeField] private LayerMask interactableLayer;
+
     // nur kleiner Prüfbereich an den "Füßen"
     [SerializeField] private float footRadius = 0.08f;
 
@@ -98,7 +100,7 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 footCheckPos = (Vector2)targetPos + footOffset;
 
-        Collider2D hit = Physics2D.OverlapCircle(footCheckPos, footRadius, solidObjectsLayer);
+        Collider2D hit = Physics2D.OverlapCircle(footCheckPos, footRadius, solidObjectsLayer | interactableLayer);
 
         if (hit != null)
         {
