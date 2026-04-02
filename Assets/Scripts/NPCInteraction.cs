@@ -6,11 +6,6 @@ public class NPCInteraction : MonoBehaviour
 
     void Update()
     {
-        if (playerInRange)
-        {
-            Debug.Log("Player ist im Trigger");
-        }
-
         if (playerInRange && Input.GetKeyDown(KeyCode.E))
         {
             Debug.Log("Interaktion gestartet");
@@ -22,6 +17,7 @@ public class NPCInteraction : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerInRange = true;
+            Debug.Log("Player ist im Trigger");
         }
     }
 
@@ -30,6 +26,7 @@ public class NPCInteraction : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerInRange = false;
+            Debug.Log("Player hat Trigger verlassen");
         }
     }
 }

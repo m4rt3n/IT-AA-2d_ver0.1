@@ -100,7 +100,7 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 footCheckPos = (Vector2)targetPos + footOffset;
 
-        Collider2D hit = Physics2D.OverlapCircle(footCheckPos, footRadius, solidObjectsLayer | interactableLayer);
+        Collider2D hit = Physics2D.OverlapCircle(footCheckPos, footRadius, solidObjectsLayer);
 
         if (hit != null)
         {
