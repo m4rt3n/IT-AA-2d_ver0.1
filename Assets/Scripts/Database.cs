@@ -10,24 +10,13 @@ public class Database : MonoBehaviour
     void Start()
     {
         Init();
-        CreateUser("Martin");
-
-        User user = GetUser("Martin");
-
-        if (user != null)
-        {
-            Debug.Log("Geladener User: " + user.Username + " Score: " + user.Score);
-        }
     }
 
     void Init()
     {
         string dbPath = Path.Combine(Application.dataPath, "../Database/game.db");
-
         connection = new SQLiteConnection(dbPath);
-
         connection.CreateTable<User>();
-
         Debug.Log("Datenbank initialisiert");
     }
 
@@ -49,6 +38,18 @@ public class Database : MonoBehaviour
     public User GetUser(string username)
     {
         return connection.Table<User>().FirstOrDefault(x => x.Username == username);
+    }
+
+    public void UpdateScore(string username, int newScore)
+    {
+        var user = GetUser(username);
+
+        if (user != null)
+        {
+            user.Score = newScore;
+            connection.Update(user);
+            Debug.Log("Score aktualisiert: " + username + " -> " + newScore);
+        }
     }
 }
 
