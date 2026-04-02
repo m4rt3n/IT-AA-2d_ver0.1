@@ -12,6 +12,11 @@ public class NPCInteraction : MonoBehaviour
         }
     }
 
+    public void Interact()
+    {
+        Debug.Log("Arthur: Hallo Spieler.");
+    }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
