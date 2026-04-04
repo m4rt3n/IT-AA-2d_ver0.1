@@ -1,72 +1,92 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    [Header("Movement")]
-    [SerializeField] private float moveSpeed = 2f;
-    [SerializeField] private float step = 0.07f;
+    #region Inspector
 
-    [Header("Collision")]
+    [Header("Movement")]
+    [SerializeField] private float moveSpeed = 3f;
     [SerializeField] private LayerMask solidObjectsLayer;
-    [SerializeField] private float footRadius = 0.06f;
-    [SerializeField] private Vector2 footOffset = new Vector2(0f, -0.25f);
+    [SerializeField] private float step = 0.5f;
+    [SerializeField] private float radius = 0.01f;
+    [SerializeField] private float collisionOffsetY = 0.2f;
 
     [Header("Interaction")]
     [SerializeField] private LayerMask interactableLayer;
-    [SerializeField] private float interactionRadius = 0.2f;
-    [SerializeField] private float interactionDistance = 0.3f;
+    [SerializeField] private float interactRadius = 0.2f;
+    [SerializeField] private float interactDistance = 0.6f;
+
+    #endregion
+
+    #region State
 
     private bool isMoving;
+    private bool interactPressed;
+
     private Vector2 input;
-    private Vector2 lastDirection = Vector2.down;
+    private Vector2 moveInput;
+    private Vector2 lastMoveDirection = Vector2.down;
+
     private Animator animator;
+
+    #endregion
+
+    #region Unity Methods
 
     private void Awake()
     {
         animator = GetComponent<Animator>();
-
-        if (animator == null)
-        {
-            Debug.LogError("Kein Animator auf dem Player gefunden.");
-        }
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            Interact();
-        }
+        HandleInteraction();
 
         if (isMoving)
-        {
-            if (animator != null)
-            {
-                animator.SetBool("isMoving", true);
-            }
             return;
-        }
 
-        input.x = Input.GetAxisRaw("Horizontal");
-        input.y = Input.GetAxisRaw("Vertical");
+        HandleMovementInput();
+    }
+
+    #endregion
+
+    #region Input System
+
+    public void OnMove(InputValue value)
+    {
+        moveInput = value.Get<Vector2>();
+    }
+
+    public void OnInteract(InputValue value)
+    {
+        if (value.isPressed)
+            interactPressed = true;
+    }
+
+    #endregion
+
+    #region Movement
+
+    private void HandleMovementInput()
+    {
+        input = moveInput;
 
         // Keine diagonale Bewegung
         if (input.x != 0)
-        {
             input.y = 0;
-        }
+
+        // Auf feste Richtungen reduzieren
+        input.x = Mathf.Round(input.x);
+        input.y = Mathf.Round(input.y);
 
         if (input != Vector2.zero)
         {
-            lastDirection = input.normalized;
+            lastMoveDirection = input;
 
-            if (animator != null)
-            {
-                animator.SetFloat("moveX", input.x);
-                animator.SetFloat("moveY", input.y);
-                animator.SetBool("isMoving", true);
-            }
+            animator.SetFloat("moveX", input.x);
+            animator.SetFloat("moveY", input.y);
 
             Vector3 targetPos = transform.position;
             targetPos.x += input.x * step;
@@ -76,29 +96,19 @@ public class PlayerController : MonoBehaviour
             {
                 StartCoroutine(Move(targetPos));
             }
-            else
-            {
-                Debug.Log("Blockiert");
-                if (animator != null)
-                {
-                    animator.SetBool("isMoving", false);
-                }
-            }
         }
         else
         {
-            if (animator != null)
-            {
-                animator.SetBool("isMoving", false);
-            }
+            animator.SetBool("isMoving", false);
         }
     }
 
     private IEnumerator Move(Vector3 targetPos)
     {
         isMoving = true;
+        animator.SetBool("isMoving", true);
 
-        while ((targetPos - transform.position).sqrMagnitude > 0.0001f)
+        while ((targetPos - transform.position).sqrMagnitude > Mathf.Epsilon)
         {
             transform.position = Vector3.MoveTowards(
                 transform.position,
@@ -111,60 +121,86 @@ public class PlayerController : MonoBehaviour
 
         transform.position = targetPos;
         isMoving = false;
-
-        if (animator != null)
-        {
-            animator.SetBool("isMoving", false);
-        }
+        animator.SetBool("isMoving", false);
     }
 
     private bool IsWalkable(Vector3 targetPos)
     {
-        Vector2 footCheckPos = (Vector2)targetPos + footOffset;
+        Vector2 checkPosition = new Vector2(
+            targetPos.x,
+            targetPos.y - collisionOffsetY
+        );
 
-        Collider2D hit = Physics2D.OverlapCircle(footCheckPos, footRadius, solidObjectsLayer);
-
-        if (hit != null)
-        {
-            Debug.Log("Getroffen: " + hit.name);
-            return false;
-        }
-
-        return true;
+        return Physics2D.OverlapCircle(checkPosition, radius, solidObjectsLayer) == null;
     }
 
-    private void Interact()
-    {
-        Vector2 checkPos = (Vector2)transform.position + lastDirection * interactionDistance;
+    #endregion
 
-        Collider2D hit = Physics2D.OverlapCircle(checkPos, interactionRadius, interactableLayer);
+    #region Interaction
+
+    private void HandleInteraction()
+    {
+        if (!interactPressed)
+            return;
+
+        interactPressed = false;
+
+        Vector2 origin = transform.position;
+        Vector2 direction = lastMoveDirection;
+
+        if (direction == Vector2.zero)
+            direction = Vector2.down;
+
+        Vector2 checkPosition = origin + direction * interactDistance;
+
+        Collider2D hit = Physics2D.OverlapCircle(
+            checkPosition,
+            interactRadius,
+            interactableLayer
+        );
 
         if (hit != null)
         {
-            Debug.Log("Interaktion mit: " + hit.name);
+            INPCInteractable interactable = hit.GetComponent<INPCInteractable>();
+
+            if (interactable != null)
+            {
+                interactable.Interact();
+                return;
+            }
 
             NPCInteraction npc = hit.GetComponent<NPCInteraction>();
             if (npc != null)
             {
                 npc.Interact();
+                return;
             }
+
+            Debug.Log("Interagierbares Objekt: " + hit.name);
         }
         else
         {
-            Debug.Log("Nichts zum Interagieren gefunden.");
+            Debug.Log("Nichts zum Interagieren.");
         }
     }
 
+    #endregion
+
+    #region Debug
+
     private void OnDrawGizmosSelected()
     {
-        Vector2 footCheckPos = (Vector2)transform.position + footOffset;
-
+        // Collision
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(footCheckPos, footRadius);
+        Vector3 collisionPos = transform.position + new Vector3(0f, -collisionOffsetY, 0f);
+        Gizmos.DrawWireSphere(collisionPos, radius);
 
-        Vector2 interactCheckPos = (Vector2)transform.position + lastDirection * interactionDistance;
-
+        // Interaction
         Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(interactCheckPos, interactionRadius);
+        Vector2 dir = lastMoveDirection == Vector2.zero ? Vector2.down : lastMoveDirection;
+        Vector3 interactPos = transform.position + (Vector3)(dir * interactDistance);
+        Gizmos.DrawWireSphere(interactPos, interactRadius);
     }
+
+    #endregion
 }

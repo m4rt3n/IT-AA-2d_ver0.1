@@ -1,37 +1,12 @@
 using UnityEngine;
 
-public class NPCInteraction : MonoBehaviour
+public class NPCInteraction : MonoBehaviour, INPCInteractable
 {
-    private bool playerInRange = false;
-
-    void Update()
-    {
-        if (playerInRange && Input.GetKeyDown(KeyCode.E))
-        {
-            Debug.Log("Interaktion gestartet");
-        }
-    }
+    [SerializeField] private string npcName = "Arthur";
+    [SerializeField] private string message = "Hallo, ich bin Arthur.";
 
     public void Interact()
     {
-        Debug.Log("Arthur: Hallo Spieler.");
-    }
-
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            playerInRange = true;
-            Debug.Log("Player ist im Trigger");
-        }
-    }
-
-    private void OnTriggerExit2D(Collider2D other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            playerInRange = false;
-            Debug.Log("Player hat Trigger verlassen");
-        }
+        Debug.Log(npcName + ": " + message);
     }
 }
