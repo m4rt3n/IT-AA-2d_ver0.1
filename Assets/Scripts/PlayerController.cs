@@ -196,7 +196,7 @@ public class PlayerController : MonoBehaviour
         Gizmos.DrawWireSphere(collisionPos, radius);
 
         // Interaction
-        Gizmos.color = Color.green;
+        Gizmos.color = Color.red;
         Vector2 dir = lastMoveDirection == Vector2.zero ? Vector2.down : lastMoveDirection;
         Vector3 interactPos = transform.position + (Vector3)(dir * interactDistance);
         Gizmos.DrawWireSphere(interactPos, interactRadius);
