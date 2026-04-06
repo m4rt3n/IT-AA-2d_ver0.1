@@ -37,8 +37,6 @@ public class PlayerController : MonoBehaviour
         HandleMovement();
     }
 
-    #region CONTROL
-
     public void SetPlayerControlEnabled(bool enabled)
     {
         canMove = enabled;
@@ -55,10 +53,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    #endregion
-
-    #region Movement
-
     private void HandleMovement()
     {
         if (!canMove || isMoving)
@@ -69,7 +63,8 @@ public class PlayerController : MonoBehaviour
             Input.GetAxisRaw("Vertical")
         );
 
-        if (input.x != 0) input.y = 0;
+        if (input.x != 0)
+            input.y = 0;
 
         input.x = Mathf.Round(input.x);
         input.y = Mathf.Round(input.y);
@@ -96,7 +91,9 @@ public class PlayerController : MonoBehaviour
         else
         {
             if (animator != null)
+            {
                 animator.SetBool("isMoving", false);
+            }
         }
     }
 
@@ -105,7 +102,9 @@ public class PlayerController : MonoBehaviour
         isMoving = true;
 
         if (animator != null)
+        {
             animator.SetBool("isMoving", true);
+        }
 
         while ((targetPos - transform.position).sqrMagnitude > 0.001f)
         {
@@ -121,7 +120,9 @@ public class PlayerController : MonoBehaviour
         isMoving = false;
 
         if (animator != null)
+        {
             animator.SetBool("isMoving", false);
+        }
     }
 
     private bool IsWalkable(Vector3 targetPos)
@@ -130,13 +131,9 @@ public class PlayerController : MonoBehaviour
         return Physics2D.OverlapCircle(checkPos, footRadius, solidObjectsLayer) == null;
     }
 
-    #endregion
-
-    #region Interaction
-
     private void HandleInteraction()
     {
-        if (!canMove) // ← wichtig: kein Input im Menü
+        if (!canMove)
             return;
 
         if (!Input.GetKeyDown(KeyCode.E))
@@ -146,7 +143,6 @@ public class PlayerController : MonoBehaviour
 
         Vector2 origin = transform.position;
         Vector2 direction = lastMoveDirection == Vector2.zero ? Vector2.down : lastMoveDirection;
-
         Vector2 forwardPos = origin + direction * interactDistance;
 
         Collider2D hit = Physics2D.OverlapCircle(forwardPos, interactRadius, interactableLayer);
@@ -165,7 +161,7 @@ public class PlayerController : MonoBehaviour
 
         Collider2D[] nearby = Physics2D.OverlapCircleAll(origin, fallbackInteractRadius, interactableLayer);
 
-        foreach (var col in nearby)
+        foreach (Collider2D col in nearby)
         {
             INPCInteractable npc = col.GetComponent<INPCInteractable>();
 
@@ -180,5 +176,18 @@ public class PlayerController : MonoBehaviour
         Debug.Log("Nichts gefunden");
     }
 
-    #endregion
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Vector3 collisionPos = transform.position + new Vector3(0f, footOffset.y, 0f);
+        Gizmos.DrawWireSphere(collisionPos, footRadius);
+
+        Gizmos.color = Color.yellow;
+        Vector2 dir = lastMoveDirection == Vector2.zero ? Vector2.down : lastMoveDirection;
+        Vector3 interactPos = transform.position + (Vector3)(dir * interactDistance);
+        Gizmos.DrawWireSphere(interactPos, interactRadius);
+
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(transform.position, fallbackInteractRadius);
+    }
 }

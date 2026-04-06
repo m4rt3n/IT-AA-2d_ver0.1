@@ -11,6 +11,14 @@ public class NPCInteraction : MonoBehaviour, INPCInteractable
 
     private bool playerInRange = false;
 
+    private void Start()
+    {
+        if (interactHint != null)
+        {
+            interactHint.SetActive(false);
+        }
+    }
+
     public void Interact()
     {
         Debug.Log("NPC Interaktion gestartet: " + gameObject.name);
@@ -27,18 +35,10 @@ public class NPCInteraction : MonoBehaviour, INPCInteractable
         }
         else
         {
-            Debug.LogWarning("StartMenuController ist nicht gesetzt auf: " + gameObject.name);
+            Debug.LogWarning("NPCInteraction: startMenuController ist nicht gesetzt.");
         }
 
         if (hideHintOnInteract && interactHint != null)
-        {
-            interactHint.SetActive(false);
-        }
-    }
-
-    private void Start()
-    {
-        if (interactHint != null)
         {
             interactHint.SetActive(false);
         }
