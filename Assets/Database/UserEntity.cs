@@ -1,4 +1,4 @@
-public class UserData
+public class UserEntity
 {
     public int Id;
     public string Username;

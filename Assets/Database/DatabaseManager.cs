@@ -2,9 +2,9 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
-public class Database : MonoBehaviour
+public class DatabaseManager : MonoBehaviour
 {
-    public static Database Instance { get; private set; }
+    public static DatabaseManager Instance { get; private set; }
 
     private List<UserData> users = new List<UserData>();
     private int currentId = 1;

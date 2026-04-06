@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class StartMenuController : MonoBehaviour
+public class StartSceneMenuController : MonoBehaviour
 {
     [Header("UI Objects")]
     [SerializeField] private GameObject loginPanel;
