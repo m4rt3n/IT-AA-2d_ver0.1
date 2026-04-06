@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using NPC;
 
 public class PlayerController : MonoBehaviour
 {

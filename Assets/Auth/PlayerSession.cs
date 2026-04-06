@@ -4,9 +4,10 @@ public class PlayerSession : MonoBehaviour
 {
     public static PlayerSession Instance { get; private set; }
 
-    public int CurrentUserId { get; private set; } = -1;
-    public string CurrentUsername { get; private set; } = string.Empty;
-    public bool IsLoggedIn => CurrentUserId >= 0;
+    public int UserId { get; private set; }
+    public string Username { get; private set; }
+
+    public bool IsLoggedIn => !string.IsNullOrEmpty(Username);
 
     private void Awake()
     {
@@ -22,13 +23,13 @@ public class PlayerSession : MonoBehaviour
 
     public void SetUser(int userId, string username)
     {
-        CurrentUserId = userId;
-        CurrentUsername = username;
+        UserId = userId;
+        Username = username;
     }
 
-    public void Logout()
+    public void ClearUser()
     {
-        CurrentUserId = -1;
-        CurrentUsername = string.Empty;
+        UserId = 0;
+        Username = string.Empty;
     }
 }

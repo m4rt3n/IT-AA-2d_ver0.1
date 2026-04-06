@@ -18,7 +18,7 @@ public class PlayerNameTag : MonoBehaviour
 
         if (PlayerSession.Instance != null && PlayerSession.Instance.IsLoggedIn)
         {
-            nameText.text = PlayerSession.Instance.CurrentUsername;
+            nameText.text = PlayerSession.Instance.Username;
         }
         else
         {
