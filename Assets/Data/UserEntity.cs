@@ -1,14 +1,7 @@
-using SQLite;
-
-[Table("Users")]
+[System.Serializable]
 public class UserEntity
 {
-    [PrimaryKey, AutoIncrement]
-    public int Id { get; set; }
-
-    [Unique, NotNull]
-    public string Username { get; set; }
-
-    [NotNull]
-    public string Password { get; set; }
+    public int Id;
+    public string Username;
+    public string Password;
 }

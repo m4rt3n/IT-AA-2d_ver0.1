@@ -3,9 +3,13 @@ using UnityEngine;
 
 public class StartSceneMenuController : MonoBehaviour
 {
-    [Header("UI Objects")]
+    [Header("Root UI Objects")]
     [SerializeField] private GameObject loginPanel;
     [SerializeField] private GameObject backgroundDim;
+
+    [Header("Sub Menus")]
+    [SerializeField] private GameObject startMenuPanel;
+    [SerializeField] private GameObject loginMenuPanel;
 
     [Header("Player")]
     [SerializeField] private PlayerController playerController;
@@ -50,13 +54,25 @@ public class StartSceneMenuController : MonoBehaviour
     {
         if (loginPanel == null)
         {
-            Debug.LogError("StartMenuController: loginPanel ist nicht zugewiesen.");
+            Debug.LogError("StartSceneMenuController: loginPanel ist nicht zugewiesen.");
             return;
         }
 
         if (backgroundDim == null)
         {
-            Debug.LogError("StartMenuController: backgroundDim ist nicht zugewiesen.");
+            Debug.LogError("StartSceneMenuController: backgroundDim ist nicht zugewiesen.");
+            return;
+        }
+
+        if (startMenuPanel == null)
+        {
+            Debug.LogError("StartSceneMenuController: startMenuPanel ist nicht zugewiesen.");
+            return;
+        }
+
+        if (loginMenuPanel == null)
+        {
+            Debug.LogError("StartSceneMenuController: loginMenuPanel ist nicht zugewiesen.");
             return;
         }
 
@@ -65,8 +81,6 @@ public class StartSceneMenuController : MonoBehaviour
 
     public void OpenMenu()
     {
-        Debug.Log("OpenMenu called");
-
         if (isOpen || isAnimating)
             return;
 
@@ -76,6 +90,8 @@ public class StartSceneMenuController : MonoBehaviour
         {
             playerController.SetPlayerControlEnabled(false);
         }
+
+        ShowStartSubMenu();
 
         if (currentAnimation != null)
         {
@@ -87,8 +103,6 @@ public class StartSceneMenuController : MonoBehaviour
 
     public void CloseMenu()
     {
-        Debug.Log("CloseMenu called");
-
         if (!isOpen || isAnimating)
             return;
 
@@ -104,12 +118,12 @@ public class StartSceneMenuController : MonoBehaviour
 
     public void OnClickSignIn()
     {
-        Debug.Log("Sign In clicked");
+        ShowLoginSubMenu();
     }
 
-    public void OnClickLogin()
+    public void OnClickBackToStart()
     {
-        Debug.Log("Login clicked");
+        ShowStartSubMenu();
     }
 
     public void OnClickGuest()
@@ -121,6 +135,24 @@ public class StartSceneMenuController : MonoBehaviour
     public bool IsOpen()
     {
         return isOpen;
+    }
+
+    public void ShowStartSubMenu()
+    {
+        if (startMenuPanel != null)
+            startMenuPanel.SetActive(true);
+
+        if (loginMenuPanel != null)
+            loginMenuPanel.SetActive(false);
+    }
+
+    public void ShowLoginSubMenu()
+    {
+        if (startMenuPanel != null)
+            startMenuPanel.SetActive(false);
+
+        if (loginMenuPanel != null)
+            loginMenuPanel.SetActive(true);
     }
 
     private IEnumerator OpenMenuRoutine()
@@ -226,6 +258,8 @@ public class StartSceneMenuController : MonoBehaviour
             loginCanvasGroup.blocksRaycasts = false;
             loginCanvasGroup.interactable = false;
         }
+
+        ShowStartSubMenu();
 
         if (loginPanel != null)
         {
