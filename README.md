@@ -1,85 +1,147 @@
-# IT-AA Lernplattform (Unity Projekt)
+# 🎮 IT-AA 2D Lernspiel
 
-Dieses Projekt dient als **interaktive Lernplattform zur Vorbereitung auf das Auswahlverfahren des Auswärtigen Amts (mittlerer Dienst – IT/Support)**.  
-Ziel ist es, technische Fähigkeiten, Problemlösungskompetenz und strukturiertes Arbeiten praxisnah zu demonstrieren.
-
----
-
-## 🎯 Ziel des Spiels
-
-Das Spiel simuliert typische IT-Support- und Analyse-Szenarien, wie sie im Auswärtigen Amt auftreten können:
-
-- Fehleranalyse und Troubleshooting
-- Systemverständnis (Netzwerke, Clients, Infrastruktur)
-- Logisches Denken und Entscheidungsfindung
-- Arbeiten unter realitätsnahen Bedingungen (Zeitdruck, Priorisierung)
-
-Dabei steht nicht Unterhaltung im Vordergrund, sondern **Lernen durch Interaktion und Simulation**.
-
-Hintergrund: Im IT-Bereich des Auswärtigen Amts ist es entscheidend, dass Systeme weltweit zuverlässig funktionieren und Probleme schnell gelöst werden müssen :contentReference[oaicite:0]{index=0}.
+> Interaktives 2D-Lernspiel zur Vorbereitung auf das Auswahlverfahren im IT-Bereich des Auswärtigen Amts
 
 ---
 
-## 📦 Aktueller Stand
+## 📌 Projektübersicht
 
-- ✔️ Grundlegende Spielwelt (2D Tilemap, Overworld)
-- ✔️ Player Movement & Collision System
-- ✔️ Erste Logik für Interaktion (Input-System)
-- ✔️ Struktur für zukünftige Aufgaben/Level vorhanden
-- ⚙️ Erste Ansätze für visuelle Darstellung von Entwicklungsprozessen (Git/Gource Integration geplant)
+Dieses Projekt ist ein praxisnahes Lernspiel, das typische IT-Szenarien spielerisch vermittelt.  
+Der Fokus liegt auf realen Problemstellungen aus dem IT-Support und der Systemadministration.
 
----
-
-## 🧰 Tech Stack
-
-**Engine & Frameworks**
-- Unity (2D, URP)
-- C#
-
-**Tools & Workflow**
-- Git & GitHub (Versionierung, Portfolio)
-- Gource (Visualisierung der Entwicklung)
-- ggf. Unity + externe Daten (GitHub API)
-
-**Weitere Technologien (geplant / teilweise genutzt)**
-- JSON / Datenstrukturen für Aufgaben
-- Event-Systeme für Interaktionen
-- UI-System (Unity Canvas)
+Ziel ist es, den Spieler durch eine strukturierte Lernwelt zu führen – von Grundlagen bis hin zu komplexeren Aufgaben.
 
 ---
 
-## 🚀 Nächste Schritte
+## 🎯 Zielsetzung
 
-**Gameplay & Lernlogik**
-- [ ] Implementierung von IT-Support-Szenarien (z. B. „Kein Netzwerk“, „Mail funktioniert nicht“)
-- [ ] Entscheidungsbasierte Dialogsysteme
-- [ ] Bewertungssystem (Score / Effizienz / Lösungsweg)
-
-**Technik & Features**
-- [ ] GitHub-Daten einlesen (Commits, Timestamps)
-- [ ] Visualisierung der Projektentwicklung (z. B. Netzwerkgraph)
-- [ ] Modularer Aufbau für neue Lernmodule
-
-**Portfolio & Bewerbung**
-- [ ] README erweitern (Screenshots, GIFs, Demo)
-- [ ] Dokumentation der Lernfortschritte
-- [ ] Bezug zu Anforderungen des Auswärtigen Amts klar herausstellen (IT + Soft Skills) :contentReference[oaicite:1]{index=1}
+- Vorbereitung auf das Auswahlverfahren (mittlerer Dienst IT)
+- Vermittlung von IT-Grundlagen durch Gameplay
+- Simulation realer Support-Situationen
+- Aufbau eines starken Portfolio-Projekts
 
 ---
 
-## 🎓 Ziel als Lernplattform
+## 🧩 Aktueller Entwicklungsstand
 
-Dieses Projekt ist gezielt darauf ausgelegt:
+### ✅ Implementierte Features
 
-- Fachliche IT-Kompetenz sichtbar zu machen  
-- Eigenständiges Lernen und Projektarbeit zu demonstrieren  
-- Komplexe Inhalte verständlich und interaktiv aufzubereiten  
+- 🗺️ **Tilemap-basierte Spielwelt**
+  - Straßen, Schnee, strukturierte Umgebung
 
-**Langfristiges Ziel:**  
-Bestmögliche Vorbereitung auf das Auswahlverfahren und Positionierung als leistungsstarker Kandidat im IT-Bereich des Auswärtigen Amts.
+- 🚶 **Spielerbewegung**
+  - Grid-basiertes Movement (Step-System)
+  - Richtungsabhängige Animation
+
+- 🧱 **Kollisionssystem**
+  - Tilemap Collider + Composite Collider
+  - Grundlegende Begrenzung der Spielfläche
+
+- 🧍 **NPC-Interaktion**
+  - Trigger-System
+  - Interaktion per **E-Taste**
+  - Basis für Dialogsystem
+
+- 🧭 **Startszene**
+  - Einstiegspunkt ins Spiel
+  - Vorbereitung für Menüführung
+
+- 🖥️ **UI-System**
+  - Menüstruktur vorhanden
+  - Background-Dimming implementiert
+
+- 🔁 **Versionierung**
+  - Git + GitHub
+  - Kontinuierliche Entwicklung dokumentiert
 
 ---
 
-## 📌 Hinweis
+### ⚠️ Aktuelle Herausforderungen
 
-Das Projekt befindet sich aktiv in Entwicklung und wird kontinuierlich erweitert.
+- Kollisionsabstände entlang der Straßen noch nicht optimal
+- Spieler kann visuell über Grenzen hinauslaufen
+- UI-Menü wird teilweise nicht korrekt gerendert
+- Trigger feuern zu häufig (Interaktionssystem)
+
+---
+
+## 🛠️ Tech Stack
+
+| Bereich        | Technologie                |
+|----------------|--------------------------|
+| Engine         | Unity (2D)               |
+| Sprache        | C#                       |
+| Physik         | Unity 2D Physics         |
+| UI             | Unity UI System          |
+| Assets         | Free Pixel Art Tilesets  |
+| Versionierung  | Git + GitHub             |
+
+---
+
+## 🎮 Gameplay-Konzept
+
+### Beispiel-Szenario: „Kein Internet“
+
+Der Spieler muss schrittweise eine Störung analysieren:
+
+1. Verbindung prüfen (LAN / WLAN)
+2. IP-Adresse analysieren
+3. Gateway prüfen
+4. DNS-Probleme erkennen
+
+**Interaktion erfolgt über:**
+- NPCs
+- Umgebung (Objekte)
+- Entscheidungslogik
+
+---
+
+## 🧠 Systemarchitektur (vereinfacht)
+
+    PlayerController
+     ├── Movement (Grid System)
+     ├── Collision Detection
+     └── Animation Handling
+
+    NPCInteraction
+     ├── Trigger Detection
+     ├── Input Handling (E-Taste)
+     └── Dialog Trigger
+
+    StartMenuController
+     ├── Menüsteuerung
+     └── Background Fade
+
+    Tilemap System
+     ├── Ground Layer
+     ├── Collision Layer
+     └── Visual Layer
+
+---
+
+## 🚀 Roadmap
+
+### 🔹 Kurzfristig
+- Kollisionssystem optimieren (präzise Begrenzung)
+- UI Menü vollständig funktionsfähig machen
+- Interaktionssystem stabilisieren
+
+### 🔹 Mittelfristig
+- Dialogsystem erweitern
+- Quest-System implementieren
+- Inventar-System hinzufügen
+- Skilltree integrieren
+- Tag-/Nacht-Zyklus
+
+### 🔹 Langfristig
+- Backend (Datenbank für Fortschritt)
+- Cloud-Speicherung
+- Dynamische Dialoge (KI-Integration)
+- Mobile Deployment
+
+---
+
+## 📦 Installation & Setup
+
+```bash
+git clone https://github.com/m4rt3n/IT-AA-2d_ver0.1.git
