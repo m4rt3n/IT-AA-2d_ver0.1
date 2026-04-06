@@ -1,10 +1,11 @@
 using UnityEngine;
+using NPC;
 
-public class NPCInteraction : MonoBehaviour, INPCInteractable
+public class NPCInteraction : MonoBehaviour, IInteractable
 {
     [Header("UI")]
     [SerializeField] private GameObject interactHint;
-    [SerializeField] private StartMenuController startMenuController;
+    [SerializeField] private StartSceneMenuController startMenuController;
 
     [Header("Settings")]
     [SerializeField] private bool hideHintOnInteract = true;

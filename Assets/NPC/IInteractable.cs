@@ -1,6 +1,9 @@
 using UnityEngine;
 
-public interface IInteractable
+namespace NPC
 {
-    void Interact();
+    public interface IInteractable
+    {
+        void Interact();
+    }
 }
