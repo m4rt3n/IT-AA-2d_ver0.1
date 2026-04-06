@@ -32,15 +32,7 @@ public class AuthManager : MonoBehaviour
             return false;
 
         PlayerSession.Instance.SetUser(user.Id, user.Username);
-
-        // Für kleine Projekte ok. Für sauberes Laden ist LoadSceneAsync oft besser.
         SceneManager.LoadScene(sceneAfterLogin);
         return true;
-    }
-
-    public void Logout()
-    {
-        PlayerSession.Instance.Logout();
-        SceneManager.LoadScene("LoginScene");
     }
 }

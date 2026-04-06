@@ -1,5 +1,12 @@
+using SQLite;
+
 public class UserData
 {
-    public int Id;
-    public string Username;
+    [PrimaryKey, AutoIncrement]
+    public int Id { get; set; }
+
+    [Unique]
+    public string Username { get; set; }
+
+    public string Password { get; set; }
 }

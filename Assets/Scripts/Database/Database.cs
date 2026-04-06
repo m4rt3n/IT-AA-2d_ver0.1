@@ -1,13 +1,13 @@
-using System;
-using Mono.Data.Sqlite;
-using System.Data;
+using SQLite;
 using UnityEngine;
+using System.IO;
+using System.Linq;
 
 public class Database : MonoBehaviour
 {
     public static Database Instance { get; private set; }
 
-    private string connectionString;
+    private SQLiteConnection db;
 
     private void Awake()
     {
@@ -20,30 +20,15 @@ public class Database : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        string dbPath = "URI=file:" + Application.streamingAssetsPath + "/game.db";
-        connectionString = dbPath;
+        string dbPath = Path.Combine(Application.persistentDataPath, "game.db");
+        db = new SQLiteConnection(dbPath, SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create);
 
         InitializeDatabase();
     }
 
     private void InitializeDatabase()
     {
-        using (var connection = new SqliteConnection(connectionString))
-        {
-            connection.Open();
-
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = @"
-                    CREATE TABLE IF NOT EXISTS users (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        username TEXT NOT NULL UNIQUE,
-                        password TEXT NOT NULL
-                    );
-                ";
-                command.ExecuteNonQuery();
-            }
-        }
+        db.CreateTable<UserData>();
     }
 
     public bool RegisterUser(string username, string password)
@@ -51,32 +36,20 @@ public class Database : MonoBehaviour
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             return false;
 
-        try
-        {
-            using (var connection = new SqliteConnection(connectionString))
-            {
-                connection.Open();
+        var existingUser = db.Table<UserData>()
+            .FirstOrDefault(u => u.Username == username);
 
-                using (var command = connection.CreateCommand())
-                {
-                    command.CommandText = @"
-                        INSERT INTO users (username, password)
-                        VALUES (@username, @password);
-                    ";
-
-                    command.Parameters.Add(new SqliteParameter("@username", username.Trim()));
-                    command.Parameters.Add(new SqliteParameter("@password", password));
-                    command.ExecuteNonQuery();
-                }
-            }
-
-            return true;
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError("RegisterUser fehlgeschlagen: " + ex.Message);
+        if (existingUser != null)
             return false;
-        }
+
+        var newUser = new UserData
+        {
+            Username = username.Trim(),
+            Password = password
+        };
+
+        db.Insert(newUser);
+        return true;
     }
 
     public UserData LoginUser(string username, string password)
@@ -84,43 +57,12 @@ public class Database : MonoBehaviour
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             return null;
 
-        try
-        {
-            using (var connection = new SqliteConnection(connectionString))
-            {
-                connection.Open();
+        return db.Table<UserData>()
+            .FirstOrDefault(u => u.Username == username.Trim() && u.Password == password);
+    }
 
-                using (var command = connection.CreateCommand())
-                {
-                    command.CommandText = @"
-                        SELECT id, username
-                        FROM users
-                        WHERE username = @username AND password = @password
-                        LIMIT 1;
-                    ";
-
-                    command.Parameters.Add(new SqliteParameter("@username", username.Trim()));
-                    command.Parameters.Add(new SqliteParameter("@password", password));
-
-                    using (IDataReader reader = command.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            return new UserData
-                            {
-                                Id = Convert.ToInt32(reader["id"]),
-                                Username = reader["username"].ToString()
-                            };
-                        }
-                    }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError("LoginUser fehlgeschlagen: " + ex.Message);
-        }
-
-        return null;
+    private void OnDestroy()
+    {
+        db?.Close();
     }
 }
