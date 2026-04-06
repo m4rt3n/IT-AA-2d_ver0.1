@@ -24,15 +24,14 @@ public class StartSceneMenuController : MonoBehaviour
     private CanvasGroup backgroundCanvasGroup;
 
     private Coroutine currentAnimation;
-    private bool isOpen = false;
-    private bool isAnimating = false;
+    private bool isOpen;
+    private bool isAnimating;
 
     private void Awake()
     {
         if (loginPanel != null)
         {
             loginCanvasGroup = loginPanel.GetComponent<CanvasGroup>();
-
             if (loginCanvasGroup == null)
             {
                 loginCanvasGroup = loginPanel.AddComponent<CanvasGroup>();
@@ -42,7 +41,6 @@ public class StartSceneMenuController : MonoBehaviour
         if (backgroundDim != null)
         {
             backgroundCanvasGroup = backgroundDim.GetComponent<CanvasGroup>();
-
             if (backgroundCanvasGroup == null)
             {
                 backgroundCanvasGroup = backgroundDim.AddComponent<CanvasGroup>();
@@ -91,7 +89,7 @@ public class StartSceneMenuController : MonoBehaviour
             playerController.SetPlayerControlEnabled(false);
         }
 
-        ShowStartSubMenu();
+        ShowStartMenu();
 
         if (currentAnimation != null)
         {
@@ -116,14 +114,32 @@ public class StartSceneMenuController : MonoBehaviour
         currentAnimation = StartCoroutine(CloseMenuRoutine());
     }
 
+    public void ShowStartMenu()
+    {
+        if (startMenuPanel != null)
+            startMenuPanel.SetActive(true);
+
+        if (loginMenuPanel != null)
+            loginMenuPanel.SetActive(false);
+    }
+
+    public void ShowLoginMenu()
+    {
+        if (startMenuPanel != null)
+            startMenuPanel.SetActive(false);
+
+        if (loginMenuPanel != null)
+            loginMenuPanel.SetActive(true);
+    }
+
     public void OnClickSignIn()
     {
-        ShowLoginSubMenu();
+        ShowLoginMenu();
     }
 
     public void OnClickBackToStart()
     {
-        ShowStartSubMenu();
+        ShowStartMenu();
     }
 
     public void OnClickGuest()
@@ -135,24 +151,6 @@ public class StartSceneMenuController : MonoBehaviour
     public bool IsOpen()
     {
         return isOpen;
-    }
-
-    public void ShowStartSubMenu()
-    {
-        if (startMenuPanel != null)
-            startMenuPanel.SetActive(true);
-
-        if (loginMenuPanel != null)
-            loginMenuPanel.SetActive(false);
-    }
-
-    public void ShowLoginSubMenu()
-    {
-        if (startMenuPanel != null)
-            startMenuPanel.SetActive(false);
-
-        if (loginMenuPanel != null)
-            loginMenuPanel.SetActive(true);
     }
 
     private IEnumerator OpenMenuRoutine()
@@ -221,12 +219,11 @@ public class StartSceneMenuController : MonoBehaviour
         {
             elapsed += Time.unscaledDeltaTime;
             float t = Mathf.Clamp01(elapsed / fadeDuration);
-            float eased = EaseInCubic(t);
 
             backgroundCanvasGroup.alpha = Mathf.Lerp(dimTargetAlpha, 0f, t);
             loginCanvasGroup.alpha = Mathf.Lerp(1f, 0f, t);
 
-            float scale = Mathf.Lerp(closeStartScale, closeEndScale, eased);
+            float scale = Mathf.Lerp(closeStartScale, closeEndScale, EaseInCubic(t));
             loginPanel.transform.localScale = new Vector3(scale, scale, 1f);
 
             yield return null;
@@ -259,7 +256,7 @@ public class StartSceneMenuController : MonoBehaviour
             loginCanvasGroup.interactable = false;
         }
 
-        ShowStartSubMenu();
+        ShowStartMenu();
 
         if (loginPanel != null)
         {
