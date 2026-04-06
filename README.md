@@ -56,7 +56,6 @@ Dieses Projekt dient als praxisorientierte Lernplattform zur:
 **Tools:**  
 - Visual Studio Code  
 - GitHub  
-- (geplant) Gource zur Visualisierung  
 
 ---
 
@@ -113,15 +112,6 @@ Dieses Projekt zeigt:
 - Verständnis von Architektur (Manager, Trennung von UI/Logic)  
 - Backend-Grundlagen im Game-Kontext  
 - Eigenständige Problemlösung (z. B. Collision, UI, DB)  
-
----
-
-## 📈 Visualisierung (geplant)
-
-Integration von Tools wie:
-
-- **Gource** → Visualisierung der Git-Entwicklung  
-- Verbindung von Code-Änderungen mit Gameplay-Entwicklung  
 
 ---
 
