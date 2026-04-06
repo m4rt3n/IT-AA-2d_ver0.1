@@ -21,12 +21,12 @@ public class AuthManager : MonoBehaviour
 
     public bool SignUp(string username, string password)
     {
-        return Database.Instance.RegisterUser(username, password);
+        return DatabaseManager.Instance.RegisterUser(username, password);
     }
 
     public bool SignIn(string username, string password)
     {
-        UserData user = Database.Instance.LoginUser(username, password);
+        UserEntity user = DatabaseManager.Instance.LoginUser(username, password);
 
         if (user == null)
             return false;

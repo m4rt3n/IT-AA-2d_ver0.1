@@ -149,12 +149,12 @@ public class PlayerController : MonoBehaviour
 
         if (hit != null)
         {
-            INPCInteractable npc = hit.GetComponent<INPCInteractable>();
+            IInteractable interactable = hit.GetComponent<IInteractable>();
 
-            if (npc != null)
+            if (interactable != null)
             {
                 Debug.Log("Interaktion mit: " + hit.name);
-                npc.Interact();
+                interactable.Interact();
                 return;
             }
         }
@@ -163,12 +163,12 @@ public class PlayerController : MonoBehaviour
 
         foreach (Collider2D col in nearby)
         {
-            INPCInteractable npc = col.GetComponent<INPCInteractable>();
+            IInteractable interactable = col.GetComponent<IInteractable>();
 
-            if (npc != null)
+            if (interactable != null)
             {
                 Debug.Log("Fallback Interaktion mit: " + col.name);
-                npc.Interact();
+                interactable.Interact();
                 return;
             }
         }
