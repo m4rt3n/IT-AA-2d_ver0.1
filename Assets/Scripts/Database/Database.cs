@@ -1,13 +1,13 @@
-using SQLite;
 using UnityEngine;
-using System.IO;
+using System.Collections.Generic;
 using System.Linq;
 
 public class Database : MonoBehaviour
 {
     public static Database Instance { get; private set; }
 
-    private SQLiteConnection db;
+    private List<UserData> users = new List<UserData>();
+    private int currentId = 1;
 
     private void Awake()
     {
@@ -19,50 +19,26 @@ public class Database : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
-
-        string dbPath = Path.Combine(Application.persistentDataPath, "game.db");
-        db = new SQLiteConnection(dbPath, SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create);
-
-        InitializeDatabase();
-    }
-
-    private void InitializeDatabase()
-    {
-        db.CreateTable<UserData>();
     }
 
     public bool RegisterUser(string username, string password)
     {
-        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+        if (users.Any(u => u.Username == username))
             return false;
 
-        var existingUser = db.Table<UserData>()
-            .FirstOrDefault(u => u.Username == username);
-
-        if (existingUser != null)
-            return false;
-
-        var newUser = new UserData
+        users.Add(new UserData
         {
-            Username = username.Trim(),
+            Id = currentId++,
+            Username = username,
             Password = password
-        };
+        });
 
-        db.Insert(newUser);
         return true;
     }
 
     public UserData LoginUser(string username, string password)
     {
-        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
-            return null;
-
-        return db.Table<UserData>()
-            .FirstOrDefault(u => u.Username == username.Trim() && u.Password == password);
-    }
-
-    private void OnDestroy()
-    {
-        db?.Close();
+        return users.FirstOrDefault(u =>
+            u.Username == username && u.Password == password);
     }
 }
