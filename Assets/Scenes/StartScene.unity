@@ -94261,7 +94261,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43d849dba24e4c24eb5c7344d55948b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPCInteraction
-  interactHint: {fileID: 1672437180}
+  interactHint: {fileID: 2102773475}
   startMenuController: {fileID: 749671469}
   hideHintOnInteract: 1
 --- !u!1 &749671468
@@ -94293,8 +94293,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1dc7ea215b407145b8ab8c0c51a3e57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StartMenuController
-  loginPanel: {fileID: 2082348158}
-  backgroundDim: {fileID: 0}
+  loginPanel: {fileID: 2102773475}
+  backgroundDim: {fileID: 1695271960}
   playerController: {fileID: 1672437183}
 --- !u!4 &749671470
 Transform:
@@ -94763,17 +94763,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerControler
   moveSpeed: 2
+  step: 0.08
   solidObjectsLayer:
     serializedVersion: 2
     m_Bits: 640
-  step: 0.08
-  radius: 0.01
-  collisionOffsetY: 0.2
+  footRadius: 0.08
+  footOffset: {x: 0, y: -0.3}
   interactableLayer:
     serializedVersion: 2
     m_Bits: 768
-  interactRadius: 0.2
   interactDistance: 0.6
+  interactRadius: 0.2
   fallbackInteractRadius: 0.9
 --- !u!95 &1672437184
 Animator:
@@ -96676,8 +96676,8 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1695271961}
   - {fileID: 2102773476}
+  - {fileID: 1695271961}
   m_Father: {fileID: 1866067903}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -96744,7 +96744,7 @@ Canvas:
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 1
   m_UseReflectionProbes: 0
-  m_AdditionalShaderChannelsFlag: 25
+  m_AdditionalShaderChannelsFlag: 1
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
@@ -96774,9 +96774,9 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2102773475}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 452738181}
