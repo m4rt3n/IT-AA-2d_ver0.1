@@ -15,8 +15,9 @@ public class PlayerController : MonoBehaviour
 
     [Header("Interaction")]
     [SerializeField] private LayerMask interactableLayer;
-    [SerializeField] private float interactRadius = 0.2f;
-    [SerializeField] private float interactDistance = 0.6f;
+    [SerializeField] private float interactRadius = 0.35f;
+    [SerializeField] private float interactDistance = 0.7f;
+    [SerializeField] private float fallbackInteractRadius = 0.9f;
 
     #endregion
 
@@ -51,7 +52,11 @@ public class PlayerController : MonoBehaviour
 
         if (!canMove)
         {
-            animator.SetBool("isMoving", false);
+            if (animator != null)
+            {
+                animator.SetBool("isMoving", false);
+            }
+
             return;
         }
 
@@ -75,12 +80,12 @@ public class PlayerController : MonoBehaviour
             input = Vector2.zero;
             isMoving = false;
 
+            StopAllCoroutines();
+
             if (animator != null)
             {
                 animator.SetBool("isMoving", false);
             }
-
-            StopAllCoroutines();
         }
     }
 
@@ -121,7 +126,9 @@ public class PlayerController : MonoBehaviour
             return;
 
         if (value.isPressed)
+        {
             interactPressed = true;
+        }
     }
 
     #endregion
@@ -144,8 +151,11 @@ public class PlayerController : MonoBehaviour
         {
             lastMoveDirection = input;
 
-            animator.SetFloat("moveX", input.x);
-            animator.SetFloat("moveY", input.y);
+            if (animator != null)
+            {
+                animator.SetFloat("moveX", input.x);
+                animator.SetFloat("moveY", input.y);
+            }
 
             Vector3 targetPos = transform.position;
             targetPos.x += input.x * step;
@@ -158,20 +168,31 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            animator.SetBool("isMoving", false);
+            if (animator != null)
+            {
+                animator.SetBool("isMoving", false);
+            }
         }
     }
 
     private IEnumerator Move(Vector3 targetPos)
     {
         isMoving = true;
-        animator.SetBool("isMoving", true);
+
+        if (animator != null)
+        {
+            animator.SetBool("isMoving", true);
+        }
 
         while ((targetPos - transform.position).sqrMagnitude > Mathf.Epsilon)
         {
             if (!canMove)
             {
-                animator.SetBool("isMoving", false);
+                if (animator != null)
+                {
+                    animator.SetBool("isMoving", false);
+                }
+
                 yield break;
             }
 
@@ -186,7 +207,11 @@ public class PlayerController : MonoBehaviour
 
         transform.position = targetPos;
         isMoving = false;
-        animator.SetBool("isMoving", false);
+
+        if (animator != null)
+        {
+            animator.SetBool("isMoving", false);
+        }
     }
 
     private bool IsWalkable(Vector3 targetPos)
@@ -210,43 +235,61 @@ public class PlayerController : MonoBehaviour
 
         interactPressed = false;
 
+        TryInteract();
+    }
+
+    private void TryInteract()
+    {
         Vector2 origin = transform.position;
         Vector2 direction = lastMoveDirection;
 
         if (direction == Vector2.zero)
             direction = Vector2.down;
 
-        Vector2 checkPosition = origin + direction * interactDistance;
+        Vector2 forwardCheckPosition = origin + direction * interactDistance;
 
-        Collider2D hit = Physics2D.OverlapCircle(
-            checkPosition,
+        // 1. Erst klassisch vor dem Spieler prüfen
+        Collider2D forwardHit = Physics2D.OverlapCircle(
+            forwardCheckPosition,
             interactRadius,
             interactableLayer
         );
 
-        if (hit != null)
+        if (TryHandleCollider(forwardHit))
+            return;
+
+        // 2. Falls nichts gefunden wurde: Umgebung prüfen
+        Collider2D[] nearbyHits = Physics2D.OverlapCircleAll(
+            origin,
+            fallbackInteractRadius,
+            interactableLayer
+        );
+
+        foreach (Collider2D hit in nearbyHits)
         {
-            INPCInteractable interactable = hit.GetComponent<INPCInteractable>();
-
-            if (interactable != null)
-            {
-                interactable.Interact();
+            if (TryHandleCollider(hit))
                 return;
-            }
-
-            NPCInteraction npc = hit.GetComponent<NPCInteraction>();
-            if (npc != null)
-            {
-                npc.Interact();
-                return;
-            }
-
-            Debug.Log("Interagierbares Objekt: " + hit.name);
         }
-        else
+
+        Debug.Log("Nichts zum Interagieren gefunden.");
+    }
+
+    private bool TryHandleCollider(Collider2D hit)
+    {
+        if (hit == null)
+            return false;
+
+        INPCInteractable interactable = hit.GetComponent<INPCInteractable>();
+
+        if (interactable != null)
         {
-            Debug.Log("Nichts zum Interagieren.");
+            Debug.Log("Interaktion mit: " + hit.name);
+            interactable.Interact();
+            return true;
         }
+
+        Debug.Log("Collider gefunden, aber kein INPCInteractable auf: " + hit.name);
+        return false;
     }
 
     #endregion
@@ -260,11 +303,15 @@ public class PlayerController : MonoBehaviour
         Vector3 collisionPos = transform.position + new Vector3(0f, -collisionOffsetY, 0f);
         Gizmos.DrawWireSphere(collisionPos, radius);
 
-        // Interaction
+        // Forward interaction
         Gizmos.color = Color.yellow;
         Vector2 dir = lastMoveDirection == Vector2.zero ? Vector2.down : lastMoveDirection;
         Vector3 interactPos = transform.position + (Vector3)(dir * interactDistance);
         Gizmos.DrawWireSphere(interactPos, interactRadius);
+
+        // Fallback interaction
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(transform.position, fallbackInteractRadius);
     }
 
     #endregion

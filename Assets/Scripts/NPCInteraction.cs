@@ -13,14 +13,21 @@ public class NPCInteraction : MonoBehaviour, INPCInteractable
 
     public void Interact()
     {
-        if (!playerInRange)
-            return;
+        Debug.Log("NPC Interaktion gestartet: " + gameObject.name);
 
-        Debug.Log("NPC Interaktion gestartet");
+        if (!playerInRange)
+        {
+            Debug.Log("Interaktion abgebrochen, Player ist nicht in Range.");
+            return;
+        }
 
         if (startMenuController != null)
         {
             startMenuController.OpenMenu();
+        }
+        else
+        {
+            Debug.LogWarning("StartMenuController ist nicht gesetzt auf: " + gameObject.name);
         }
 
         if (hideHintOnInteract && interactHint != null)

@@ -94774,6 +94774,7 @@ MonoBehaviour:
     m_Bits: 768
   interactRadius: 0.2
   interactDistance: 0.6
+  fallbackInteractRadius: 0.9
 --- !u!95 &1672437184
 Animator:
   serializedVersion: 7
