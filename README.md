@@ -1,147 +1,136 @@
-# 🎮 IT-AA 2D Lernspiel
+# 🎮 IT-AA 2D Game (Unity)
 
-> Interaktives 2D-Lernspiel zur Vorbereitung auf das Auswahlverfahren im IT-Bereich des Auswärtigen Amts
-
----
-
-## 📌 Projektübersicht
-
-Dieses Projekt ist ein praxisnahes Lernspiel, das typische IT-Szenarien spielerisch vermittelt.  
-Der Fokus liegt auf realen Problemstellungen aus dem IT-Support und der Systemadministration.
-
-Ziel ist es, den Spieler durch eine strukturierte Lernwelt zu führen – von Grundlagen bis hin zu komplexeren Aufgaben.
+Ein 2D-Spielprojekt als Lern- und Portfolio-Plattform mit Fokus auf Softwarearchitektur, Gameplay-Systeme und Backend-Integration.
 
 ---
 
-## 🎯 Zielsetzung
+## 🚀 Ziel des Projekts
 
-- Vorbereitung auf das Auswahlverfahren (mittlerer Dienst IT)
-- Vermittlung von IT-Grundlagen durch Gameplay
-- Simulation realer Support-Situationen
-- Aufbau eines starken Portfolio-Projekts
+Dieses Projekt dient als praxisorientierte Lernplattform zur:
 
----
-
-## 🧩 Aktueller Entwicklungsstand
-
-### ✅ Implementierte Features
-
-- 🗺️ **Tilemap-basierte Spielwelt**
-  - Straßen, Schnee, strukturierte Umgebung
-
-- 🚶 **Spielerbewegung**
-  - Grid-basiertes Movement (Step-System)
-  - Richtungsabhängige Animation
-
-- 🧱 **Kollisionssystem**
-  - Tilemap Collider + Composite Collider
-  - Grundlegende Begrenzung der Spielfläche
-
-- 🧍 **NPC-Interaktion**
-  - Trigger-System
-  - Interaktion per **E-Taste**
-  - Basis für Dialogsystem
-
-- 🧭 **Startszene**
-  - Einstiegspunkt ins Spiel
-  - Vorbereitung für Menüführung
-
-- 🖥️ **UI-System**
-  - Menüstruktur vorhanden
-  - Background-Dimming implementiert
-
-- 🔁 **Versionierung**
-  - Git + GitHub
-  - Kontinuierliche Entwicklung dokumentiert
+- Entwicklung eines strukturierten Unity-Projekts  
+- Umsetzung von Clean Code & SOLID-Prinzipien  
+- Aufbau eines einfachen Backends (User, Login, Datenhaltung)  
+- Vorbereitung auf technische Bewerbungen (z. B. Auswärtiges Amt)  
 
 ---
 
-### ⚠️ Aktuelle Herausforderungen
+## 🧩 Aktueller Stand
 
-- Kollisionsabstände entlang der Straßen noch nicht optimal
-- Spieler kann visuell über Grenzen hinauslaufen
-- UI-Menü wird teilweise nicht korrekt gerendert
-- Trigger feuern zu häufig (Interaktionssystem)
+### 🔐 Authentifizierung & Benutzerverwaltung
+- Login- und Registrierungssystem implementiert  
+- Persistente Speicherung (aktuell JSON / vorbereitet für SQLite)  
+- `AuthManager` verwaltet Session & Szenenwechsel  
+
+### 🗄️ Datenhaltung
+- Erste Datenbankstruktur vorhanden (`DatabaseManager`)  
+- Alternative Speicherung via JSON umgesetzt  
+- Vorbereitung auf SQLite Integration  
+
+### 🧭 Menüsystem
+- Startmenü (Start / Login / Navigation)  
+- Login UI mit Validierung  
+- UI-Manager für Steuerung der Menüs  
+- Fade-In / UI-Animation vorbereitet  
+
+### 🧍 Gameplay & Interaktion
+- Player Movement mit Grid/Step-System  
+- NPC-Interaktion (z. B. Arthur)  
+- Trigger-System für Interaktionen  
+- Basis für Dialogsystem vorhanden  
+
+### 🧱 Welt & Kollision
+- Tilemap-System im Einsatz  
+- Collider + Composite Collider  
+- Erste Ansätze für „unsichtbare Begrenzungen“  
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Bereich        | Technologie                |
-|----------------|--------------------------|
-| Engine         | Unity (2D)               |
-| Sprache        | C#                       |
-| Physik         | Unity 2D Physics         |
-| UI             | Unity UI System          |
-| Assets         | Free Pixel Art Tilesets  |
-| Versionierung  | Git + GitHub             |
+- **Engine:** Unity (2D, URP)  
+- **Sprache:** C#  
+- **Datenhaltung:** JSON (aktuell), SQLite (geplant)  
+- **Versionskontrolle:** Git / GitHub  
+
+**Tools:**  
+- Visual Studio Code  
+- GitHub  
+- (geplant) Gource zur Visualisierung  
 
 ---
 
-## 🎮 Gameplay-Konzept
+## 🏗️ Projektstruktur (vereinfacht)
 
-### Beispiel-Szenario: „Kein Internet“
-
-Der Spieler muss schrittweise eine Störung analysieren:
-
-1. Verbindung prüfen (LAN / WLAN)
-2. IP-Adresse analysieren
-3. Gateway prüfen
-4. DNS-Probleme erkennen
-
-**Interaktion erfolgt über:**
-- NPCs
-- Umgebung (Objekte)
-- Entscheidungslogik
-
----
-
-## 🧠 Systemarchitektur (vereinfacht)
-
-    PlayerController
-     ├── Movement (Grid System)
-     ├── Collision Detection
-     └── Animation Handling
-
-    NPCInteraction
-     ├── Trigger Detection
-     ├── Input Handling (E-Taste)
-     └── Dialog Trigger
-
-    StartMenuController
-     ├── Menüsteuerung
-     └── Background Fade
-
-    Tilemap System
-     ├── Ground Layer
-     ├── Collision Layer
-     └── Visual Layer
+Assets/  
+├── Scripts/  
+│   ├── Auth/  
+│   │   └── AuthManager.cs  
+│   ├── Database/  
+│   │   └── DatabaseManager.cs  
+│   ├── UI/  
+│   │   ├── MenuManager.cs  
+│   │   ├── StartMenuController.cs  
+│   │   └── LoginMenuController.cs  
+│   ├── Player/  
+│   │   └── PlayerController.cs  
+│   └── NPC/  
+│       └── NPCInteraction.cs  
+│  
+├── Scenes/  
+│   └── StartScene.unity  
+│  
+└── Data/  
+    └── (JSON / DB Files)  
 
 ---
 
-## 🚀 Roadmap
+## 🎯 Nächste Schritte
 
-### 🔹 Kurzfristig
-- Kollisionssystem optimieren (präzise Begrenzung)
-- UI Menü vollständig funktionsfähig machen
-- Interaktionssystem stabilisieren
+### 🔜 Kurzfristig
+- Login vollständig testen & absichern  
+- UI-Flow verbessern (Transitions, Feedback)  
+- Fehlerhandling erweitern  
 
-### 🔹 Mittelfristig
-- Dialogsystem erweitern
-- Quest-System implementieren
-- Inventar-System hinzufügen
-- Skilltree integrieren
-- Tag-/Nacht-Zyklus
+### 🧠 Mittelfristig
+- SQLite sauber integrieren (sqlite-net)  
+- Dialogsystem für NPCs  
+- Quest-/Event-System  
 
-### 🔹 Langfristig
-- Backend (Datenbank für Fortschritt)
-- Cloud-Speicherung
-- Dynamische Dialoge (KI-Integration)
-- Mobile Deployment
+### 🔥 Langfristig
+- Backend-Anbindung (API)  
+- Dynamische Dialoge (z. B. ChatGPT Integration)  
+- Tag-/Nacht-System (Realtime)  
+- Mobile Build  
 
 ---
 
-## 📦 Installation & Setup
+## 📊 Portfolio-Mehrwert
 
-```bash
-git clone https://github.com/m4rt3n/IT-AA-2d_ver0.1.git
+Dieses Projekt zeigt:
+
+- Strukturierte Softwareentwicklung in Unity  
+- Verständnis von Architektur (Manager, Trennung von UI/Logic)  
+- Backend-Grundlagen im Game-Kontext  
+- Eigenständige Problemlösung (z. B. Collision, UI, DB)  
+
+---
+
+## 📈 Visualisierung (geplant)
+
+Integration von Tools wie:
+
+- **Gource** → Visualisierung der Git-Entwicklung  
+- Verbindung von Code-Änderungen mit Gameplay-Entwicklung  
+
+---
+
+## 📎 Repository
+
+https://github.com/m4rt3n/IT-AA-2d_ver0.1  
+
+---
+
+## ⚠️ Hinweis
+
+Dieses Projekt befindet sich aktiv in Entwicklung und dient primär Lern- und Demonstrationszwecken.
