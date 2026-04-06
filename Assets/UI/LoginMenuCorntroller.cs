@@ -1,82 +1,82 @@
-using UnityEngine;
 using TMPro;
+using UnityEngine;
 
 public class LoginMenuController : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private StartSceneMenuController menuController;
+    [SerializeField] private MenuManager menuManager;
     [SerializeField] private TMP_InputField usernameInput;
     [SerializeField] private TMP_InputField passwordInput;
-    [SerializeField] private TextMeshProUGUI feedbackText;
+    [SerializeField] private TMP_Text messageText;
 
     private void OnEnable()
     {
-        ClearInputs();
-        ClearFeedback();
+        ClearMessage();
 
         if (usernameInput != null)
         {
+            usernameInput.text = "";
             usernameInput.ActivateInputField();
+        }
+
+        if (passwordInput != null)
+        {
+            passwordInput.text = "";
+        }
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+        {
+            OnClickLogin();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            OnClickBack();
         }
     }
 
     public void OnClickLogin()
     {
-        if (usernameInput == null || passwordInput == null)
+        string username = usernameInput != null ? usernameInput.text.Trim() : "";
+        string password = passwordInput != null ? passwordInput.text : "";
+
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
         {
-            Debug.LogError("LoginMenuController: Inputfelder sind nicht zugewiesen.");
+            ShowMessage("Bitte Benutzername und Passwort eingeben.");
             return;
         }
 
         if (AuthManager.Instance == null)
         {
-            Debug.LogError("LoginMenuController: AuthManager.Instance fehlt.");
-            SetFeedback("AuthManager fehlt.");
-            return;
-        }
-
-        string username = usernameInput.text.Trim();
-        string password = passwordInput.text;
-
-        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
-        {
-            SetFeedback("Bitte Benutzername und Passwort eingeben.");
+            ShowMessage("AuthManager nicht gefunden.");
             return;
         }
 
         bool success = AuthManager.Instance.SignIn(username, password);
 
-        if (success)
+        if (!success)
         {
-            SetFeedback("Login erfolgreich.");
-        }
-        else
-        {
-            SetFeedback("Falsche Daten.");
+            ShowMessage("Login fehlgeschlagen. Benutzername oder Passwort falsch.");
         }
     }
 
     public void OnClickRegister()
     {
-        if (usernameInput == null || passwordInput == null)
+        string username = usernameInput != null ? usernameInput.text.Trim() : "";
+        string password = passwordInput != null ? passwordInput.text : "";
+
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
         {
-            Debug.LogError("LoginMenuController: Inputfelder sind nicht zugewiesen.");
+            ShowMessage("Bitte Benutzername und Passwort eingeben.");
             return;
         }
 
         if (AuthManager.Instance == null)
         {
-            Debug.LogError("LoginMenuController: AuthManager.Instance fehlt.");
-            SetFeedback("AuthManager fehlt.");
-            return;
-        }
-
-        string username = usernameInput.text.Trim();
-        string password = passwordInput.text;
-
-        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
-        {
-            SetFeedback("Bitte Benutzername und Passwort eingeben.");
+            ShowMessage("AuthManager nicht gefunden.");
             return;
         }
 
@@ -84,53 +84,45 @@ public class LoginMenuController : MonoBehaviour
 
         if (success)
         {
-            SetFeedback("Registriert. Jetzt einloggen.");
+            ShowMessage("Registrierung erfolgreich. Du kannst dich jetzt einloggen.");
         }
         else
         {
-            SetFeedback("Benutzer existiert bereits.");
+            ShowMessage("Registrierung fehlgeschlagen. Benutzername existiert bereits.");
         }
     }
 
     public void OnClickBack()
-    {
-        ClearInputs();
-        ClearFeedback();
-
-        if (menuController != null)
-        {
-            menuController.OnClickBackToStart();
-        }
-        else
-        {
-            Debug.LogWarning("LoginMenuController: menuController ist nicht zugewiesen.");
-        }
-    }
-
-    private void SetFeedback(string message)
-    {
-        if (feedbackText != null)
-        {
-            feedbackText.text = message;
-        }
-
-        Debug.Log(message);
-    }
-
-    private void ClearFeedback()
-    {
-        if (feedbackText != null)
-        {
-            feedbackText.text = "";
-        }
-    }
-
-    private void ClearInputs()
     {
         if (usernameInput != null)
             usernameInput.text = "";
 
         if (passwordInput != null)
             passwordInput.text = "";
+
+        ClearMessage();
+
+        if (menuManager != null)
+        {
+            menuManager.ShowStartMenu();
+        }
+        else
+        {
+            Debug.LogWarning("LoginMenuController: MenuManager ist nicht gesetzt.");
+        }
+    }
+
+    private void ShowMessage(string message)
+    {
+        if (messageText != null)
+            messageText.text = message;
+
+        Debug.Log(message);
+    }
+
+    private void ClearMessage()
+    {
+        if (messageText != null)
+            messageText.text = "";
     }
 }

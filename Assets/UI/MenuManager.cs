@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class MenuManager : MonoBehaviour
 {
-    [Header("Panels")]
     [SerializeField] private GameObject startMenuPanel;
     [SerializeField] private GameObject loginMenuPanel;
 
