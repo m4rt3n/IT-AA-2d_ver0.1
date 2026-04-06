@@ -24,6 +24,8 @@ public class PlayerController : MonoBehaviour
 
     private bool isMoving;
     private bool interactPressed;
+    private bool canMove = true;
+    private bool canInteract = true;
 
     private Vector2 input;
     private Vector2 moveInput;
@@ -42,7 +44,16 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        HandleInteraction();
+        if (canInteract)
+        {
+            HandleInteraction();
+        }
+
+        if (!canMove)
+        {
+            animator.SetBool("isMoving", false);
+            return;
+        }
 
         if (isMoving)
             return;
@@ -52,15 +63,63 @@ public class PlayerController : MonoBehaviour
 
     #endregion
 
+    #region Public Control
+
+    public void SetMovementEnabled(bool enabled)
+    {
+        canMove = enabled;
+
+        if (!canMove)
+        {
+            moveInput = Vector2.zero;
+            input = Vector2.zero;
+            isMoving = false;
+
+            if (animator != null)
+            {
+                animator.SetBool("isMoving", false);
+            }
+
+            StopAllCoroutines();
+        }
+    }
+
+    public void SetInteractionEnabled(bool enabled)
+    {
+        canInteract = enabled;
+
+        if (!canInteract)
+        {
+            interactPressed = false;
+        }
+    }
+
+    public void SetPlayerControlEnabled(bool enabled)
+    {
+        SetMovementEnabled(enabled);
+        SetInteractionEnabled(enabled);
+    }
+
+    #endregion
+
     #region Input System
 
     public void OnMove(InputValue value)
     {
+        if (!canMove)
+        {
+            moveInput = Vector2.zero;
+            return;
+        }
+
         moveInput = value.Get<Vector2>();
     }
 
     public void OnInteract(InputValue value)
     {
+        if (!canInteract)
+            return;
+
         if (value.isPressed)
             interactPressed = true;
     }
@@ -110,6 +169,12 @@ public class PlayerController : MonoBehaviour
 
         while ((targetPos - transform.position).sqrMagnitude > Mathf.Epsilon)
         {
+            if (!canMove)
+            {
+                animator.SetBool("isMoving", false);
+                yield break;
+            }
+
             transform.position = Vector3.MoveTowards(
                 transform.position,
                 targetPos,
@@ -196,7 +261,7 @@ public class PlayerController : MonoBehaviour
         Gizmos.DrawWireSphere(collisionPos, radius);
 
         // Interaction
-        Gizmos.color = Color.red;
+        Gizmos.color = Color.yellow;
         Vector2 dir = lastMoveDirection == Vector2.zero ? Vector2.down : lastMoveDirection;
         Vector3 interactPos = transform.position + (Vector3)(dir * interactDistance);
         Gizmos.DrawWireSphere(interactPos, interactRadius);
