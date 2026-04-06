@@ -2,23 +2,32 @@ using UnityEngine;
 
 public class NPCInteraction : MonoBehaviour, INPCInteractable
 {
-    [SerializeField] private KeyCode interactKey = KeyCode.E;
+    [Header("UI")]
     [SerializeField] private GameObject interactHint;
     [SerializeField] private StartMenuController startMenuController;
 
+    [Header("Settings")]
+    [SerializeField] private bool hideHintOnInteract = true;
+
     private bool playerInRange = false;
 
+    public void Interact()
+    {
+        if (!playerInRange)
+            return;
 
-        public void Interact()
+        Debug.Log("NPC Interaktion gestartet");
+
+        if (startMenuController != null)
         {
-            Debug.Log("NPC Interaktion gestartet");
-
-            // Hier später:
-            // Login öffnen
-            // Dialog starten
-            // Szene wechseln etc.
+            startMenuController.OpenMenu();
         }
 
+        if (hideHintOnInteract && interactHint != null)
+        {
+            interactHint.SetActive(false);
+        }
+    }
 
     private void Start()
     {
@@ -28,22 +37,10 @@ public class NPCInteraction : MonoBehaviour, INPCInteractable
         }
     }
 
-    private void Update()
-    {
-        if (playerInRange && Input.GetKeyDown(interactKey))
-        {
-            Debug.Log("Arthur interaction triggered");
-
-            if (startMenuController != null)
-            {
-                startMenuController.OpenMenu();
-            }
-        }
-    }
-
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!other.CompareTag("Player")) return;
+        if (!other.CompareTag("Player"))
+            return;
 
         playerInRange = true;
 
@@ -57,7 +54,8 @@ public class NPCInteraction : MonoBehaviour, INPCInteractable
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (!other.CompareTag("Player")) return;
+        if (!other.CompareTag("Player"))
+            return;
 
         playerInRange = false;
 
