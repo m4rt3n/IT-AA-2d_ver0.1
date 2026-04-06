@@ -93873,7 +93873,7 @@ GameObject:
   - component: {fileID: 519420031}
   - component: {fileID: 519420029}
   - component: {fileID: 519420030}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
@@ -94094,7 +94094,7 @@ GameObject:
   - component: {fileID: 745381510}
   - component: {fileID: 745381514}
   - component: {fileID: 745381512}
-  - component: {fileID: 745381516}
+  - component: {fileID: 745381515}
   m_Layer: 9
   m_Name: Arthur
   m_TagString: Untagged
@@ -94249,7 +94249,7 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &745381516
+--- !u!114 &745381515
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -94261,7 +94261,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43d849dba24e4c24eb5c7344d55948b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPCInteraction
-  interactHint: {fileID: 0}
+  interactHint: {fileID: 1672437180}
   startMenuController: {fileID: 749671469}
   hideHintOnInteract: 1
 --- !u!1 &749671468

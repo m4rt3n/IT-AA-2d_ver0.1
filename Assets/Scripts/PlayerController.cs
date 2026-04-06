@@ -4,8 +4,6 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    #region Inspector
-
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 3f;
     [SerializeField] private LayerMask solidObjectsLayer;
@@ -19,10 +17,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float interactDistance = 0.7f;
     [SerializeField] private float fallbackInteractRadius = 0.9f;
 
-    #endregion
-
-    #region State
-
     private bool isMoving;
     private bool interactPressed;
     private bool canMove = true;
@@ -33,10 +27,6 @@ public class PlayerController : MonoBehaviour
     private Vector2 lastMoveDirection = Vector2.down;
 
     private Animator animator;
-
-    #endregion
-
-    #region Unity Methods
 
     private void Awake()
     {
@@ -65,10 +55,6 @@ public class PlayerController : MonoBehaviour
 
         HandleMovementInput();
     }
-
-    #endregion
-
-    #region Public Control
 
     public void SetMovementEnabled(bool enabled)
     {
@@ -105,10 +91,6 @@ public class PlayerController : MonoBehaviour
         SetInteractionEnabled(enabled);
     }
 
-    #endregion
-
-    #region Input System
-
     public void OnMove(InputValue value)
     {
         if (!canMove)
@@ -131,19 +113,13 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    #endregion
-
-    #region Movement
-
     private void HandleMovementInput()
     {
         input = moveInput;
 
-        // Keine diagonale Bewegung
         if (input.x != 0)
             input.y = 0;
 
-        // Auf feste Richtungen reduzieren
         input.x = Mathf.Round(input.x);
         input.y = Mathf.Round(input.y);
 
@@ -224,17 +200,12 @@ public class PlayerController : MonoBehaviour
         return Physics2D.OverlapCircle(checkPosition, radius, solidObjectsLayer) == null;
     }
 
-    #endregion
-
-    #region Interaction
-
     private void HandleInteraction()
     {
         if (!interactPressed)
             return;
 
         interactPressed = false;
-
         TryInteract();
     }
 
@@ -248,7 +219,6 @@ public class PlayerController : MonoBehaviour
 
         Vector2 forwardCheckPosition = origin + direction * interactDistance;
 
-        // 1. Erst klassisch vor dem Spieler prüfen
         Collider2D forwardHit = Physics2D.OverlapCircle(
             forwardCheckPosition,
             interactRadius,
@@ -258,7 +228,6 @@ public class PlayerController : MonoBehaviour
         if (TryHandleCollider(forwardHit))
             return;
 
-        // 2. Falls nichts gefunden wurde: Umgebung prüfen
         Collider2D[] nearbyHits = Physics2D.OverlapCircleAll(
             origin,
             fallbackInteractRadius,
@@ -292,27 +261,18 @@ public class PlayerController : MonoBehaviour
         return false;
     }
 
-    #endregion
-
-    #region Debug
-
     private void OnDrawGizmosSelected()
     {
-        // Collision
         Gizmos.color = Color.red;
         Vector3 collisionPos = transform.position + new Vector3(0f, -collisionOffsetY, 0f);
         Gizmos.DrawWireSphere(collisionPos, radius);
 
-        // Forward interaction
         Gizmos.color = Color.yellow;
         Vector2 dir = lastMoveDirection == Vector2.zero ? Vector2.down : lastMoveDirection;
         Vector3 interactPos = transform.position + (Vector3)(dir * interactDistance);
         Gizmos.DrawWireSphere(interactPos, interactRadius);
 
-        // Fallback interaction
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, fallbackInteractRadius);
     }
-
-    #endregion
 }
