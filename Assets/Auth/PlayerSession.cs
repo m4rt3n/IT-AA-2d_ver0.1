@@ -11,13 +11,11 @@ public class PlayerSession : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (transform.parent != null)
         {
-            Destroy(gameObject);
-            return;
+            transform.SetParent(null);
         }
 
-        Instance = this;
         DontDestroyOnLoad(gameObject);
     }
 

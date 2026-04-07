@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace NPC
 {
     public interface IInteractable

@@ -1,77 +1,50 @@
 using UnityEngine;
-using NPC;
 
-public class NPCInteraction : MonoBehaviour, IInteractable
+public class NPCInteraction : MonoBehaviour
 {
-    [Header("UI")]
-    [SerializeField] private GameObject interactHint;
-    [SerializeField] private StartSceneMenuController startMenuController;
+    [SerializeField] private string npcName = "Arthur";
+    [SerializeField] private MenuManager menuManager;
 
-    [Header("Settings")]
-    [SerializeField] private bool hideHintOnInteract = true;
-
-    private bool playerInRange = false;
-
-    private void Start()
-    {
-        if (interactHint != null)
-        {
-            interactHint.SetActive(false);
-        }
-    }
+    private bool isInteracting;
 
     public void Interact()
     {
-        Debug.Log("NPC Interaktion gestartet: " + gameObject.name);
-
-        if (!playerInRange)
-        {
-            Debug.Log("Interaktion abgebrochen, Player ist nicht in Range.");
+        if (isInteracting)
             return;
-        }
 
-        if (startMenuController != null)
+        isInteracting = true;
+
+        Debug.Log("NPC Interaktion gestartet: " + npcName);
+
+        if (menuManager != null)
         {
-            startMenuController.OpenMenu();
+            menuManager.ShowStartMenu();
         }
         else
         {
-            Debug.LogWarning("NPCInteraction: startMenuController ist nicht gesetzt.");
+            Debug.LogWarning("MenuManager fehlt!");
         }
 
-        if (hideHintOnInteract && interactHint != null)
+        PlayerController player = FindFirstObjectByType<PlayerController>();
+        if (player != null)
         {
-            interactHint.SetActive(false);
+            player.SetPlayerControlEnabled(false);
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    public void EndInteraction()
     {
-        if (!other.CompareTag("Player"))
-            return;
+        isInteracting = false;
 
-        playerInRange = true;
-
-        if (interactHint != null)
+        if (menuManager != null)
         {
-            interactHint.SetActive(true);
+            menuManager.HideAll();
         }
 
-        Debug.Log("Player entered Arthur range");
-    }
-
-    private void OnTriggerExit2D(Collider2D other)
-    {
-        if (!other.CompareTag("Player"))
-            return;
-
-        playerInRange = false;
-
-        if (interactHint != null)
+        PlayerController player = FindFirstObjectByType<PlayerController>();
+        if (player != null)
         {
-            interactHint.SetActive(false);
+            player.SetPlayerControlEnabled(true);
         }
-
-        Debug.Log("Player left Arthur range");
     }
 }

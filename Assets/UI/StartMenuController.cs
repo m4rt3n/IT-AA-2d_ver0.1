@@ -6,19 +6,15 @@ public class StartMenuController : MonoBehaviour
 
     public void OnClickOpenLogin()
     {
-        if (menuManager != null)
-        {
-            menuManager.ShowLoginMenu();
-        }
-        else
-        {
-            Debug.LogWarning("StartMenuController: MenuManager ist nicht gesetzt.");
-        }
+        menuManager.ShowLoginMenu();
     }
 
-    public void OnClickQuit()
+    public void OnClickClose()
     {
-        Debug.Log("Spiel wird beendet.");
-        Application.Quit();
+        menuManager.HideAll();
+
+        NPCInteraction npc = FindFirstObjectByType<NPCInteraction>();
+        if (npc != null)
+            npc.EndInteraction();
     }
 }
