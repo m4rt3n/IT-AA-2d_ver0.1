@@ -14,14 +14,10 @@ public class ArthurAutoInteraction : MonoBehaviour
     private bool hasTriggered;
     private Transform playerTarget;
 
-    private void Reset()
-    {
-        npcInteraction = GetComponent<NPCInteraction>();
-        animator = GetComponent<Animator>();
-    }
-
     public void TriggerAutoInteraction(Transform player)
     {
+        Debug.Log("[ArthurAutoInteraction] TriggerAutoInteraction");
+
         if (hasTriggered || player == null)
             return;
 
@@ -31,6 +27,8 @@ public class ArthurAutoInteraction : MonoBehaviour
 
     private IEnumerator ApproachAndInteract()
     {
+        Debug.Log("[ArthurAutoInteraction] ApproachAndInteract gestartet");
+
         hasTriggered = true;
 
         PlayerController player = FindFirstObjectByType<PlayerController>();
@@ -43,6 +41,7 @@ public class ArthurAutoInteraction : MonoBehaviour
             Vector2 target = playerTarget.position;
 
             float distance = Vector2.Distance(current, target);
+            Debug.Log("[ArthurAutoInteraction] Distanz: " + distance);
 
             if (distance <= stopDistance)
                 break;
@@ -66,13 +65,16 @@ public class ArthurAutoInteraction : MonoBehaviour
         }
 
         if (animator != null && animator.runtimeAnimatorController != null)
-        {
             animator.SetBool("isMoving", false);
-        }
 
         if (npcInteraction != null)
         {
+            Debug.Log("[ArthurAutoInteraction] Interact wird aufgerufen");
             npcInteraction.Interact();
+        }
+        else
+        {
+            Debug.LogError("[ArthurAutoInteraction] npcInteraction fehlt");
         }
     }
 }
