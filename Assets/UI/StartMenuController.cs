@@ -33,11 +33,9 @@ public class StartMenuController : MonoBehaviour
         {
             foundNpc.EndInteraction();
         }
-        else
+        else if (menuManager != null)
         {
-            Debug.LogWarning("[StartMenuController] Keine NPCInteraction gefunden");
-            if (menuManager != null)
-                menuManager.HideAll();
+            menuManager.HideAll();
         }
     }
 }
