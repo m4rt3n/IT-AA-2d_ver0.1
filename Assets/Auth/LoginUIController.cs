@@ -1,13 +1,13 @@
 using UnityEngine;
 
 /// <summary>
-/// Altes LoginUIController-Skript wird nicht mehr verwendet.
-/// Bleibt nur als Platzhalter erhalten, damit keine Compile-Fehler entstehen.
+/// Veralteter Controller. Bleibt nur als Platzhalter erhalten,
+/// damit alte Referenzen keine Compile-Fehler erzeugen.
 /// </summary>
 public class LoginUIController : MonoBehaviour
 {
     private void Awake()
     {
-        Debug.Log("[LoginUIController] Dieses Skript ist veraltet und wird nicht mehr genutzt.");
+        Debug.Log("[LoginUIController] Veraltet und aktuell ohne Funktion.");
     }
 }

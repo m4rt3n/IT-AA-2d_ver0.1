@@ -3,8 +3,14 @@ using UnityEngine;
 
 public class LoginMenuController : MonoBehaviour
 {
+    #region Inspector
+
     [SerializeField] private SaveSlotSelectionPopup popup;
     [SerializeField] private TMP_Text selectedUserText;
+
+    #endregion
+
+    #region Public Methods
 
     public void OpenSaveSelection()
     {
@@ -18,6 +24,10 @@ public class LoginMenuController : MonoBehaviour
 
         popup.Open(OnSaveSelected);
     }
+
+    #endregion
+
+    #region Private Methods
 
     private void OnSaveSelected(SaveSlotInfo save)
     {
@@ -43,4 +53,6 @@ public class LoginMenuController : MonoBehaviour
             Debug.LogError("[LoginMenuController] AuthManager fehlt.");
         }
     }
+
+    #endregion
 }

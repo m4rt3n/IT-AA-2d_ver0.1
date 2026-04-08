@@ -1,72 +1,69 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerSession : MonoBehaviour
+public class DatabaseManager : MonoBehaviour
 {
     #region Singleton
 
-    public static PlayerSession Instance;
+    public static DatabaseManager Instance;
 
     private void Awake()
     {
         if (Instance != null && Instance != this)
         {
-            Debug.LogWarning("[PlayerSession] Zweite Instanz gefunden, zerstöre Objekt.");
+            Debug.LogWarning("[DatabaseManager] Zweite Instanz gefunden, zerstöre Objekt.");
             Destroy(gameObject);
             return;
         }
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
-        Debug.Log("[PlayerSession] Initialisiert.");
+        Debug.Log("[DatabaseManager] Initialisiert.");
     }
 
     #endregion
 
-    #region Data
+    #region Mock Data
 
-    public int UserId { get; private set; }
-    public string Username { get; private set; }
-
-    public int SaveSlotId { get; private set; }
-    public string SaveSlotName { get; private set; }
-
-    public int Level { get; private set; }
-    public int Score { get; private set; }
-
-    public bool IsLoggedIn => !string.IsNullOrEmpty(Username);
-
-    #endregion
-
-    #region Public Methods
-
-    public void SetSession(SaveSlotInfo save)
+    private readonly List<SaveSlotInfo> saveSlots = new List<SaveSlotInfo>()
     {
-        if (save == null)
+        new SaveSlotInfo
         {
-            Debug.LogError("[PlayerSession] SaveSlotInfo ist null.");
-            return;
+            Id = 1,
+            Username = "Martin",
+            SaveSlotName = "Slot 1",
+            Level = 5,
+            Score = 1200,
+            LastPlayed = "Heute"
+        },
+        new SaveSlotInfo
+        {
+            Id = 2,
+            Username = "Martin",
+            SaveSlotName = "Slot 2",
+            Level = 12,
+            Score = 3400,
+            LastPlayed = "Gestern"
+        },
+        new SaveSlotInfo
+        {
+            Id = 3,
+            Username = "ArthurTest",
+            SaveSlotName = "Slot A",
+            Level = 2,
+            Score = 300,
+            LastPlayed = "Vor 3 Tagen"
         }
+    };
 
-        UserId = save.Id;
-        Username = save.Username;
-        SaveSlotId = save.Id;
-        SaveSlotName = save.SaveSlotName;
-        Level = save.Level;
-        Score = save.Score;
+    #endregion
 
-        Debug.Log($"[PlayerSession] Session gesetzt: {Username} | {SaveSlotName} | Level {Level} | Score {Score}");
-    }
+    #region Public API
 
-    public void ClearSession()
+    public List<SaveSlotInfo> GetAllSaveSlots()
     {
-        UserId = 0;
-        Username = string.Empty;
-        SaveSlotId = 0;
-        SaveSlotName = string.Empty;
-        Level = 0;
-        Score = 0;
-
-        Debug.Log("[PlayerSession] Session geleert.");
+        Debug.Log($"[DatabaseManager] Lade SaveSlots. Anzahl: {saveSlots.Count}");
+        return saveSlots;
     }
 
     #endregion

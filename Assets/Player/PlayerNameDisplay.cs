@@ -3,27 +3,35 @@ using UnityEngine;
 
 public class PlayerNameDisplay : MonoBehaviour
 {
-    [SerializeField] private TextMeshPro nameText;
+    [SerializeField] private TMP_Text nameText;
+    [SerializeField] private TMP_Text progressText;
 
     private void Start()
     {
-        UpdateName();
+        Refresh();
     }
 
-    public void UpdateName()
+    public void Refresh()
     {
-        if (nameText == null)
+        if (PlayerSession.Instance == null || !PlayerSession.Instance.IsLoggedIn)
         {
-            Debug.LogWarning("PlayerNameDisplay: nameText ist nicht gesetzt.");
+            if (nameText != null) nameText.text = "Gast";
+            if (progressText != null) progressText.text = string.Empty;
+
+            Debug.Log("[PlayerNameDisplay] Keine aktive Session.");
             return;
         }
 
-        if (PlayerSession.Instance == null)
+        if (nameText != null)
         {
-            nameText.text = "Unknown";
-            return;
+            nameText.text = PlayerSession.Instance.Username;
         }
 
-        nameText.text = PlayerSession.Instance.Username;
+        if (progressText != null)
+        {
+            progressText.text = $"Level {PlayerSession.Instance.Level} | Score {PlayerSession.Instance.Score}";
+        }
+
+        Debug.Log($"[PlayerNameDisplay] Anzeige aktualisiert: {PlayerSession.Instance.Username}");
     }
 }

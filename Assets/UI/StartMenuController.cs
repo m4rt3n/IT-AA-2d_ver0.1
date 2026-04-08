@@ -3,39 +3,32 @@ using UnityEngine;
 public class StartMenuController : MonoBehaviour
 {
     [SerializeField] private MenuManager menuManager;
-    [SerializeField] private NPCInteraction npcInteraction;
+
+    private void Start()
+    {
+        if (menuManager == null)
+        {
+            menuManager = FindAnyObjectByType<MenuManager>();
+        }
+    }
 
     public void OnClickOpenLogin()
     {
-        Debug.Log("[StartMenuController] OnClickOpenLogin");
+        Debug.Log("[StartMenuController] Öffne Login-Menü.");
 
-        if (menuManager == null)
+        if (menuManager != null)
         {
-            Debug.LogError("[StartMenuController] MenuManager fehlt");
-            return;
+            menuManager.ShowLoginMenu();
         }
-
-        menuManager.ShowLoginMenu();
     }
 
     public void OnClickClose()
     {
-        Debug.Log("[StartMenuController] OnClickClose");
+        Debug.Log("[StartMenuController] Menü schließen.");
 
-        if (npcInteraction != null)
+        if (menuManager != null)
         {
-            npcInteraction.EndInteraction();
-            return;
-        }
-
-        NPCInteraction foundNpc = FindFirstObjectByType<NPCInteraction>();
-        if (foundNpc != null)
-        {
-            foundNpc.EndInteraction();
-        }
-        else if (menuManager != null)
-        {
-            menuManager.HideAll();
+            menuManager.HideAllMenus();
         }
     }
 }

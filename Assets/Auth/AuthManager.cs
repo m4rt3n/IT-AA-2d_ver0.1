@@ -48,6 +48,8 @@ public class AuthManager : MonoBehaviour
         }
 
         PlayerSession.Instance.SetSession(save);
+
+        Debug.Log($"[AuthManager] Lade Szene nach Login: {sceneAfterLogin}");
         SceneManager.LoadScene(sceneAfterLogin);
     }
 
@@ -57,13 +59,13 @@ public class AuthManager : MonoBehaviour
 
     public bool SignIn(string username, string password)
     {
-        Debug.LogWarning("[AuthManager] Alte Methode SignIn(username, password) wurde aufgerufen. Diese Login-Art ist veraltet.");
+        Debug.LogWarning("[AuthManager] Alte Methode SignIn(username, password) wurde aufgerufen. Nicht mehr verwendet.");
         return false;
     }
 
     public bool SignUp(string username, string password)
     {
-        Debug.LogWarning("[AuthManager] Alte Methode SignUp(username, password) wurde aufgerufen. Diese Registrierung ist veraltet.");
+        Debug.LogWarning("[AuthManager] Alte Methode SignUp(username, password) wurde aufgerufen. Nicht mehr verwendet.");
         return false;
     }
 

@@ -2,49 +2,67 @@ using UnityEngine;
 
 public class NPCInteraction : MonoBehaviour
 {
-    [SerializeField] private string npcName = "Arthur";
-    [SerializeField] private MenuManager menuManager;
+    [SerializeField] private GameObject interactionHint;
+    [SerializeField] private bool openLoginMenu = true;
 
-    private bool isInteracting;
+    private bool playerInside;
+    private MenuManager menuManager;
 
-    public void Interact()
+    private void Start()
     {
-        if (isInteracting)
-            return;
+        menuManager = FindAnyObjectByType<MenuManager>();
 
-        isInteracting = true;
-
-        Debug.Log("NPC Interaktion gestartet: " + npcName);
-
-        if (menuManager != null)
+        if (interactionHint != null)
         {
-            menuManager.ShowStartMenu();
-        }
-        else
-        {
-            Debug.LogWarning("MenuManager fehlt!");
-        }
-
-        PlayerController player = FindFirstObjectByType<PlayerController>();
-        if (player != null)
-        {
-            player.SetPlayerControlEnabled(false);
+            interactionHint.SetActive(false);
         }
     }
 
-    public void EndInteraction()
+    private void Update()
     {
-        isInteracting = false;
-
-        if (menuManager != null)
+        if (!playerInside)
         {
-            menuManager.HideAll();
+            return;
         }
 
-        PlayerController player = FindFirstObjectByType<PlayerController>();
-        if (player != null)
+        if (Input.GetKeyDown(KeyCode.E))
         {
-            player.SetPlayerControlEnabled(true);
+            Debug.Log("[NPCInteraction] Interaktion mit NPC ausgelöst.");
+
+            if (openLoginMenu && menuManager != null)
+            {
+                menuManager.ShowLoginMenu();
+            }
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (!other.CompareTag("Player"))
+        {
+            return;
+        }
+
+        playerInside = true;
+
+        if (interactionHint != null)
+        {
+            interactionHint.SetActive(true);
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (!other.CompareTag("Player"))
+        {
+            return;
+        }
+
+        playerInside = false;
+
+        if (interactionHint != null)
+        {
+            interactionHint.SetActive(false);
         }
     }
 }

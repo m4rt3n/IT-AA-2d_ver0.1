@@ -14,53 +14,99 @@ public class SaveSlotSelectionPopup : MonoBehaviour
 
     #endregion
 
-    #region Private
+    #region Private Fields
 
-    private List<SaveSlotListItemUI> items = new();
+    private readonly List<SaveSlotListItemUI> items = new List<SaveSlotListItemUI>();
     private Action<SaveSlotInfo> callback;
 
     #endregion
 
+    #region Unity Methods
+
+    private void Awake()
+    {
+        if (root != null)
+        {
+            root.SetActive(false);
+        }
+
+        Debug.Log("[SaveSlotSelectionPopup] Initialisiert.");
+    }
+
+    #endregion
+
+    #region Public Methods
+
     public void Open(Action<SaveSlotInfo> onSelected)
     {
         callback = onSelected;
-        root.SetActive(true);
+
+        if (root != null)
+        {
+            root.SetActive(true);
+        }
 
         Refresh();
     }
 
     public void Close()
     {
-        root.SetActive(false);
+        if (root != null)
+        {
+            root.SetActive(false);
+        }
     }
+
+    #endregion
+
+    #region Private Methods
 
     private void Refresh()
     {
         Clear();
 
-        var list = DatabaseManager.Instance.GetAllSaveSlots();
-
-        emptyText.gameObject.SetActive(list.Count == 0);
-
-        foreach (var slot in list)
+        if (DatabaseManager.Instance == null)
         {
-            var item = Instantiate(itemPrefab, contentRoot);
+            Debug.LogError("[SaveSlotSelectionPopup] DatabaseManager fehlt.");
+            return;
+        }
+
+        List<SaveSlotInfo> list = DatabaseManager.Instance.GetAllSaveSlots();
+
+        if (emptyText != null)
+        {
+            emptyText.gameObject.SetActive(list.Count == 0);
+        }
+
+        foreach (SaveSlotInfo slot in list)
+        {
+            SaveSlotListItemUI item = Instantiate(itemPrefab, contentRoot);
             item.Bind(slot, OnSelected);
             items.Add(item);
         }
+
+        Debug.Log($"[SaveSlotSelectionPopup] Einträge aufgebaut: {items.Count}");
     }
 
     private void Clear()
     {
-        foreach (var i in items)
-            Destroy(i.gameObject);
+        foreach (SaveSlotListItemUI item in items)
+        {
+            if (item != null)
+            {
+                Destroy(item.gameObject);
+            }
+        }
 
         items.Clear();
     }
 
     private void OnSelected(SaveSlotInfo save)
     {
+        Debug.Log($"[SaveSlotSelectionPopup] Gewählt: {save.Username}");
         callback?.Invoke(save);
         Close();
     }
+
+    #endregion
 }
