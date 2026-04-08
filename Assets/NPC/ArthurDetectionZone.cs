@@ -12,13 +12,11 @@ public class ArthurDetectionZone : MonoBehaviour
 
     private void Reset()
     {
-        // Sucht automatisch die ArthurAutoInteraction am Parent
         arthurAutoInteraction = GetComponentInParent<ArthurAutoInteraction>();
     }
 
     private void Awake()
     {
-        // Falls im Inspector nichts gesetzt wurde, beim Start noch einmal suchen
         if (arthurAutoInteraction == null)
         {
             arthurAutoInteraction = GetComponentInParent<ArthurAutoInteraction>();
@@ -27,18 +25,17 @@ public class ArthurDetectionZone : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log("[ArthurDetectionZone] DetectionZone getroffen von: " + other.name);
+        Debug.Log("[ArthurDetectionZone] Trigger von: " + other.name);
 
-        // Nur der Player darf Arthur auslösen
         if (!other.CompareTag("Player"))
         {
-            Debug.Log("[ArthurDetectionZone] Objekt ignoriert, da es nicht den Tag 'Player' hat.");
+            Debug.Log("[ArthurDetectionZone] Ignoriert, da Objekt nicht Player ist.");
             return;
         }
 
         if (arthurAutoInteraction != null)
         {
-            Debug.Log("[ArthurDetectionZone] Arthur Auto Interaction wird ausgelöst.");
+            Debug.Log("[ArthurDetectionZone] ArthurAutoInteraction wird ausgelöst.");
             arthurAutoInteraction.TriggerAutoInteraction(other.gameObject);
         }
         else

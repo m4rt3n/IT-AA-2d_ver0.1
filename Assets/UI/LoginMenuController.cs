@@ -13,6 +13,9 @@ public class LoginMenuController : MonoBehaviour
     [SerializeField] private TMP_Text selectedUserText;
     [SerializeField] private Button continueButton;
 
+    [Header("Navigation")]
+    [SerializeField] private MenuManager menuManager;
+
     #endregion
 
     #region Private Fields
@@ -25,6 +28,11 @@ public class LoginMenuController : MonoBehaviour
 
     private void Start()
     {
+        if (menuManager == null)
+        {
+            menuManager = FindAnyObjectByType<MenuManager>();
+        }
+
         ResetSelection();
     }
 
@@ -67,6 +75,20 @@ public class LoginMenuController : MonoBehaviour
         }
 
         AuthManager.Instance.SignInWithSaveSlot(selectedSave);
+    }
+
+    public void BackToStartMenu()
+    {
+        Debug.Log("[LoginMenuController] Zurück ins StartMenuPanel.");
+
+        if (menuManager != null)
+        {
+            menuManager.ShowStartMenu();
+        }
+        else
+        {
+            Debug.LogError("[LoginMenuController] MenuManager fehlt.");
+        }
     }
 
     #endregion

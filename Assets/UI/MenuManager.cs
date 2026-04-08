@@ -2,14 +2,24 @@ using UnityEngine;
 
 public class MenuManager : MonoBehaviour
 {
+    #region Inspector
+
+    [SerializeField] private GameObject backgroundDim;
     [SerializeField] private GameObject startMenuPanel;
     [SerializeField] private GameObject loginMenuPanel;
-    [SerializeField] private GameObject backgroundDim;
+
+    #endregion
+
+    #region Unity Methods
 
     private void Start()
     {
-        ShowStartMenu();
+        HideAllMenus();
     }
+
+    #endregion
+
+    #region Public Methods
 
     public void ShowStartMenu()
     {
@@ -26,7 +36,7 @@ public class MenuManager : MonoBehaviour
         if (startMenuPanel != null) startMenuPanel.SetActive(false);
         if (loginMenuPanel != null) loginMenuPanel.SetActive(true);
 
-        Debug.Log("[MenuManager] Loginmenü aktiv.");
+        Debug.Log("[MenuManager] LoginMenuPanel aktiv.");
     }
 
     public void HideAllMenus()
@@ -37,4 +47,6 @@ public class MenuManager : MonoBehaviour
 
         Debug.Log("[MenuManager] Alle Menüs verborgen.");
     }
+
+    #endregion
 }
