@@ -1,18 +1,15 @@
-using System.IO;
-using System.Linq;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class DatabaseManager : MonoBehaviour
 {
-    public static DatabaseManager Instance { get; private set; }
+    #region Singleton
 
-    private UserDatabase database = new UserDatabase();
-    private string path;
-    private int currentId = 1;
+    public static DatabaseManager Instance;
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (Instance != null)
         {
             Destroy(gameObject);
             return;
@@ -21,91 +18,29 @@ public class DatabaseManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        path = Path.Combine(Application.persistentDataPath, "users.json");
-
-        Load();
-        SeedDummy();
-        Save();
+        Debug.Log("[DatabaseManager] Initialisiert.");
     }
 
-    private void Load()
+    #endregion
+
+    #region Mock Data
+
+    private List<SaveSlotInfo> mockData = new List<SaveSlotInfo>()
     {
-        if (!File.Exists(path))
-        {
-            database = new UserDatabase();
-            return;
-        }
+        new SaveSlotInfo { Id = 1, Username = "Martin", SaveSlotName = "Slot 1", Level = 5, Score = 1200, LastPlayed = "Heute" },
+        new SaveSlotInfo { Id = 2, Username = "Martin", SaveSlotName = "Slot 2", Level = 12, Score = 3400, LastPlayed = "Gestern" },
+        new SaveSlotInfo { Id = 3, Username = "TestUser", SaveSlotName = "Slot A", Level = 2, Score = 300, LastPlayed = "Vor 3 Tagen" }
+    };
 
-        string json = File.ReadAllText(path);
-        database = JsonUtility.FromJson<UserDatabase>(json);
+    #endregion
 
-        if (database == null)
-            database = new UserDatabase();
+    #region Public API
 
-        if (database.users == null)
-            database.users = new System.Collections.Generic.List<UserEntity>();
-
-        if (database.users.Count > 0)
-            currentId = database.users.Max(u => u.Id) + 1;
-    }
-
-    private void Save()
+    public List<SaveSlotInfo> GetAllSaveSlots()
     {
-        string json = JsonUtility.ToJson(database, true);
-        File.WriteAllText(path, json);
+        Debug.Log("[DatabaseManager] Lade alle SaveSlots...");
+        return mockData;
     }
 
-    private void SeedDummy()
-    {
-        if (database.users.Any(u => u.Username == "MartinDummy"))
-            return;
-
-        database.users.Add(new UserEntity
-        {
-            Id = currentId++,
-            Username = "MartinDummy",
-            Password = "1234"
-        });
-    }
-
-    public bool RegisterUser(string username, string password)
-    {
-        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
-            return false;
-
-        if (database.users.Any(u => u.Username == username))
-            return false;
-
-        database.users.Add(new UserEntity
-        {
-            Id = currentId++,
-            Username = username,
-            Password = password
-        });
-
-        Save();
-        return true;
-    }
-
-    public UserEntity LoginUser(string username, string password)
-    {
-        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
-            return null;
-
-        return database.users.FirstOrDefault(u =>
-            u.Username == username && u.Password == password);
-    }
-
-    public UserEntity GetUserById(int id)
-    {
-        return database.users.FirstOrDefault(u => u.Id == id);
-    }
-
-    public UserEntity GetUserByUsername(string username)
-    {
-        if (string.IsNullOrWhiteSpace(username))
-            return null;
-
-        return database.users.FirstOrDefault(u => u.Username == username);
-    }
+    #endregion
 }
