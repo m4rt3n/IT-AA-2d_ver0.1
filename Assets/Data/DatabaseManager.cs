@@ -25,11 +25,15 @@ public class DatabaseManager : MonoBehaviour
 
     #region Mock Data
 
+    // Übergangslösung:
+    // Diese Liste dient nur dazu, das Popup und den Login-Flow sauber zu testen.
+    // Später kannst du das gegen JSON oder SQLite austauschen.
     private readonly List<SaveSlotInfo> saveSlots = new List<SaveSlotInfo>()
     {
         new SaveSlotInfo
         {
-            Id = 1,
+            UserId = 1,
+            SaveSlotId = 101,
             Username = "Martin",
             SaveSlotName = "Slot 1",
             Level = 5,
@@ -38,7 +42,8 @@ public class DatabaseManager : MonoBehaviour
         },
         new SaveSlotInfo
         {
-            Id = 2,
+            UserId = 1,
+            SaveSlotId = 102,
             Username = "Martin",
             SaveSlotName = "Slot 2",
             Level = 12,
@@ -47,7 +52,8 @@ public class DatabaseManager : MonoBehaviour
         },
         new SaveSlotInfo
         {
-            Id = 3,
+            UserId = 2,
+            SaveSlotId = 201,
             Username = "ArthurTest",
             SaveSlotName = "Slot A",
             Level = 2,
@@ -64,6 +70,21 @@ public class DatabaseManager : MonoBehaviour
     {
         Debug.Log($"[DatabaseManager] Lade SaveSlots. Anzahl: {saveSlots.Count}");
         return saveSlots;
+    }
+
+    public SaveSlotInfo GetSaveSlotByIds(int userId, int saveSlotId)
+    {
+        for (int i = 0; i < saveSlots.Count; i++)
+        {
+            if (saveSlots[i].UserId == userId && saveSlots[i].SaveSlotId == saveSlotId)
+            {
+                Debug.Log($"[DatabaseManager] SaveSlot gefunden: UserId={userId}, SaveSlotId={saveSlotId}");
+                return saveSlots[i];
+            }
+        }
+
+        Debug.LogWarning($"[DatabaseManager] Kein SaveSlot gefunden: UserId={userId}, SaveSlotId={saveSlotId}");
+        return null;
     }
 
     #endregion

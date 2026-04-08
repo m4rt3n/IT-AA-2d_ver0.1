@@ -1,12 +1,37 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LoginMenuController : MonoBehaviour
 {
     #region Inspector
 
+    [Header("Popup")]
     [SerializeField] private SaveSlotSelectionPopup popup;
+
+    [Header("UI")]
     [SerializeField] private TMP_Text selectedUserText;
+    [SerializeField] private Button continueButton;
+
+    #endregion
+
+    #region Private Fields
+
+    private SaveSlotInfo selectedSave;
+
+    #endregion
+
+    #region Unity Methods
+
+    private void Start()
+    {
+        ResetSelection();
+    }
+
+    private void OnEnable()
+    {
+        ResetSelection();
+    }
 
     #endregion
 
@@ -25,6 +50,25 @@ public class LoginMenuController : MonoBehaviour
         popup.Open(OnSaveSelected);
     }
 
+    public void ContinueWithSelectedSave()
+    {
+        Debug.Log("[LoginMenuController] Fortsetzen mit ausgewähltem Save.");
+
+        if (selectedSave == null)
+        {
+            Debug.LogWarning("[LoginMenuController] Kein Save ausgewählt.");
+            return;
+        }
+
+        if (AuthManager.Instance == null)
+        {
+            Debug.LogError("[LoginMenuController] AuthManager fehlt.");
+            return;
+        }
+
+        AuthManager.Instance.SignInWithSaveSlot(selectedSave);
+    }
+
     #endregion
 
     #region Private Methods
@@ -37,20 +81,33 @@ public class LoginMenuController : MonoBehaviour
             return;
         }
 
+        selectedSave = save;
+
         Debug.Log($"[LoginMenuController] Gewählt: {save.Username} - {save.SaveSlotName}");
 
         if (selectedUserText != null)
         {
-            selectedUserText.text = $"{save.Username} - {save.SaveSlotName}";
+            selectedUserText.text = $"{save.Username} - {save.SaveSlotName} | Level {save.Level} | Score {save.Score}";
         }
 
-        if (AuthManager.Instance != null)
+        if (continueButton != null)
         {
-            AuthManager.Instance.SignInWithSaveSlot(save);
+            continueButton.interactable = true;
         }
-        else
+    }
+
+    private void ResetSelection()
+    {
+        selectedSave = null;
+
+        if (selectedUserText != null)
         {
-            Debug.LogError("[LoginMenuController] AuthManager fehlt.");
+            selectedUserText.text = "Kein Spielstand ausgewählt";
+        }
+
+        if (continueButton != null)
+        {
+            continueButton.interactable = false;
         }
     }
 

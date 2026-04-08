@@ -57,6 +57,9 @@ public class AuthManager : MonoBehaviour
 
     #region Compatibility Methods
 
+    // Diese Methoden bleiben vorübergehend erhalten,
+    // damit alte Referenzen keine Compile-Fehler verursachen.
+
     public bool SignIn(string username, string password)
     {
         Debug.LogWarning("[AuthManager] Alte Methode SignIn(username, password) wurde aufgerufen. Nicht mehr verwendet.");

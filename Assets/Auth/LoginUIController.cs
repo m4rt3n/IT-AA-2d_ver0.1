@@ -1,7 +1,8 @@
 using UnityEngine;
 
 /// <summary>
-/// Veralteter Controller. Bleibt nur als Platzhalter erhalten,
+/// Veralteter Controller.
+/// Bleibt nur als Platzhalter erhalten,
 /// damit alte Referenzen keine Compile-Fehler erzeugen.
 /// </summary>
 public class LoginUIController : MonoBehaviour

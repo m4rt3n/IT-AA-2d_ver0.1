@@ -1,69 +1,72 @@
-using System.Collections.Generic;
 using UnityEngine;
 
-public class DatabaseManager : MonoBehaviour
+public class PlayerSession : MonoBehaviour
 {
     #region Singleton
 
-    public static DatabaseManager Instance;
+    public static PlayerSession Instance;
 
     private void Awake()
     {
         if (Instance != null && Instance != this)
         {
-            Debug.LogWarning("[DatabaseManager] Zweite Instanz gefunden, zerstöre Objekt.");
+            Debug.LogWarning("[PlayerSession] Zweite Instanz gefunden, zerstöre Objekt.");
             Destroy(gameObject);
             return;
         }
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
-        Debug.Log("[DatabaseManager] Initialisiert.");
+        Debug.Log("[PlayerSession] Initialisiert.");
     }
 
     #endregion
 
-    #region Mock Data
+    #region Properties
 
-    private readonly List<SaveSlotInfo> saveSlots = new List<SaveSlotInfo>()
-    {
-        new SaveSlotInfo
-        {
-            Id = 1,
-            Username = "Martin",
-            SaveSlotName = "Slot 1",
-            Level = 5,
-            Score = 1200,
-            LastPlayed = "Heute"
-        },
-        new SaveSlotInfo
-        {
-            Id = 2,
-            Username = "Martin",
-            SaveSlotName = "Slot 2",
-            Level = 12,
-            Score = 3400,
-            LastPlayed = "Gestern"
-        },
-        new SaveSlotInfo
-        {
-            Id = 3,
-            Username = "ArthurTest",
-            SaveSlotName = "Slot A",
-            Level = 2,
-            Score = 300,
-            LastPlayed = "Vor 3 Tagen"
-        }
-    };
+    public int UserId { get; private set; }
+    public string Username { get; private set; }
+
+    public int SaveSlotId { get; private set; }
+    public string SaveSlotName { get; private set; }
+
+    public int Level { get; private set; }
+    public int Score { get; private set; }
+
+    public bool IsLoggedIn => !string.IsNullOrEmpty(Username);
 
     #endregion
 
-    #region Public API
+    #region Public Methods
 
-    public List<SaveSlotInfo> GetAllSaveSlots()
+    public void SetSession(SaveSlotInfo save)
     {
-        Debug.Log($"[DatabaseManager] Lade SaveSlots. Anzahl: {saveSlots.Count}");
-        return saveSlots;
+        if (save == null)
+        {
+            Debug.LogError("[PlayerSession] SaveSlotInfo ist null.");
+            return;
+        }
+
+        UserId = save.UserId;
+        Username = save.Username;
+        SaveSlotId = save.SaveSlotId;
+        SaveSlotName = save.SaveSlotName;
+        Level = save.Level;
+        Score = save.Score;
+
+        Debug.Log($"[PlayerSession] Session gesetzt: {Username} | {SaveSlotName} | Level {Level} | Score {Score}");
+    }
+
+    public void ClearSession()
+    {
+        UserId = 0;
+        Username = string.Empty;
+        SaveSlotId = 0;
+        SaveSlotName = string.Empty;
+        Level = 0;
+        Score = 0;
+
+        Debug.Log("[PlayerSession] Session geleert.");
     }
 
     #endregion

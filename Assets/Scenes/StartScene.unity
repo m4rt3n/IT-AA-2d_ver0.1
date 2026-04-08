@@ -77576,11 +77576,11 @@ Transform:
   m_GameObject: {fileID: 416801914}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0.70821, y: 3.34211, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1183948325}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &416801916
 MonoBehaviour:
@@ -95048,8 +95048,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43d849dba24e4c24eb5c7344d55948b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPCInteraction
-  npcName: Arthur
-  menuManager: {fileID: 749671471}
+  interactionHint: {fileID: 0}
+  openLoginMenu: 1
 --- !u!114 &745381516
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -95062,10 +95062,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d162b5cd9dcf1ab4d8ad0ca77612b48b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ArthurAutoInteraction
-  moveSpeed: 2.5
-  stopDistance: 0.6
-  npcInteraction: {fileID: 745381515}
-  animator: {fileID: 745381517}
+  triggerDelay: 0.25
 --- !u!95 &745381517
 Animator:
   serializedVersion: 7
@@ -95114,11 +95111,11 @@ Transform:
   m_GameObject: {fileID: 749671468}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 445.2825, y: 350.14838, z: 0}
+  m_LocalPosition: {x: 445.99072, y: 353.49048, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1183948325}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &749671471
 MonoBehaviour:
@@ -95132,13 +95129,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24ceb812ef9e1b84795fe9e074e327ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MenuManager
-  backgroundDim: {fileID: 1695271960}
-  menuPanel: {fileID: 2102773475}
   startMenuPanel: {fileID: 1419130777}
   loginMenuPanel: {fileID: 1387962816}
-  backgroundDimGroup: {fileID: 1695271964}
-  startMenuGroup: {fileID: 1419130782}
-  loginMenuGroup: {fileID: 1387962821}
+  backgroundDim: {fileID: 1695271960}
 --- !u!1 &837566163
 GameObject:
   m_ObjectHideFlags: 0
@@ -95573,7 +95566,7 @@ GameObject:
   - component: {fileID: 908229789}
   m_Layer: 9
   m_Name: DetectionZone
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -96312,11 +96305,7 @@ Transform:
   m_LocalPosition: {x: 0.70821, y: 3.34211, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 416801915}
-  - {fileID: 1377716541}
-  - {fileID: 1980876246}
-  - {fileID: 749671470}
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1225455659
@@ -96755,11 +96744,11 @@ Transform:
   m_GameObject: {fileID: 1377716539}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0.70821, y: 3.34211, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1183948325}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1387962816
 GameObject:
@@ -96860,10 +96849,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39af0767c3fe46642b5d59c755626f11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LoginMenuController
-  menuManager: {fileID: 749671471}
-  usernameInput: {fileID: 1180516644}
-  passwordInput: {fileID: 0}
-  messageText: {fileID: 1002383803}
+  popup: {fileID: 0}
+  selectedUserText: {fileID: 0}
+  continueButton: {fileID: 0}
 --- !u!225 &1387962821
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -97108,7 +97096,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StartMenuController
   menuManager: {fileID: 749671471}
-  npcInteraction: {fileID: 745381515}
 --- !u!1 &1470731874
 GameObject:
   m_ObjectHideFlags: 0
@@ -97594,12 +97581,12 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1413273052}
-  m_Father: {fileID: 2082348159}
+  m_Father: {fileID: 2102773476}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -10}
+  m_SizeDelta: {x: 517, y: 34}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1617242583
 MonoBehaviour:
@@ -97677,6 +97664,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 583ca2932feba1243be8aa1f16c714a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SaveSlotSelectionPopup
+  root: {fileID: 0}
+  contentRoot: {fileID: 0}
+  itemPrefab: {fileID: 0}
+  emptyText: {fileID: 0}
 --- !u!1 &1641606826
 GameObject:
   m_ObjectHideFlags: 0
@@ -100364,11 +100355,11 @@ Transform:
   m_GameObject: {fileID: 1980876245}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0.70821, y: 3.34211, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1183948325}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1980876247
 MonoBehaviour:
@@ -100460,7 +100451,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1695271961}
-  - {fileID: 1617242582}
   - {fileID: 2102773476}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -100566,6 +100556,7 @@ RectTransform:
   m_Children:
   - {fileID: 1419130778}
   - {fileID: 1387962817}
+  - {fileID: 1617242582}
   m_Father: {fileID: 2082348159}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -100635,3 +100626,7 @@ SceneRoots:
   - {fileID: 1672437182}
   - {fileID: 745381511}
   - {fileID: 1410127730}
+  - {fileID: 416801915}
+  - {fileID: 1377716541}
+  - {fileID: 1980876246}
+  - {fileID: 749671470}
