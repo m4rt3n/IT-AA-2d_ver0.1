@@ -9,14 +9,16 @@ public class AuthManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance != null)
+        if (Instance != null && Instance != this)
         {
+            Debug.LogWarning("[AuthManager] Zweite Instanz gefunden, zerstöre Objekt.");
             Destroy(gameObject);
             return;
         }
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
+        Debug.Log("[AuthManager] Initialisiert.");
     }
 
     #endregion
@@ -27,15 +29,42 @@ public class AuthManager : MonoBehaviour
 
     #endregion
 
-    #region Login
+    #region New Login Flow
 
     public void SignInWithSaveSlot(SaveSlotInfo save)
     {
-        Debug.Log("[Auth] Login mit SaveSlot");
+        Debug.Log("[AuthManager] Login mit SaveSlot.");
+
+        if (save == null)
+        {
+            Debug.LogError("[AuthManager] SaveSlot ist null.");
+            return;
+        }
+
+        if (PlayerSession.Instance == null)
+        {
+            Debug.LogError("[AuthManager] PlayerSession fehlt.");
+            return;
+        }
 
         PlayerSession.Instance.SetSession(save);
-
         SceneManager.LoadScene(sceneAfterLogin);
+    }
+
+    #endregion
+
+    #region Compatibility Methods
+
+    public bool SignIn(string username, string password)
+    {
+        Debug.LogWarning("[AuthManager] Alte Methode SignIn(username, password) wurde aufgerufen. Diese Login-Art ist veraltet.");
+        return false;
+    }
+
+    public bool SignUp(string username, string password)
+    {
+        Debug.LogWarning("[AuthManager] Alte Methode SignUp(username, password) wurde aufgerufen. Diese Registrierung ist veraltet.");
+        return false;
     }
 
     #endregion

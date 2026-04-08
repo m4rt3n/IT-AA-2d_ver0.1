@@ -3,23 +3,29 @@ using UnityEngine;
 
 public class PlayerNameTag : MonoBehaviour
 {
-    [SerializeField] private TMP_Text nameText;
+    [SerializeField] private TMP_Text playerNameText;
 
     private void Start()
     {
-        if (nameText == null)
+        Refresh();
+    }
+
+    public void Refresh()
+    {
+        if (playerNameText == null)
         {
-            Debug.LogWarning("PlayerNameTag: nameText ist nicht gesetzt.");
+            Debug.LogWarning("[PlayerNameTag] TMP_Text Referenz fehlt.");
             return;
         }
 
-        if (PlayerSession.Instance != null && PlayerSession.Instance.IsLoggedIn)
+        if (PlayerSession.Instance == null || !PlayerSession.Instance.IsLoggedIn)
         {
-            nameText.text = PlayerSession.Instance.Username;
+            playerNameText.text = "Gast";
+            Debug.Log("[PlayerNameTag] Keine aktive Session.");
+            return;
         }
-        else
-        {
-            nameText.text = "Gast";
-        }
+
+        playerNameText.text = PlayerSession.Instance.Username;
+        Debug.Log($"[PlayerNameTag] Name gesetzt: {PlayerSession.Instance.Username}");
     }
 }

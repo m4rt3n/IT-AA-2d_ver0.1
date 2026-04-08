@@ -3,33 +3,44 @@ using UnityEngine;
 
 public class LoginMenuController : MonoBehaviour
 {
-    #region Inspector
-
     [SerializeField] private SaveSlotSelectionPopup popup;
     [SerializeField] private TMP_Text selectedUserText;
 
-    #endregion
-
-    #region Public
-
     public void OpenSaveSelection()
     {
-        Debug.Log("[Login] Öffne SaveSlot Auswahl");
+        Debug.Log("[LoginMenuController] Öffne SaveSlot-Auswahl.");
+
+        if (popup == null)
+        {
+            Debug.LogError("[LoginMenuController] Popup Referenz fehlt.");
+            return;
+        }
+
         popup.Open(OnSaveSelected);
     }
 
-    #endregion
-
-    #region Callback
-
     private void OnSaveSelected(SaveSlotInfo save)
     {
-        Debug.Log($"[Login] Ausgewählt: {save.Username} ({save.SaveSlotName})");
+        if (save == null)
+        {
+            Debug.LogWarning("[LoginMenuController] Kein Save ausgewählt.");
+            return;
+        }
 
-        selectedUserText.text = $"{save.Username} - {save.SaveSlotName}";
+        Debug.Log($"[LoginMenuController] Gewählt: {save.Username} - {save.SaveSlotName}");
 
-        AuthManager.Instance.SignInWithSaveSlot(save);
+        if (selectedUserText != null)
+        {
+            selectedUserText.text = $"{save.Username} - {save.SaveSlotName}";
+        }
+
+        if (AuthManager.Instance != null)
+        {
+            AuthManager.Instance.SignInWithSaveSlot(save);
+        }
+        else
+        {
+            Debug.LogError("[LoginMenuController] AuthManager fehlt.");
+        }
     }
-
-    #endregion
 }
