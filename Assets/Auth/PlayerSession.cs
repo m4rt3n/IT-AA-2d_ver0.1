@@ -2,32 +2,52 @@ using UnityEngine;
 
 public class PlayerSession : MonoBehaviour
 {
-    public static PlayerSession Instance { get; private set; }
+    #region Singleton
 
-    public int UserId { get; private set; }
-    public string Username { get; private set; }
-
-    public bool IsLoggedIn => !string.IsNullOrEmpty(Username);
+    public static PlayerSession Instance;
 
     private void Awake()
     {
-        if (transform.parent != null)
+        if (Instance != null)
         {
-            transform.SetParent(null);
+            Destroy(gameObject);
+            return;
         }
 
+        Instance = this;
         DontDestroyOnLoad(gameObject);
     }
 
-    public void SetUser(int userId, string username)
+    #endregion
+
+    #region Data
+
+    public int UserId;
+    public string Username;
+
+    public int SaveSlotId;
+    public string SaveSlotName;
+
+    public int Level;
+    public int Score;
+
+    #endregion
+
+    #region Public
+
+    public void SetSession(SaveSlotInfo save)
     {
-        UserId = userId;
-        Username = username;
+        UserId = save.Id;
+        Username = save.Username;
+
+        SaveSlotId = save.Id;
+        SaveSlotName = save.SaveSlotName;
+
+        Level = save.Level;
+        Score = save.Score;
+
+        Debug.Log($"[Session] {Username} | {SaveSlotName} | Level {Level}");
     }
 
-    public void ClearUser()
-    {
-        UserId = 0;
-        Username = string.Empty;
-    }
+    #endregion
 }

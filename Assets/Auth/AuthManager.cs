@@ -3,13 +3,13 @@ using UnityEngine.SceneManagement;
 
 public class AuthManager : MonoBehaviour
 {
-    public static AuthManager Instance { get; private set; }
+    #region Singleton
 
-    [SerializeField] private string sceneAfterLogin = "StartScene";
+    public static AuthManager Instance;
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (Instance != null)
         {
             Destroy(gameObject);
             return;
@@ -19,51 +19,24 @@ public class AuthManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    public bool SignUp(string username, string password)
+    #endregion
+
+    #region Inspector
+
+    [SerializeField] private string sceneAfterLogin = "StartScene";
+
+    #endregion
+
+    #region Login
+
+    public void SignInWithSaveSlot(SaveSlotInfo save)
     {
-        if (DatabaseManager.Instance == null)
-        {
-            Debug.LogError("AuthManager: DatabaseManager.Instance ist null.");
-            return false;
-        }
+        Debug.Log("[Auth] Login mit SaveSlot");
 
-        return DatabaseManager.Instance.RegisterUser(username, password);
-    }
-
-    public bool SignIn(string username, string password)
-    {
-        if (DatabaseManager.Instance == null)
-        {
-            Debug.LogError("AuthManager: DatabaseManager.Instance ist null.");
-            return false;
-        }
-
-        UserEntity user = DatabaseManager.Instance.LoginUser(username, password);
-
-        if (user == null)
-        {
-            Debug.Log("Login fehlgeschlagen: Benutzer nicht gefunden oder Passwort falsch.");
-            return false;
-        }
-
-        if (PlayerSession.Instance == null)
-        {
-            Debug.LogError("AuthManager: PlayerSession.Instance ist null.");
-            return false;
-        }
-
-        PlayerSession.Instance.SetUser(user.Id, user.Username);
-        Debug.Log("Login erfolgreich: " + user.Username);
+        PlayerSession.Instance.SetSession(save);
 
         SceneManager.LoadScene(sceneAfterLogin);
-        return true;
     }
 
-    public void Logout()
-    {
-        if (PlayerSession.Instance != null)
-        {
-            PlayerSession.Instance.ClearUser();
-        }
-    }
+    #endregion
 }

@@ -16,62 +16,27 @@ public class SaveSlotSelectionPopup : MonoBehaviour
 
     #region Private
 
-    private readonly List<SaveSlotListItemUI> spawnedItems = new();
-    private Action<SaveSlotInfo> onSaveSelected;
+    private List<SaveSlotListItemUI> items = new();
+    private Action<SaveSlotInfo> callback;
 
     #endregion
-
-    #region Unity
-
-    private void Awake()
-    {
-        if (root != null)
-        {
-            root.SetActive(false);
-        }
-
-        Debug.Log("[Popup] Initialisiert.");
-    }
-
-    #endregion
-
-    #region Public
 
     public void Open(Action<SaveSlotInfo> onSelected)
     {
-        Debug.Log("[Popup] Öffnen");
-
-        onSaveSelected = onSelected;
-
-        if (root != null)
-        {
-            root.SetActive(true);
-        }
+        callback = onSelected;
+        root.SetActive(true);
 
         Refresh();
     }
 
     public void Close()
     {
-        Debug.Log("[Popup] Schließen");
-
-        if (root != null)
-        {
-            root.SetActive(false);
-        }
+        root.SetActive(false);
     }
 
-    public void Refresh()
+    private void Refresh()
     {
-        Debug.Log("[Popup] Refresh");
-
         Clear();
-
-        if (DatabaseManager.Instance == null)
-        {
-            Debug.LogError("[Popup] DatabaseManager fehlt!");
-            return;
-        }
 
         var list = DatabaseManager.Instance.GetAllSaveSlots();
 
@@ -81,34 +46,21 @@ public class SaveSlotSelectionPopup : MonoBehaviour
         {
             var item = Instantiate(itemPrefab, contentRoot);
             item.Bind(slot, OnSelected);
-            spawnedItems.Add(item);
+            items.Add(item);
         }
-
-        Debug.Log($"[Popup] Einträge: {spawnedItems.Count}");
     }
-
-    #endregion
-
-    #region Private
 
     private void Clear()
     {
-        foreach (var item in spawnedItems)
-        {
-            if (item != null)
-                Destroy(item.gameObject);
-        }
+        foreach (var i in items)
+            Destroy(i.gameObject);
 
-        spawnedItems.Clear();
+        items.Clear();
     }
 
-    private void OnSelected(SaveSlotInfo slot)
+    private void OnSelected(SaveSlotInfo save)
     {
-        Debug.Log($"[Popup] Gewählt: {slot.Username}");
-
-        onSaveSelected?.Invoke(slot);
+        callback?.Invoke(save);
         Close();
     }
-
-    #endregion
 }

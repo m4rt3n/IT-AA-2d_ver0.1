@@ -14,8 +14,7 @@ public class LoginMenuController : MonoBehaviour
 
     public void OpenSaveSelection()
     {
-        Debug.Log("[Login] Öffne Auswahl");
-
+        Debug.Log("[Login] Öffne SaveSlot Auswahl");
         popup.Open(OnSaveSelected);
     }
 
@@ -25,9 +24,11 @@ public class LoginMenuController : MonoBehaviour
 
     private void OnSaveSelected(SaveSlotInfo save)
     {
-        Debug.Log($"[Login] Spieler gewählt: {save.Username}");
+        Debug.Log($"[Login] Ausgewählt: {save.Username} ({save.SaveSlotName})");
 
-        selectedUserText.text = save.Username;
+        selectedUserText.text = $"{save.Username} - {save.SaveSlotName}";
+
+        AuthManager.Instance.SignInWithSaveSlot(save);
     }
 
     #endregion
