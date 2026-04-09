@@ -1,135 +1,137 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class LoginMenuController : MonoBehaviour
 {
     #region Inspector
 
-    [Header("Popup")]
-    [SerializeField] private SaveSlotSelectionPopup popup;
-
-    [Header("UI")]
-    [SerializeField] private TMP_Text selectedUserText;
-    [SerializeField] private Button continueButton;
-
-    [Header("Navigation")]
     [SerializeField] private MenuManager menuManager;
 
+    [Header("Input")]
+    [SerializeField] private TMP_InputField usernameInput;
+    [SerializeField] private TMP_InputField passwordInput;
+
+    [Header("Feedback")]
+    [SerializeField] private TMP_Text statusText;
+
+    [Header("Save Slot UI")]
+    [SerializeField] private SaveSlotSelectionPopup saveSlotSelectionPopup;
+
     #endregion
 
-    #region Private Fields
-
-    private SaveSlotInfo selectedSave;
-
-    #endregion
-
-    #region Unity Methods
-
-    private void Start()
-    {
-        if (menuManager == null)
-        {
-            menuManager = FindAnyObjectByType<MenuManager>();
-        }
-
-        ResetSelection();
-    }
+    #region Unity
 
     private void OnEnable()
     {
-        ResetSelection();
+        ClearStatus();
     }
 
     #endregion
 
-    #region Public Methods
+    #region Public Button Events
 
-    public void OpenSaveSelection()
+    public void OnClickRegister()
     {
-        Debug.Log("[LoginMenuController] Öffne SaveSlot-Auswahl.");
+        string username = GetUsername();
+        string password = GetPassword();
 
-        if (popup == null)
+        if (!ValidateFields(username, password))
         {
-            Debug.LogError("[LoginMenuController] Popup Referenz fehlt.");
             return;
         }
 
-        popup.Open(OnSaveSelected);
+        bool success = AuthManager.Instance != null && AuthManager.Instance.Register(username, password);
+
+        if (success)
+        {
+            SetStatus("Registrierung erfolgreich.");
+        }
+        else
+        {
+            SetStatus("Registrierung fehlgeschlagen. Benutzer existiert evtl. bereits.");
+        }
     }
 
-    public void ContinueWithSelectedSave()
+    public void OnClickLogin()
     {
-        Debug.Log("[LoginMenuController] Fortsetzen mit ausgewähltem Save.");
+        string username = GetUsername();
+        string password = GetPassword();
 
-        if (selectedSave == null)
+        if (!ValidateFields(username, password))
         {
-            Debug.LogWarning("[LoginMenuController] Kein Save ausgewählt.");
             return;
         }
 
         if (AuthManager.Instance == null)
         {
-            Debug.LogError("[LoginMenuController] AuthManager fehlt.");
+            SetStatus("AuthManager fehlt.");
             return;
         }
 
-        AuthManager.Instance.SignInWithSaveSlot(selectedSave);
-    }
+        bool success = AuthManager.Instance.Login(username, password, out string message);
+        SetStatus(message);
 
-    public void BackToStartMenu()
-    {
-        Debug.Log("[LoginMenuController] Zurück ins StartMenuPanel.");
+        if (!success)
+        {
+            return;
+        }
 
         if (menuManager != null)
         {
-            menuManager.ShowStartMenu();
+            menuManager.ShowSaveSlotMenu();
         }
-        else
+
+        if (saveSlotSelectionPopup != null)
         {
-            Debug.LogError("[LoginMenuController] MenuManager fehlt.");
+            saveSlotSelectionPopup.OpenForUser(username);
         }
+    }
+
+    public void OnClickBack()
+    {
+        menuManager?.ShowStartMenu();
     }
 
     #endregion
 
-    #region Private Methods
+    #region Private Helpers
 
-    private void OnSaveSelected(SaveSlotInfo save)
+    private string GetUsername()
     {
-        if (save == null)
-        {
-            Debug.LogWarning("[LoginMenuController] Kein Save ausgewählt.");
-            return;
-        }
-
-        selectedSave = save;
-
-        Debug.Log($"[LoginMenuController] Gewählt: {save.Username} - {save.SaveSlotName}");
-
-        if (selectedUserText != null)
-        {
-            selectedUserText.text = $"{save.Username} - {save.SaveSlotName} | Level {save.Level} | Score {save.Score}";
-        }
-
-        if (continueButton != null)
-        {
-            continueButton.interactable = true;
-        }
+        return usernameInput != null ? usernameInput.text.Trim() : string.Empty;
     }
 
-    private void ResetSelection()
+    private string GetPassword()
     {
-        selectedSave = null;
+        return passwordInput != null ? passwordInput.text : string.Empty;
+    }
 
-        if (selectedUserText != null)
+    private bool ValidateFields(string username, string password)
+    {
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
         {
-            selectedUserText.text = "Kein Spielstand ausgewählt";
+            SetStatus("Bitte Benutzername und Passwort eingeben.");
+            return false;
         }
 
-        if (continueButton != null)
+        return true;
+    }
+
+    private void SetStatus(string message)
+    {
+        if (statusText != null)
         {
-            continueButton.interactable = false;
+            statusText.text = message;
+        }
+
+        Debug.Log($"[LoginMenuController] {message}");
+    }
+
+    private void ClearStatus()
+    {
+        if (statusText != null)
+        {
+            statusText.text = string.Empty;
         }
     }
 

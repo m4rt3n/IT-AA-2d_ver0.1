@@ -13,72 +13,38 @@ public class StartMenuController : MonoBehaviour
 
     #endregion
 
-    #region Unity Methods
+    #region Public Button Events
 
-    private void Start()
+    public void OnClickOpenLogin()
     {
         if (menuManager == null)
         {
-            menuManager = FindAnyObjectByType<MenuManager>();
+            Debug.LogError("[StartMenuController] MenuManager fehlt.");
+            return;
         }
 
-        // Noch nicht aktiv
-        if (btnSave != null)
-        {
-            btnSave.interactable = false;
-        }
-
-        if (btnSettings != null)
-        {
-            btnSettings.interactable = false;
-        }
+        menuManager.ShowLoginMenu();
     }
 
-    #endregion
-
-    #region Button Events
-
-    public void OnClickSignInDummy()
+    public void OnClickClose()
     {
-        Debug.Log("[StartMenuController] SignIn Dummy geklickt. Noch ohne Funktion.");
-    }
-
-    public void OnClickOpenLoginMenu()
-    {
-        Debug.Log("[StartMenuController] Wechsel ins LoginMenuPanel.");
-
-        if (menuManager != null)
-        {
-            menuManager.ShowLoginMenu();
-        }
-        else
+        if (menuManager == null)
         {
             Debug.LogError("[StartMenuController] MenuManager fehlt.");
+            return;
         }
+
+        menuManager.HideAllMenus();
     }
 
-    public void OnClickSaveDisabled()
+    public void OnClickSave()
     {
-        Debug.Log("[StartMenuController] Speichern ist derzeit nicht aktiv.");
+        Debug.Log("[StartMenuController] Save-Button aktuell noch ohne Funktion.");
     }
 
-    public void OnClickSettingsDisabled()
+    public void OnClickSettings()
     {
-        Debug.Log("[StartMenuController] Einstellungen sind derzeit nicht aktiv.");
-    }
-
-    public void OnClickCloseMenu()
-    {
-        Debug.Log("[StartMenuController] Menü schließen.");
-
-        if (menuManager != null)
-        {
-            menuManager.HideAllMenus();
-        }
-        else
-        {
-            Debug.LogError("[StartMenuController] MenuManager fehlt.");
-        }
+        Debug.Log("[StartMenuController] Settings-Button aktuell noch ohne Funktion.");
     }
 
     #endregion

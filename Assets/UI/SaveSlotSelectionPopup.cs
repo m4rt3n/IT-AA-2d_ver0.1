@@ -1,60 +1,78 @@
-using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SaveSlotSelectionPopup : MonoBehaviour
 {
     #region Inspector
 
-    [SerializeField] private GameObject root;
+    [SerializeField] private MenuManager menuManager;
+
+    [Header("List")]
     [SerializeField] private Transform contentRoot;
-    [SerializeField] private SaveSlotListItemUI itemPrefab;
-    [SerializeField] private TMP_Text emptyText;
+    [SerializeField] private SaveSlotListItemUI saveSlotItemPrefab;
+
+    [Header("Header / Feedback")]
+    [SerializeField] private TMP_Text titleText;
+    [SerializeField] private TMP_Text infoText;
+
+    [Header("Actions")]
+    [SerializeField] private Button createNewSlotButton;
+    [SerializeField] private Button backButton;
 
     #endregion
 
     #region Private Fields
 
-    private readonly List<SaveSlotListItemUI> items = new List<SaveSlotListItemUI>();
-    private Action<SaveSlotInfo> callback;
-
-    #endregion
-
-    #region Unity Methods
-
-    private void Awake()
-    {
-        if (root != null)
-        {
-            root.SetActive(false);
-        }
-
-        Debug.Log("[SaveSlotSelectionPopup] Initialisiert.");
-    }
+    private string currentUsername = string.Empty;
+    private readonly List<SaveSlotListItemUI> spawnedItems = new List<SaveSlotListItemUI>();
 
     #endregion
 
     #region Public Methods
 
-    public void Open(Action<SaveSlotInfo> onSelected)
+    public void OpenForUser(string username)
     {
-        callback = onSelected;
+        currentUsername = username;
 
-        if (root != null)
+        if (titleText != null)
         {
-            root.SetActive(true);
+            titleText.text = $"SaveSlots für {username}";
         }
 
         Refresh();
     }
 
-    public void Close()
+    public void OnClickCreateNewSlot()
     {
-        if (root != null)
+        if (string.IsNullOrWhiteSpace(currentUsername))
         {
-            root.SetActive(false);
+            SetInfo("Kein Benutzer aktiv.");
+            return;
         }
+
+        if (DatabaseManager.Instance == null)
+        {
+            SetInfo("DatabaseManager fehlt.");
+            return;
+        }
+
+        SaveSlotInfo newSlot = DatabaseManager.Instance.CreateNewSaveSlot(currentUsername);
+
+        if (newSlot == null)
+        {
+            SetInfo("SaveSlot konnte nicht erstellt werden.");
+            return;
+        }
+
+        SetInfo($"Neuer SaveSlot erstellt: {newSlot.SaveSlotName}");
+        Refresh();
+    }
+
+    public void OnClickBack()
+    {
+        menuManager?.ShowLoginMenu();
     }
 
     #endregion
@@ -63,49 +81,64 @@ public class SaveSlotSelectionPopup : MonoBehaviour
 
     private void Refresh()
     {
-        Clear();
+        ClearList();
 
         if (DatabaseManager.Instance == null)
         {
-            Debug.LogError("[SaveSlotSelectionPopup] DatabaseManager fehlt.");
+            SetInfo("DatabaseManager fehlt.");
             return;
         }
 
-        List<SaveSlotInfo> list = DatabaseManager.Instance.GetAllSaveSlots();
+        List<SaveSlotInfo> saves = DatabaseManager.Instance.GetSaveSlotsByUsername(currentUsername);
 
-        if (emptyText != null)
+        if (saves.Count == 0)
         {
-            emptyText.gameObject.SetActive(list.Count == 0);
+            SetInfo("Keine SaveSlots vorhanden.");
+            return;
         }
 
-        foreach (SaveSlotInfo slot in list)
-        {
-            SaveSlotListItemUI item = Instantiate(itemPrefab, contentRoot);
-            item.Bind(slot, OnSelected);
-            items.Add(item);
-        }
+        SetInfo("Wähle einen Spielstand aus.");
 
-        Debug.Log($"[SaveSlotSelectionPopup] Einträge aufgebaut: {items.Count}");
+        foreach (SaveSlotInfo save in saves)
+        {
+            SaveSlotListItemUI item = Instantiate(saveSlotItemPrefab, contentRoot);
+            item.Setup(save, OnSaveSelected);
+            spawnedItems.Add(item);
+        }
     }
 
-    private void Clear()
+    private void OnSaveSelected(SaveSlotInfo selectedSave)
     {
-        foreach (SaveSlotListItemUI item in items)
+        if (selectedSave == null)
         {
-            if (item != null)
+            SetInfo("Ungültiger SaveSlot.");
+            return;
+        }
+
+        AuthManager.Instance?.StartGameWithSave(selectedSave);
+    }
+
+    private void ClearList()
+    {
+        for (int i = 0; i < spawnedItems.Count; i++)
+        {
+            if (spawnedItems[i] != null)
             {
-                Destroy(item.gameObject);
+                Destroy(spawnedItems[i].gameObject);
             }
         }
 
-        items.Clear();
+        spawnedItems.Clear();
     }
 
-    private void OnSelected(SaveSlotInfo save)
+    private void SetInfo(string message)
     {
-        Debug.Log($"[SaveSlotSelectionPopup] Gewählt: {save.Username}");
-        callback?.Invoke(save);
-        Close();
+        if (infoText != null)
+        {
+            infoText.text = message;
+        }
+
+        Debug.Log($"[SaveSlotSelectionPopup] {message}");
     }
 
     #endregion

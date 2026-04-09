@@ -7,40 +7,72 @@ public class SaveSlotListItemUI : MonoBehaviour
 {
     #region Inspector
 
+    [Header("Texts")]
+    [SerializeField] private TMP_Text saveSlotNameText;
     [SerializeField] private TMP_Text usernameText;
     [SerializeField] private TMP_Text levelText;
     [SerializeField] private TMP_Text scoreText;
+    [SerializeField] private TMP_Text progressText;
     [SerializeField] private TMP_Text lastPlayedText;
-    [SerializeField] private Button button;
+
+    [Header("UI")]
+    [SerializeField] private Slider progressSlider;
+    [SerializeField] private Button selectButton;
 
     #endregion
 
     #region Private Fields
 
-    private SaveSlotInfo data;
-    private Action<SaveSlotInfo> callback;
+    private SaveSlotInfo currentSave;
+    private Action<SaveSlotInfo> onSelected;
 
     #endregion
 
     #region Public Methods
 
-    public void Bind(SaveSlotInfo info, Action<SaveSlotInfo> onClick)
+    public void Setup(SaveSlotInfo save, Action<SaveSlotInfo> onSelectCallback)
     {
-        data = info;
-        callback = onClick;
+        currentSave = save;
+        onSelected = onSelectCallback;
 
-        if (usernameText != null) usernameText.text = info.Username;
-        if (levelText != null) levelText.text = $"Level: {info.Level}";
-        if (scoreText != null) scoreText.text = $"Score: {info.Score}";
-        if (lastPlayedText != null) lastPlayedText.text = info.LastPlayed;
+        if (saveSlotNameText != null) saveSlotNameText.text = save.SaveSlotName;
+        if (usernameText != null) usernameText.text = $"User: {save.Username}";
+        if (levelText != null) levelText.text = $"Level: {save.Level}";
+        if (scoreText != null) scoreText.text = $"Score: {save.Score}";
+        if (progressText != null) progressText.text = $"Fortschritt: {save.ProgressPercent}%";
+        if (lastPlayedText != null) lastPlayedText.text = $"Letztes Spiel: {FormatDate(save.LastPlayedUtc)}";
 
-        if (button != null)
+        if (progressSlider != null)
         {
-            button.onClick.RemoveAllListeners();
-            button.onClick.AddListener(() => callback?.Invoke(data));
+            progressSlider.minValue = 0f;
+            progressSlider.maxValue = 100f;
+            progressSlider.value = save.ProgressPercent;
         }
 
-        Debug.Log($"[SaveSlotListItemUI] Gebunden: {info.Username}");
+        if (selectButton != null)
+        {
+            selectButton.onClick.RemoveAllListeners();
+            selectButton.onClick.AddListener(OnClickSelect);
+        }
+    }
+
+    #endregion
+
+    #region Private Methods
+
+    private void OnClickSelect()
+    {
+        onSelected?.Invoke(currentSave);
+    }
+
+    private static string FormatDate(string utcValue)
+    {
+        if (DateTime.TryParse(utcValue, out DateTime parsed))
+        {
+            return parsed.ToLocalTime().ToString("dd.MM.yyyy HH:mm");
+        }
+
+        return "-";
     }
 
     #endregion

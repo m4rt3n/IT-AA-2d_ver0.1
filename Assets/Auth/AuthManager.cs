@@ -5,13 +5,23 @@ public class AuthManager : MonoBehaviour
 {
     #region Singleton
 
-    public static AuthManager Instance;
+    public static AuthManager Instance { get; private set; }
+
+    #endregion
+
+    #region Inspector
+
+    [Header("Scenes")]
+    [SerializeField] private string gameSceneName = "StartScene";
+
+    #endregion
+
+    #region Unity
 
     private void Awake()
     {
         if (Instance != null && Instance != this)
         {
-            Debug.LogWarning("[AuthManager] Zweite Instanz gefunden, zerstöre Objekt.");
             Destroy(gameObject);
             return;
         }
@@ -23,21 +33,49 @@ public class AuthManager : MonoBehaviour
 
     #endregion
 
-    #region Inspector
+    #region Public API
 
-    [SerializeField] private string sceneAfterLogin = "StartScene";
-
-    #endregion
-
-    #region New Login Flow
-
-    public void SignInWithSaveSlot(SaveSlotInfo save)
+    public bool Register(string username, string password)
     {
-        Debug.Log("[AuthManager] Login mit SaveSlot.");
-
-        if (save == null)
+        if (DatabaseManager.Instance == null)
         {
-            Debug.LogError("[AuthManager] SaveSlot ist null.");
+            Debug.LogError("[AuthManager] DatabaseManager fehlt.");
+            return false;
+        }
+
+        return DatabaseManager.Instance.RegisterUser(username, password);
+    }
+
+    public bool Login(string username, string password, out string message)
+    {
+        message = string.Empty;
+
+        if (DatabaseManager.Instance == null)
+        {
+            message = "DatabaseManager fehlt.";
+            Debug.LogError("[AuthManager] DatabaseManager fehlt.");
+            return false;
+        }
+
+        bool success = DatabaseManager.Instance.ValidateLogin(username, password, out int userId, out string normalizedUsername);
+
+        if (!success)
+        {
+            message = "Login fehlgeschlagen.";
+            return false;
+        }
+
+        DatabaseManager.Instance.EnsureDefaultSaveSlotExists(userId, normalizedUsername);
+
+        message = "Login erfolgreich.";
+        return true;
+    }
+
+    public void StartGameWithSave(SaveSlotInfo selectedSave)
+    {
+        if (selectedSave == null)
+        {
+            Debug.LogError("[AuthManager] selectedSave ist null.");
             return;
         }
 
@@ -47,29 +85,16 @@ public class AuthManager : MonoBehaviour
             return;
         }
 
-        PlayerSession.Instance.SetSession(save);
+        PlayerSession.Instance.SetSession(selectedSave);
 
-        Debug.Log($"[AuthManager] Lade Szene nach Login: {sceneAfterLogin}");
-        SceneManager.LoadScene(sceneAfterLogin);
+        Debug.Log($"[AuthManager] Starte Spiel mit SaveSlot: {selectedSave.SaveSlotName}");
+        SceneManager.LoadScene(gameSceneName);
     }
 
-    #endregion
-
-    #region Compatibility Methods
-
-    // Diese Methoden bleiben vorübergehend erhalten,
-    // damit alte Referenzen keine Compile-Fehler verursachen.
-
-    public bool SignIn(string username, string password)
+    public void Logout()
     {
-        Debug.LogWarning("[AuthManager] Alte Methode SignIn(username, password) wurde aufgerufen. Nicht mehr verwendet.");
-        return false;
-    }
-
-    public bool SignUp(string username, string password)
-    {
-        Debug.LogWarning("[AuthManager] Alte Methode SignUp(username, password) wurde aufgerufen. Nicht mehr verwendet.");
-        return false;
+        PlayerSession.Instance?.ClearSession();
+        Debug.Log("[AuthManager] Logout abgeschlossen.");
     }
 
     #endregion

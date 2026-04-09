@@ -4,7 +4,7 @@ public class PlayerSession : MonoBehaviour
 {
     #region Singleton
 
-    public static PlayerSession Instance;
+    public static PlayerSession Instance { get; private set; }
 
     private void Awake()
     {
@@ -32,8 +32,10 @@ public class PlayerSession : MonoBehaviour
 
     public int Level { get; private set; }
     public int Score { get; private set; }
+    public int ProgressPercent { get; private set; }
 
     public bool IsLoggedIn => !string.IsNullOrEmpty(Username);
+    public bool HasSaveLoaded => SaveSlotId > 0;
 
     #endregion
 
@@ -53,8 +55,18 @@ public class PlayerSession : MonoBehaviour
         SaveSlotName = save.SaveSlotName;
         Level = save.Level;
         Score = save.Score;
+        ProgressPercent = save.ProgressPercent;
 
-        Debug.Log($"[PlayerSession] Session gesetzt: {Username} | {SaveSlotName} | Level {Level} | Score {Score}");
+        Debug.Log($"[PlayerSession] Session gesetzt: {Username} | {SaveSlotName} | Level {Level} | Score {Score} | Fortschritt {ProgressPercent}%");
+    }
+
+    public void UpdateProgress(int level, int score, int progressPercent)
+    {
+        Level = Mathf.Max(1, level);
+        Score = Mathf.Max(0, score);
+        ProgressPercent = Mathf.Clamp(progressPercent, 0, 100);
+
+        Debug.Log($"[PlayerSession] Fortschritt aktualisiert: Level {Level} | Score {Score} | Fortschritt {ProgressPercent}%");
     }
 
     public void ClearSession()
@@ -65,6 +77,7 @@ public class PlayerSession : MonoBehaviour
         SaveSlotName = string.Empty;
         Level = 0;
         Score = 0;
+        ProgressPercent = 0;
 
         Debug.Log("[PlayerSession] Session geleert.");
     }
