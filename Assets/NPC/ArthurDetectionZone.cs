@@ -12,11 +12,13 @@ public class ArthurDetectionZone : MonoBehaviour
 
     private void Reset()
     {
+        // Wird automatisch gesetzt, wenn das Script neu hinzugefügt wird
         arthurAutoInteraction = GetComponentInParent<ArthurAutoInteraction>();
     }
 
     private void Awake()
     {
+        // Falls im Inspector nichts gesetzt ist, beim Start noch einmal suchen
         if (arthurAutoInteraction == null)
         {
             arthurAutoInteraction = GetComponentInParent<ArthurAutoInteraction>();
@@ -27,6 +29,7 @@ public class ArthurDetectionZone : MonoBehaviour
     {
         Debug.Log("[ArthurDetectionZone] Trigger von: " + other.name);
 
+        // Nur der Player darf Arthur auslösen
         if (!other.CompareTag("Player"))
         {
             Debug.Log("[ArthurDetectionZone] Ignoriert, da Objekt nicht Player ist.");

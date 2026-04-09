@@ -12,6 +12,7 @@ public class ArthurAutoInteraction : MonoBehaviour
     [SerializeField] private MenuManager menuManager;
     [SerializeField] private Animator animator;
     [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private Rigidbody2D rb;
 
     #endregion
 
@@ -21,6 +22,9 @@ public class ArthurAutoInteraction : MonoBehaviour
     private bool isMovingToPlayer;
     private bool interactionTriggered;
     private bool menuOpened;
+
+    // Letzte Blickrichtung für Idle
+    private Vector2 lastMoveDirection = Vector2.down;
 
     #endregion
 
@@ -42,12 +46,27 @@ public class ArthurAutoInteraction : MonoBehaviour
         {
             spriteRenderer = GetComponent<SpriteRenderer>();
         }
+
+        if (rb == null)
+        {
+            rb = GetComponent<Rigidbody2D>();
+        }
+
+        ApplyDirectionToAnimator(lastMoveDirection);
+        SetWalking(false);
+
+        Debug.Log("[ArthurAutoInteraction] Initialisiert.");
     }
 
     private void Update()
     {
         if (!isMovingToPlayer || targetPlayer == null)
         {
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector2.zero;
+            }
+
             SetWalking(false);
             return;
         }
@@ -73,10 +92,18 @@ public class ArthurAutoInteraction : MonoBehaviour
             return;
         }
 
+        if (rb == null)
+        {
+            Debug.LogError("[ArthurAutoInteraction] Rigidbody2D fehlt.");
+            return;
+        }
+
         targetPlayer = player.transform;
         isMovingToPlayer = true;
         interactionTriggered = true;
         menuOpened = false;
+
+        SetWalking(true);
 
         Debug.Log($"[ArthurAutoInteraction] Arthur läuft zu: {player.name}");
     }
@@ -88,7 +115,13 @@ public class ArthurAutoInteraction : MonoBehaviour
         interactionTriggered = false;
         menuOpened = false;
 
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+        }
+
         SetWalking(false);
+        ApplyDirectionToAnimator(lastMoveDirection);
 
         Debug.Log("[ArthurAutoInteraction] Interaktion zurückgesetzt.");
     }
@@ -99,15 +132,23 @@ public class ArthurAutoInteraction : MonoBehaviour
 
     private void MoveTowardsPlayer()
     {
-        Vector2 currentPosition = transform.position;
+        if (rb == null || targetPlayer == null)
+        {
+            return;
+        }
+
+        Vector2 currentPosition = rb.position;
         Vector2 targetPosition = targetPlayer.position;
 
         float distance = Vector2.Distance(currentPosition, targetPosition);
 
         if (distance <= stopDistance)
         {
+            rb.linearVelocity = Vector2.zero;
+
             isMovingToPlayer = false;
             SetWalking(false);
+            ApplyDirectionToAnimator(lastMoveDirection);
 
             if (!menuOpened)
             {
@@ -118,37 +159,82 @@ public class ArthurAutoInteraction : MonoBehaviour
         }
 
         Vector2 direction = (targetPosition - currentPosition).normalized;
-        Vector2 newPosition = currentPosition + direction * moveSpeed * Time.deltaTime;
 
-        transform.position = new Vector3(newPosition.x, newPosition.y, transform.position.z);
+        if (direction.sqrMagnitude > 0.001f)
+        {
+            lastMoveDirection = direction;
+        }
+
+        // Bewegung über Rigidbody2D, damit Kollisionen respektiert werden
+        rb.linearVelocity = direction * moveSpeed;
 
         UpdateFacing(direction);
+        ApplyDirectionToAnimator(direction);
         SetWalking(true);
     }
 
     private void UpdateFacing(Vector2 direction)
     {
+        // Wenn du echte Left/Right Animationen hast, kann diese Methode leer bleiben.
+        // Wenn du nur eine Seitenanimation hast, kannst du flipX weiter nutzen.
+
         if (spriteRenderer == null)
         {
             return;
         }
 
-        if (direction.x > 0.05f)
+        // Optionales Spiegeln nur bei horizontaler Dominanz
+        if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y))
         {
-            spriteRenderer.flipX = false;
+            if (direction.x > 0.05f)
+            {
+                spriteRenderer.flipX = false;
+            }
+            else if (direction.x < -0.05f)
+            {
+                spriteRenderer.flipX = true;
+            }
         }
-        else if (direction.x < -0.05f)
+    }
+
+    private void ApplyDirectionToAnimator(Vector2 direction)
+    {
+        if (animator == null)
         {
-            spriteRenderer.flipX = true;
+            return;
+        }
+
+        if (animator.runtimeAnimatorController == null)
+        {
+            return;
+        }
+
+        // Nur Hauptachse verwenden, damit die Richtung sauber bleibt
+        if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y))
+        {
+            animator.SetFloat("MoveX", direction.x > 0 ? 1f : -1f);
+            animator.SetFloat("MoveY", 0f);
+        }
+        else
+        {
+            animator.SetFloat("MoveX", 0f);
+            animator.SetFloat("MoveY", direction.y > 0 ? 1f : -1f);
         }
     }
 
     private void SetWalking(bool isWalking)
     {
-        if (animator != null)
+        if (animator == null)
         {
-            animator.SetBool("IsWalking", isWalking);
+            return;
         }
+
+        if (animator.runtimeAnimatorController == null)
+        {
+            return;
+        }
+
+        animator.SetBool("IsWalking", isWalking);
     }
 
     private void OpenStartMenu()
