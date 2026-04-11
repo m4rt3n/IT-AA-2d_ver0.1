@@ -22,20 +22,20 @@ Ein modulares 2D-Spielprojekt auf Basis von Unity mit Fokus auf:
 ## 📁 Projektstruktur
 
 Assets/
-├── Player/ # Spieler-System (Movement, Animation, Input)
-├── NPC/ # NPC-Systeme und Interaktionen
-├── UI/ # Globale UI-Systeme
-├── Data/ # Datenmodelle und Speicherung
-├── Core/ # Basis-Systeme (Manager, Utilities)
+├── Player/         # Spieler-System (Movement, Animation, Input)
+├── NPC/            # NPC-Systeme und Interaktionen
+├── UI/             # Globale UI-Systeme
+├── Data/           # Datenmodelle und Speicherung
+├── Core/           # Basis-Systeme (Manager, Utilities)
 ├── Authentication/ # Login / Benutzerverwaltung
-├── Scenes/ # Unity Szenen
-├── Art/ # Grafiken und Animationen
-├── Prefabs/ # Wiederverwendbare Objekte
-└── Settings/ # Konfigurationen
+├── Scenes/         # Unity Szenen
+├── Art/            # Grafiken und Animationen
+├── Prefabs/        # Wiederverwendbare Objekte
+└── Settings/       # Konfigurationen
 
-Database/ # Datenbank / externe Speicherung
-Packages/ # Unity Package Manager
-ProjectSettings/ # Unity Einstellungen
+Database/           # Datenbank / externe Speicherung
+Packages/           # Unity Package Manager
+ProjectSettings/    # Unity Einstellungen
 
 ---
 
