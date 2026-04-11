@@ -1,69 +1,64 @@
 using ITAA.Core.Runtime;
 using ITAA.Data.Models;
+using ITAA.Player.Session;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-namespace ITAA.Player.Session
+namespace ITAA.Authentication
 {
-    public class PlayerSession : PersistentSingleton<PlayerSession>
+    public class AuthManager : PersistentSingleton<AuthManager>
     {
-        public int UserId { get; private set; }
-        public string Username { get; private set; }
-        public int SaveSlotId { get; private set; }
-        public string SaveSlotName { get; private set; }
-        public int Level { get; private set; }
-        public int Score { get; private set; }
-        public int ProgressPercent { get; private set; }
+        [Header("Scenes")]
+        [SerializeField] private string gameSceneName = "StartScene";
 
-        public bool IsLoggedIn => !string.IsNullOrWhiteSpace(Username);
-        public bool HasSaveLoaded => SaveSlotId > 0;
+        // --- LOGIN / REGISTER (aktuell deaktiviert) ---
 
-        public void SetSession(SaveSlotData saveSlot)
+        public bool Register(string username, string password)
         {
-            if (saveSlot == null)
+            Debug.Log("[AuthManager] Registrierung ist aktuell deaktiviert.");
+            return false;
+        }
+
+        public bool Login(string username, string password, out string message)
+        {
+            message = "Login ist aktuell deaktiviert. Bitte Spielstand direkt laden.";
+            Debug.Log("[AuthManager] Login ist aktuell deaktiviert.");
+            return false;
+        }
+
+        // --- GAME START ---
+
+        public void StartGameWithSave(SaveSlotData selectedSave)
+        {
+            if (selectedSave == null)
             {
-                Debug.LogError("[PlayerSession] SaveSlotData ist null.");
+                Debug.LogError("[AuthManager] selectedSave ist null.");
                 return;
             }
 
-            UserId = saveSlot.UserId;
-            Username = saveSlot.Username;
-            SaveSlotId = saveSlot.SaveSlotId;
-            SaveSlotName = saveSlot.SaveSlotName;
-            Level = saveSlot.Level;
-            Score = saveSlot.Score;
-            ProgressPercent = saveSlot.ProgressPercent;
-        }
-
-        public void UpdateProgress(int level, int score, int progressPercent)
-        {
-            Level = Mathf.Max(1, level);
-            Score = Mathf.Max(0, score);
-            ProgressPercent = Mathf.Clamp(progressPercent, 0, 100);
-        }
-
-        public SaveSlotData CreateSnapshot()
-        {
-            return new SaveSlotData
+            if (PlayerSession.Instance == null)
             {
-                UserId = UserId,
-                Username = Username,
-                SaveSlotId = SaveSlotId,
-                SaveSlotName = SaveSlotName,
-                Level = Level,
-                Score = Score,
-                ProgressPercent = ProgressPercent
-            };
+                Debug.LogError("[AuthManager] PlayerSession fehlt.");
+                return;
+            }
+
+            Debug.Log($"[AuthManager] Starte Spiel mit Save: {selectedSave.SaveSlotName}");
+
+            PlayerSession.Instance.SetSession(selectedSave);
+
+            SceneManager.LoadScene(gameSceneName);
         }
 
-        public void ClearSession()
+        // --- LOGOUT / RESET ---
+
+        public void Logout()
         {
-            UserId = 0;
-            Username = string.Empty;
-            SaveSlotId = 0;
-            SaveSlotName = string.Empty;
-            Level = 0;
-            Score = 0;
-            ProgressPercent = 0;
+            if (PlayerSession.Instance != null)
+            {
+                PlayerSession.Instance.ClearSession();
+            }
+
+            Debug.Log("[AuthManager] Logout durchgeführt.");
         }
     }
 }

@@ -17,6 +17,7 @@ namespace ITAA.NPC.Arthur
 
         private Transform targetPlayer;
         private bool interactionTriggered;
+        private bool hasIsMovingParameter;
 
         private void Start()
         {
@@ -34,6 +35,8 @@ namespace ITAA.NPC.Arthur
             {
                 spriteRenderer = GetComponent<SpriteRenderer>();
             }
+
+            CacheAnimatorParameters();
         }
 
         private void Update()
@@ -90,10 +93,33 @@ namespace ITAA.NPC.Arthur
 
         private void SetAnimation(bool isMoving)
         {
-            if (animator != null)
+            if (animator != null && hasIsMovingParameter)
             {
                 animator.SetBool("IsMoving", isMoving);
             }
+        }
+
+        private void CacheAnimatorParameters()
+        {
+            if (animator == null)
+            {
+                return;
+            }
+
+            hasIsMovingParameter = HasParameter("IsMoving");
+        }
+
+        private bool HasParameter(string parameterName)
+        {
+            foreach (AnimatorControllerParameter parameter in animator.parameters)
+            {
+                if (parameter.name == parameterName)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

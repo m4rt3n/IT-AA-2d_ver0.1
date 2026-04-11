@@ -17,6 +17,12 @@ namespace ITAA.Player.Movement
         private Vector2 movementInput;
         private Vector2 lastMoveDirection = Vector2.down;
 
+        private bool hasMoveX;
+        private bool hasMoveY;
+        private bool hasLastMoveX;
+        private bool hasLastMoveY;
+        private bool hasIsMoving;
+
         private void Awake()
         {
             if (rb == null)
@@ -33,6 +39,8 @@ namespace ITAA.Player.Movement
             {
                 spriteRenderer = GetComponent<SpriteRenderer>();
             }
+
+            CacheAnimatorParameters();
         }
 
         private void Update()
@@ -68,18 +76,24 @@ namespace ITAA.Player.Movement
 
         private void Move(Vector2 direction)
         {
-            if (rb == null || direction == Vector2.zero)
+            if (rb == null)
             {
+                return;
+            }
+
+            if (direction == Vector2.zero)
+            {
+                rb.linearVelocity = Vector2.zero;
                 return;
             }
 
             if (IsBlocked(direction))
             {
-                rb.velocity = Vector2.zero;
+                rb.linearVelocity = Vector2.zero;
                 return;
             }
 
-            rb.velocity = direction * moveSpeed;
+            rb.linearVelocity = direction * moveSpeed;
         }
 
         private bool IsBlocked(Vector2 direction)
@@ -97,22 +111,44 @@ namespace ITAA.Player.Movement
         {
             if (animator != null)
             {
-                animator.SetFloat("MoveX", direction.x);
-                animator.SetFloat("MoveY", direction.y);
-                animator.SetFloat("LastMoveX", lastMoveDirection.x);
-                animator.SetFloat("LastMoveY", lastMoveDirection.y);
-                animator.SetBool("IsMoving", direction != Vector2.zero);
+                if (hasMoveX) animator.SetFloat("MoveX", direction.x);
+                if (hasMoveY) animator.SetFloat("MoveY", direction.y);
+                if (hasLastMoveX) animator.SetFloat("LastMoveX", lastMoveDirection.x);
+                if (hasLastMoveY) animator.SetFloat("LastMoveY", lastMoveDirection.y);
+                if (hasIsMoving) animator.SetBool("IsMoving", direction != Vector2.zero);
             }
 
             if (spriteRenderer != null && Mathf.Abs(direction.x) > 0.01f)
             {
                 spriteRenderer.flipX = direction.x < 0f;
             }
+        }
 
-            if (direction == Vector2.zero && rb != null)
+        private void CacheAnimatorParameters()
+        {
+            if (animator == null)
             {
-                rb.velocity = Vector2.zero;
+                return;
             }
+
+            hasMoveX = HasParameter("MoveX");
+            hasMoveY = HasParameter("MoveY");
+            hasLastMoveX = HasParameter("LastMoveX");
+            hasLastMoveY = HasParameter("LastMoveY");
+            hasIsMoving = HasParameter("IsMoving");
+        }
+
+        private bool HasParameter(string parameterName)
+        {
+            foreach (AnimatorControllerParameter parameter in animator.parameters)
+            {
+                if (parameter.name == parameterName)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
