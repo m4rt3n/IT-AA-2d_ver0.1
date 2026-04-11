@@ -1,17 +1,16 @@
-# Core
+# ⚙️ Core
 
 ## Zweck
-Zentrale, globale Systeme und Basislogik für das gesamte Spiel.
+Technische Basis des Projekts.
 
-## Inhalt
-- PersistentSingleton.cs: Basis für globale Manager (DontDestroyOnLoad)
+## Inhalte
+- Bootstrap/ → Initialisierung
+- Events/ → Event-System
+- SceneManagement/ → Szenensteuerung
+- Utilities/ → Hilfsfunktionen
 
-## Verantwortlichkeit
-Stellt grundlegende Funktionalität bereit, die von allen anderen Systemen genutzt wird.
+## Wichtige Klassen
+- PersistentSingleton
 
-## Abhängigkeiten
-Keine oder minimal – Core sollte möglichst unabhängig bleiben.
-
-## Hinweise
-Keine Gameplay-Logik hier einbauen.
-Nur Framework / Infrastruktur.
+## Verwendung
+Wird von allen Systemen genutzt.

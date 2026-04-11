@@ -1,20 +1,16 @@
-# UI
+# 🧭 UI
 
 ## Zweck
-Steuert alle Benutzeroberflächen.
+Verwaltet Benutzeroberflächen.
 
-## Inhalt
-- Menüs
-- HUD
-- Controller
-
-## Verantwortlichkeit
-Darstellung und Benutzerinteraktion.
+## Verantwortlichkeiten
+- Menüs anzeigen
+- UI steuern
+- Events verarbeiten
 
 ## Abhängigkeiten
 - Player
-- Authentication
-- Data
+- NPC
 
-## Hinweise
-UI sollte KEINE Logik enthalten → nur Anzeige.
+## Flow
+Event → UI öffnen → Interaktion → schließen

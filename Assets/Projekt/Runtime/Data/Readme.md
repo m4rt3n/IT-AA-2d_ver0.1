@@ -1,19 +1,16 @@
-# Data
+# 💾 Data
 
 ## Zweck
-Verwaltung aller persistierten Daten (User, Savegames).
+Verwaltet alle Daten des Spiels.
 
-## Inhalt
-- DatabaseManager.cs: zentrale Datenzugriffslogik
-- Models/: Datenstrukturen
-- Storage/: Speicherung (Dateien / DB)
-
-## Verantwortlichkeit
-Speichern und Laden aller Spielzustände.
+## Verantwortlichkeiten
+- Speichern und Laden
+- Datenmodelle
+- Datenzugriff
 
 ## Abhängigkeiten
-- Core (Singletons)
-- Player (für Save-Daten)
+- UI
+- Player
 
-## Hinweise
-Keine Game-Logik → nur Datenhandling.
+## Flow
+Spielzustand → speichern → laden → anwenden

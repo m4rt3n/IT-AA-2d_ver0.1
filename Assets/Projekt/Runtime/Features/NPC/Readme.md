@@ -1,17 +1,16 @@
-# NPC
+# 🤖 NPC
 
 ## Zweck
-Logik für NPCs und Interaktionen.
+Steuert NPCs und Interaktionen.
 
-## Inhalt
-- Arthur/: spezifische NPC-Logik
-
-## Verantwortlichkeit
-NPC-Verhalten, Interaktion, AI-Grundlogik.
+## Verantwortlichkeiten
+- Spieler erkennen
+- Interaktion auslösen
+- Verhalten steuern
 
 ## Abhängigkeiten
 - Player
 - UI
 
-## Hinweise
-Später in generisches NPC-System überführen.
+## Flow
+Trigger → Input → Interaktion → UI
