@@ -4,7 +4,7 @@ Ein modulares 2D-Spielprojekt auf Basis von Unity mit Fokus auf:
 
 * sauberer Architektur (SOLID)
 * skalierbaren Systemen
-* Kombination aus Gameplay + Backend
+* Kombination aus Gameplay und Backend
 
 ---
 
@@ -21,17 +21,23 @@ Ein modulares 2D-Spielprojekt auf Basis von Unity mit Fokus auf:
 
 ## 📁 Projektstruktur
 
+```
 Assets/
-├── Player/         # Spieler-Logik (Movement, Animation, Session)
+├── Player/         # Spieler-System (Movement, Animation, Input)
 ├── NPC/            # NPC-Systeme und Interaktionen
-├── UI/             # Menüs, HUD, UI-Controller
+├── UI/             # Globale UI-Systeme
 ├── Data/           # Datenmodelle und Speicherung
-├── Core/           # Basis-Systeme (Singletons, Manager)
+├── Core/           # Basis-Systeme (Manager, Utilities)
 ├── Authentication/ # Login / Benutzerverwaltung
+├── Scenes/         # Unity Szenen
+├── Art/            # Grafiken und Animationen
+├── Prefabs/        # Wiederverwendbare Objekte
+└── Settings/       # Konfigurationen
 
-Database/           # Externe Datenbank / Dateien
+Database/           # Datenbank / externe Speicherung
 Packages/           # Unity Package Manager
-ProjectSettings/    # Unity Projektkonfiguration
+ProjectSettings/    # Unity Einstellungen
+```
 
 ---
 
@@ -53,15 +59,17 @@ Das Projekt folgt einer **Feature-basierten Struktur**:
 
 ## 🔁 System-Flow
 
+```
 Input
-↓
+  ↓
 Player (Movement, Animation)
-↓
+  ↓
 NPC Interaction
-↓
+  ↓
 UI (Menüs, Dialoge)
-↓
+  ↓
 Data (Speichern / Laden)
+```
 
 ---
 

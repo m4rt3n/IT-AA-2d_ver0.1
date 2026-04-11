@@ -1,19 +1,31 @@
-# Player
+# 🧍 Player System
 
 ## Zweck
-Steuert alles rund um den Spieler.
+Verwaltet alle spielerbezogenen Funktionen wie Bewegung, Session und UI.
 
-## Inhalt
-- Movement/: Bewegungssystem
-- Session/: aktuelle Spielsession
-- UI/: Spieleranzeige
+## Struktur
 
-## Verantwortlichkeit
-Spielersteuerung, Zustand und Darstellung.
+- Movement/
+  - PlayerController.cs → Steuerung der Bewegung
 
-## Abhängigkeiten
-- Data (Save/Load)
-- Core
+- Session/
+  - PlayerSession.cs → Spielerstatus und Daten
 
-## Hinweise
-Movement sauber von Input trennen (wichtig für später).
+- UI/
+  - PlayerNameDisplay.cs → Anzeige des Spielernamens
+  - PlayerNameTag.cs → Name über dem Spieler
+
+## Verantwortlichkeiten
+
+- Input verarbeiten
+- Bewegung steuern
+- Spielerzustand verwalten
+- UI-Elemente aktualisieren
+
+## Flow
+
+Input → Movement → Session → UI
+
+## Einstieg
+
+Startpunkt: `PlayerController.cs`
