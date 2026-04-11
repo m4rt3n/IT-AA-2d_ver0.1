@@ -1,84 +1,75 @@
 /*
  * Datei: SaveSlotListItemUI.cs
- * Zweck: Steuert die Darstellung eines einzelnen SaveSlot-Eintrags in der UI-Liste.
- * Verantwortung: Befüllt Texte, verdrahtet den Lade-Button und meldet den ausgewählten SaveSlot zurück.
- * Abhängigkeiten: SaveSlotData, TMP_Text, Button.
- * Verwendet von: Prefab für Einträge im LoadGamePanel.
+ * Zweck: Stellt einen einzelnen Save-Slot als Listeneintrag im LoadGamePanel dar.
+ * Verantwortung:
+ *   - Anzeige von Slot-Daten
+ *   - Reaktion auf Load-Button
+ *   - Verbindung UI ↔ Slot-Daten
+ *
+ * Abhängigkeiten:
+ *   - TMPro.TextMeshProUGUI
+ *   - UnityEngine.UI.Button
+ *
+ * Verwendet von:
+ *   - LoadGamePanel
+ *   - SaveSlotItem Prefab
  */
-
-using System;
-using ITAA.Data.Models;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace ITAA.UI.Widgets
+public class SaveSlotListItemUI : MonoBehaviour
 {
-    public class SaveSlotListItemUI : MonoBehaviour
+    #region Inspector
+
+    [Header("UI References")]
+    [SerializeField] private TextMeshProUGUI labelText;
+    [SerializeField] private Button loadButton;
+
+    #endregion
+
+    #region Private Fields
+
+    private int slotIndex;
+
+    #endregion
+
+    #region Public Methods
+
+    public void Setup(int index, string level, int score, int progressPercent)
     {
-        #region Inspector
+        slotIndex = index;
 
-        [Header("Texts")]
-        [SerializeField] private TMP_Text slotNameText;
-        [SerializeField] private TMP_Text userText;
-        [SerializeField] private TMP_Text progressText;
-        [SerializeField] private TMP_Text statsText;
-
-        [Header("Button")]
-        [SerializeField] private Button selectButton;
-
-        #endregion
-
-        #region Private Fields
-
-        private SaveSlotData saveSlot;
-        private Action<SaveSlotData> onSelected;
-
-        #endregion
-
-        #region Public Methods
-
-        public void Bind(SaveSlotData data, Action<SaveSlotData> callback)
+        if (labelText != null)
         {
-            saveSlot = data;
-            onSelected = callback;
-
-            if (slotNameText != null)
-            {
-                slotNameText.text = data.SaveSlotName;
-            }
-
-            if (userText != null)
-            {
-                userText.text = data.Username;
-            }
-
-            if (progressText != null)
-            {
-                progressText.text = $"Fortschritt: {data.ProgressPercent}%";
-            }
-
-            if (statsText != null)
-            {
-                statsText.text = $"Level {data.Level} | Score {data.Score}";
-            }
-
-            if (selectButton != null)
-            {
-                selectButton.onClick.RemoveAllListeners();
-                selectButton.onClick.AddListener(Select);
-            }
+            labelText.text = $"Slot {index} | {level} | Score {score} | {progressPercent}%";
+        }
+        else
+        {
+            Debug.LogWarning($"[{nameof(SaveSlotListItemUI)}] LabelText fehlt auf {name}");
         }
 
-        #endregion
-
-        #region Private Methods
-
-        private void Select()
+        if (loadButton != null)
         {
-            onSelected?.Invoke(saveSlot);
+            loadButton.onClick.RemoveAllListeners();
+            loadButton.onClick.AddListener(OnLoadClicked);
         }
-
-        #endregion
+        else
+        {
+            Debug.LogWarning($"[{nameof(SaveSlotListItemUI)}] LoadButton fehlt auf {name}");
+        }
     }
+
+    #endregion
+
+    #region Private Methods
+
+    private void OnLoadClicked()
+    {
+        Debug.Log($"Load Slot: {slotIndex}");
+
+        // TODO: echtes Laden
+    }
+
+    #endregion
 }

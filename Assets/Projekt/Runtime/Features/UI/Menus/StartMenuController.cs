@@ -1,76 +1,68 @@
 /*
  * Datei: StartMenuController.cs
- * Zweck: Steuert die Aktionen des Startmenüs.
- * Verantwortung: Öffnet das LoadGamePanel, schließt das Menü oder beendet das Spiel.
- * Abhängigkeiten: MenuManager.
- * Verwendet von: StartMenuPanel und seine Buttons.
+ * Zweck: Steuert das Hauptmenü und ermöglicht das Öffnen des LoadGamePanels.
+ * Verantwortung:
+ *   - Reagiert auf UI-Button-Events
+ *   - Öffnet und schließt Menüs
+ *   - Steuert Sichtbarkeit der Panels
+ *
+ * Abhängigkeiten:
+ *   - GameObject (StartMenuPanel)
+ *   - GameObject (LoadGamePanel)
+ *
+ * Verwendet von:
+ *   - StartMenuPanel (Canvas UI)
  */
-
-using ITAA.UI.Managers;
 using UnityEngine;
 
-namespace ITAA.UI.Menus
+public class StartMenuController : MonoBehaviour
 {
-    public class StartMenuController : MonoBehaviour
+    #region Inspector
+
+    [Header("Panels")]
+    [SerializeField] private GameObject startMenuPanel;
+    [SerializeField] private GameObject loadGamePanel;
+
+    #endregion
+
+    #region Public Methods
+
+    /// <summary>
+    /// Öffnet das LoadGamePanel.
+    /// </summary>
+    public void OpenLoadGame()
     {
-        #region Inspector
+        Debug.Log("OpenLoadGame wurde aufgerufen.");
 
-        [Header("References")]
-        [SerializeField] private MenuManager menuManager;
-
-        [Header("State")]
-        [SerializeField] private bool openOnStart;
-
-        #endregion
-
-        #region Unity Methods
-
-        private void Start()
+        if (loadGamePanel == null)
         {
-            if (menuManager == null)
-            {
-                menuManager = FindAnyObjectByType<MenuManager>();
-            }
-
-            if (openOnStart && menuManager != null)
-            {
-                menuManager.ShowStartMenu();
-            }
-            else
-            {
-                gameObject.SetActive(false);
-            }
+            Debug.LogWarning("LoadGamePanel ist nicht zugewiesen!");
+            return;
         }
 
-        #endregion
+        loadGamePanel.SetActive(true);
 
-        #region Public Methods
-
-        public void OpenLoadGame()
+        if (startMenuPanel != null)
         {
-            if (menuManager != null)
-            {
-                menuManager.ShowLoadGamePanel();
-            }
+            startMenuPanel.SetActive(false);
         }
-
-        public void CloseMenu()
-        {
-            if (menuManager != null)
-            {
-                menuManager.HideAll();
-            }
-        }
-
-        public void QuitGame()
-        {
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-#else
-            Application.Quit();
-#endif
-        }
-
-        #endregion
     }
+
+    /// <summary>
+    /// Schließt das LoadGamePanel und kehrt zum Startmenü zurück.
+    /// </summary>
+    public void CloseLoadGame()
+    {
+        if (loadGamePanel != null)
+        {
+            loadGamePanel.SetActive(false);
+        }
+
+        if (startMenuPanel != null)
+        {
+            startMenuPanel.SetActive(true);
+        }
+    }
+
+    #endregion
 }
