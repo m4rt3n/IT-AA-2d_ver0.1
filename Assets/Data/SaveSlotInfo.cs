@@ -3,6 +3,8 @@ using System;
 [Serializable]
 public class SaveSlotInfo
 {
+    #region Fields
+
     public int SaveSlotId;
     public int UserId;
 
@@ -11,7 +13,9 @@ public class SaveSlotInfo
 
     public int Level;
     public int Score;
+    public int ProgressPercent;
+
     public string LastPlayedUtc;
 
-    public int ProgressPercent;
+    #endregion
 }

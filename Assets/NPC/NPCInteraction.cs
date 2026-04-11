@@ -2,67 +2,67 @@ using UnityEngine;
 
 public class NPCInteraction : MonoBehaviour
 {
-    [SerializeField] private GameObject interactionHint;
-    [SerializeField] private bool openLoginMenu = true;
+    #region Inspector
 
-    private bool playerInside;
-    private MenuManager menuManager;
+    [Header("UI")]
+    [SerializeField] private MenuManager menuManager;
+
+    #endregion
+
+    #region State
+
+    private bool isInteractionOpen;
+
+    #endregion
+
+    #region Unity
 
     private void Start()
     {
-        menuManager = FindAnyObjectByType<MenuManager>();
-
-        if (interactionHint != null)
+        if (menuManager == null)
         {
-            interactionHint.SetActive(false);
+            menuManager = FindFirstObjectByType<MenuManager>();
         }
     }
 
-    private void Update()
+    #endregion
+
+    #region Public Methods
+
+    public void OpenStartMenu()
     {
-        if (!playerInside)
+        if (isInteractionOpen)
         {
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            Debug.Log("[NPCInteraction] Interaktion mit NPC ausgelöst.");
+        isInteractionOpen = true;
 
-            if (openLoginMenu && menuManager != null)
-            {
-                menuManager.ShowLoginMenu();
-            }
+        if (menuManager != null)
+        {
+            Debug.Log("[NPCInteraction] Öffne Startmenü.");
+            menuManager.ShowStartMenu();
+        }
+        else
+        {
+            Debug.LogError("[NPCInteraction] MenuManager nicht gesetzt.");
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    public void CloseStartMenu()
     {
-        if (!other.CompareTag("Player"))
+        isInteractionOpen = false;
+
+        if (menuManager != null)
         {
-            return;
+            Debug.Log("[NPCInteraction] Schließe Startmenü.");
+            menuManager.HideAllMenus();
         }
-
-        playerInside = true;
-
-        if (interactionHint != null)
+        else
         {
-            interactionHint.SetActive(true);
-        }
-    }
-
-    private void OnTriggerExit2D(Collider2D other)
-    {
-        if (!other.CompareTag("Player"))
-        {
-            return;
-        }
-
-        playerInside = false;
-
-        if (interactionHint != null)
-        {
-            interactionHint.SetActive(false);
+            Debug.LogError("[NPCInteraction] MenuManager nicht gesetzt.");
         }
     }
+
+    #endregion
 }

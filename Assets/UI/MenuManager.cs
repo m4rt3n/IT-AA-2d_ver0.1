@@ -10,8 +10,7 @@ public class MenuManager : MonoBehaviour
 
     [Header("Panels")]
     [SerializeField] private GameObject startMenuPanel;
-    [SerializeField] private GameObject loginMenuPanel;
-    [SerializeField] private GameObject saveSlotPopup;
+    [SerializeField] private GameObject loadGamePanel;
 
     #endregion
 
@@ -31,32 +30,19 @@ public class MenuManager : MonoBehaviour
         SetRoot(true);
 
         if (startMenuPanel != null) startMenuPanel.SetActive(true);
-        if (loginMenuPanel != null) loginMenuPanel.SetActive(false);
-        if (saveSlotPopup != null) saveSlotPopup.SetActive(false);
+        if (loadGamePanel != null) loadGamePanel.SetActive(false);
 
         Debug.Log("[MenuManager] Startmenü aktiv.");
     }
 
-    public void ShowLoginMenu()
+    public void ShowLoadGameMenu()
     {
         SetRoot(true);
 
         if (startMenuPanel != null) startMenuPanel.SetActive(false);
-        if (loginMenuPanel != null) loginMenuPanel.SetActive(true);
-        if (saveSlotPopup != null) saveSlotPopup.SetActive(false);
+        if (loadGamePanel != null) loadGamePanel.SetActive(true);
 
-        Debug.Log("[MenuManager] Loginmenü aktiv.");
-    }
-
-    public void ShowSaveSlotMenu()
-    {
-        SetRoot(true);
-
-        if (startMenuPanel != null) startMenuPanel.SetActive(false);
-        if (loginMenuPanel != null) loginMenuPanel.SetActive(false);
-        if (saveSlotPopup != null) saveSlotPopup.SetActive(true);
-
-        Debug.Log("[MenuManager] SaveSlot-Menü aktiv.");
+        Debug.Log("[MenuManager] LoadGamePanel aktiv.");
     }
 
     public void HideAllMenus()
@@ -64,8 +50,7 @@ public class MenuManager : MonoBehaviour
         SetRoot(false);
 
         if (startMenuPanel != null) startMenuPanel.SetActive(false);
-        if (loginMenuPanel != null) loginMenuPanel.SetActive(false);
-        if (saveSlotPopup != null) saveSlotPopup.SetActive(false);
+        if (loadGamePanel != null) loadGamePanel.SetActive(false);
 
         Debug.Log("[MenuManager] Alle Menüs verborgen.");
     }

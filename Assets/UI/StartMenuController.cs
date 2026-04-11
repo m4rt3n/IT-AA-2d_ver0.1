@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 public class StartMenuController : MonoBehaviour
 {
@@ -7,15 +6,23 @@ public class StartMenuController : MonoBehaviour
 
     [SerializeField] private MenuManager menuManager;
 
-    [Header("Optional Buttons")]
-    [SerializeField] private Button btnSave;
-    [SerializeField] private Button btnSettings;
+    #endregion
+
+    #region Unity
+
+    private void Awake()
+    {
+        if (menuManager == null)
+        {
+            menuManager = FindFirstObjectByType<MenuManager>();
+        }
+    }
 
     #endregion
 
     #region Public Button Events
 
-    public void OnClickOpenLogin()
+    public void OnClickLoadGame()
     {
         if (menuManager == null)
         {
@@ -23,7 +30,18 @@ public class StartMenuController : MonoBehaviour
             return;
         }
 
-        menuManager.ShowLoginMenu();
+        menuManager.ShowLoadGameMenu();
+    }
+
+    public void OnClickBackToStartMenu()
+    {
+        if (menuManager == null)
+        {
+            Debug.LogError("[StartMenuController] MenuManager fehlt.");
+            return;
+        }
+
+        menuManager.ShowStartMenu();
     }
 
     public void OnClickClose()
@@ -35,16 +53,6 @@ public class StartMenuController : MonoBehaviour
         }
 
         menuManager.HideAllMenus();
-    }
-
-    public void OnClickSave()
-    {
-        Debug.Log("[StartMenuController] Save-Button aktuell noch ohne Funktion.");
-    }
-
-    public void OnClickSettings()
-    {
-        Debug.Log("[StartMenuController] Settings-Button aktuell noch ohne Funktion.");
     }
 
     #endregion

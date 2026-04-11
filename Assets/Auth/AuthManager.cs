@@ -37,38 +37,15 @@ public class AuthManager : MonoBehaviour
 
     public bool Register(string username, string password)
     {
-        if (DatabaseManager.Instance == null)
-        {
-            Debug.LogError("[AuthManager] DatabaseManager fehlt.");
-            return false;
-        }
-
-        return DatabaseManager.Instance.RegisterUser(username, password);
+        Debug.Log("[AuthManager] Registrierung ist aktuell deaktiviert.");
+        return false;
     }
 
     public bool Login(string username, string password, out string message)
     {
-        message = string.Empty;
-
-        if (DatabaseManager.Instance == null)
-        {
-            message = "DatabaseManager fehlt.";
-            Debug.LogError("[AuthManager] DatabaseManager fehlt.");
-            return false;
-        }
-
-        bool success = DatabaseManager.Instance.ValidateLogin(username, password, out int userId, out string normalizedUsername);
-
-        if (!success)
-        {
-            message = "Login fehlgeschlagen.";
-            return false;
-        }
-
-        DatabaseManager.Instance.EnsureDefaultSaveSlotExists(userId, normalizedUsername);
-
-        message = "Login erfolgreich.";
-        return true;
+        message = "Login ist aktuell deaktiviert. Bitte Spielstand direkt laden.";
+        Debug.Log("[AuthManager] Login ist aktuell deaktiviert.");
+        return false;
     }
 
     public void StartGameWithSave(SaveSlotInfo selectedSave)
