@@ -1,4 +1,11 @@
-using ITAA.NPC.Interfaces;
+/*
+ * Datei: NPCInteraction.cs
+ * Zweck: Ermöglicht die direkte Interaktion eines NPCs mit dem Spieler per Taste.
+ * Verantwortung: Erkennt den Spieler im Triggerbereich und öffnet bei Interaktion das Startmenü.
+ * Abhängigkeiten: IInteractable, MenuManager, 2D-Trigger-Collider.
+ * Verwendet von: Interagierbare NPCs in der Szene.
+ */
+ using ITAA.NPC.Interfaces;
 using ITAA.UI.Managers;
 using UnityEngine;
 

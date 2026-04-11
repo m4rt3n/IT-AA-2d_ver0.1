@@ -1,4 +1,11 @@
-using ITAA.UI.Managers;
+/*
+ * Datei: ArthurAutoInteraction.cs
+ * Zweck: Lässt Arthur automatisch auf den Spieler zulaufen und ein Menü öffnen.
+ * Verantwortung: Bewegt Arthur zum Ziel, prüft Hindernisse und triggert die Startinteraktion.
+ * Abhängigkeiten: MenuManager, optional Animator, optional SpriteRenderer, Physics2D.
+ * Verwendet von: Arthur-NPC in der Startszene.
+ */
+ using ITAA.UI.Managers;
 using UnityEngine;
 
 namespace ITAA.NPC.Arthur

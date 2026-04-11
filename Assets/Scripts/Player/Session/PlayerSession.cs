@@ -1,3 +1,10 @@
+/*
+ * Datei: PlayerSession.cs
+ * Zweck: Hält die aktuell geladene Spielersitzung szenenübergreifend im Speicher.
+ * Verantwortung: Speichert den aktiven Benutzer, den geladenen SaveSlot und den Fortschritt.
+ * Abhängigkeiten: PersistentSingleton, SaveSlotData.
+ * Verwendet von: AuthManager, Gameplay-Systeme, UI-Anzeigen und Speichervorgänge.
+ */
 using ITAA.Core.Runtime;
 using ITAA.Data.Models;
 using UnityEngine;

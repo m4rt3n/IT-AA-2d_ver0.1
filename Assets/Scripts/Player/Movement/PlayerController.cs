@@ -1,3 +1,10 @@
+/*
+ * Datei: PlayerController.cs
+ * Zweck: Verarbeitet die Eingabe und bewegt den Spieler in der Spielwelt.
+ * Verantwortung: Liest Richtungsinput, bewegt Rigidbody2D und aktualisiert optionale Animationswerte.
+ * Abhängigkeiten: Rigidbody2D, optional Animator, optional SpriteRenderer.
+ * Verwendet von: Player-GameObject in Gameplay-Szenen.
+ */
 using UnityEngine;
 
 namespace ITAA.Player.Movement

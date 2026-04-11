@@ -1,3 +1,10 @@
+/*
+ * Datei: ArthurDetectionZone.cs
+ * Zweck: Erkennt, wenn der Spieler Arthurs Erfassungsbereich betritt.
+ * Verantwortung: Meldet den Spieler an ArthurAutoInteraction weiter.
+ * Abhängigkeiten: ArthurAutoInteraction, 2D-Trigger-Collider.
+ * Verwendet von: DetectionZone-Childobjekt von Arthur.
+ */
 using UnityEngine;
 
 namespace ITAA.NPC.Arthur

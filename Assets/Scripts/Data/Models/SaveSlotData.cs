@@ -1,4 +1,11 @@
-using System;
+/*
+ * Datei: SaveSlotData.cs
+ * Zweck: Reines Datenmodell für einen einzelnen Spielstand.
+ * Verantwortung: Enthält SaveSlot-bezogene Werte wie Name, Fortschritt, Level und Score.
+ * Abhängigkeiten: Keine Szenen- oder Komponentenabhängigkeiten.
+ * Verwendet von: DatabaseManager, PlayerSession, AuthManager und SaveSlot-UI.
+ */
+ using System;
 
 namespace ITAA.Data.Models
 {

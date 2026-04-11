@@ -1,3 +1,10 @@
+/*
+ * Datei: DatabaseManager.cs
+ * Zweck: Lädt, speichert und verwaltet Benutzer- und Spielstandsdaten.
+ * Verantwortung: Kapselt die JSON-basierte Datenhaltung und stellt SaveSlots zentral bereit.
+ * Abhängigkeiten: PersistentSingleton, SaveSlotData, UserData, Datei- und JSON-Zugriffe.
+ * Verwendet von: LoadGamePanel, GameStartProgressSync, AuthManager und PlayerSession.
+ */
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;

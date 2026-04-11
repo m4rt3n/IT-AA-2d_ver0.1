@@ -1,4 +1,11 @@
-using System;
+/*
+ * Datei: SaveDatabaseFile.cs
+ * Zweck: Kapselt die serialisierbare Gesamtdatenstruktur für alle Spielstände.
+ * Verantwortung: Hält die Liste aller SaveSlots und den nächsten freien SaveSlot-Index.
+ * Abhängigkeiten: SaveSlotData.
+ * Verwendet von: DatabaseManager für das Speichern und Laden der Save-Datei.
+ */
+ using System;
 using System.Collections.Generic;
 using ITAA.Data.Models;
 

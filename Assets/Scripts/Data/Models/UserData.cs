@@ -1,4 +1,11 @@
-using System;
+/*
+ * Datei: UserData.cs
+ * Zweck: Reines Datenmodell für einen Benutzer.
+ * Verantwortung: Speichert benutzerbezogene Basisdaten wie ID, Name und Passwort.
+ * Abhängigkeiten: Keine Unity-Komponenten erforderlich.
+ * Verwendet von: DatabaseManager und spätere Authentifizierungslogik.
+ */
+ using System;
 
 namespace ITAA.Data.Models
 {

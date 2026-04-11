@@ -1,3 +1,10 @@
+/*
+ * Datei: AuthManager.cs
+ * Zweck: Verwaltet den Einstieg ins Spiel über einen geladenen Spielstand.
+ * Verantwortung: Übergibt Save-Daten an die PlayerSession und startet die Zielszene.
+ * Abhängigkeiten: PersistentSingleton, SaveSlotData, PlayerSession, SceneManager.
+ * Verwendet von: LoadGamePanel und späteren Login-/Start-Workflows.
+ */
 using ITAA.Core.Runtime;
 using ITAA.Data.Models;
 using ITAA.Player.Session;

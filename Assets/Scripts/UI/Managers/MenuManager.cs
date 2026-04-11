@@ -1,3 +1,11 @@
+/*
+ * Datei: MenuManager.cs
+ * Zweck: Steuert den Wechsel zwischen zentralen Menü-Panels.
+ * Verantwortung: Öffnet und schließt Startmenü, LoadGamePanel und das Hintergrund-Overlay.
+ * Abhängigkeiten: StartMenuController, LoadGamePanel, Hintergrundobjekt.
+ * Verwendet von: UI-Buttons, NPC-Interaktionen und Menüfluss in der Startszene.
+ */
+
 using ITAA.UI.Menus;
 using UnityEngine;
 
@@ -5,15 +13,25 @@ namespace ITAA.UI.Managers
 {
     public class MenuManager : MonoBehaviour
     {
+        #region Inspector
+
         [Header("Panels")]
         [SerializeField] private StartMenuController startMenuController;
         [SerializeField] private LoadGamePanel loadGamePanel;
         [SerializeField] private GameObject backgroundDim;
 
+        #endregion
+
+        #region Unity Methods
+
         private void Start()
         {
             HideAll();
         }
+
+        #endregion
+
+        #region Public Methods
 
         public void ShowStartMenu()
         {
@@ -41,6 +59,10 @@ namespace ITAA.UI.Managers
             SetActive(loadGamePanel, false);
         }
 
+        #endregion
+
+        #region Private Methods
+
         private void SetDim(bool visible)
         {
             if (backgroundDim != null)
@@ -56,5 +78,7 @@ namespace ITAA.UI.Managers
                 target.gameObject.SetActive(visible);
             }
         }
+
+        #endregion
     }
 }
