@@ -1,34 +1,51 @@
 /*
  * Datei: PlayerController.cs
  * Zweck: Verarbeitet die Eingabe und bewegt den Spieler in der Spielwelt.
- * Verantwortung: Liest Richtungsinput, bewegt Rigidbody2D und aktualisiert optionale Animationswerte.
- * Abhängigkeiten: Rigidbody2D, optional Animator, optional SpriteRenderer.
+ * Verantwortung: Liest Richtungsinput, bewegt Rigidbody2D und aktualisiert Animator-Parameter.
+ * Abhängigkeiten: Rigidbody2D, optional Animator.
  * Verwendet von: Player-GameObject in Gameplay-Szenen.
  */
+
 using UnityEngine;
 
 namespace ITAA.Player.Movement
 {
     public class PlayerController : MonoBehaviour
     {
+        #region Inspector
+
         [Header("Movement")]
         [SerializeField] private float moveSpeed = 4f;
+        [SerializeField] private bool useBlockingCheck = true;
+        [SerializeField] private float skinWidth = 0.01f;
+
+        [Header("Blocking")]
         [SerializeField] private LayerMask blockingLayer;
-        [SerializeField] private float collisionCheckDistance = 0.55f;
+
+        [Header("Debug")]
+        [SerializeField] private bool enableDebugLogs = false;
 
         [Header("References")]
         [SerializeField] private Rigidbody2D rb;
         [SerializeField] private Animator animator;
-        [SerializeField] private SpriteRenderer spriteRenderer;
+
+        #endregion
+
+        #region Private Fields
 
         private Vector2 movementInput;
         private Vector2 lastMoveDirection = Vector2.down;
+        private readonly RaycastHit2D[] castResults = new RaycastHit2D[8];
 
         private bool hasMoveX;
         private bool hasMoveY;
         private bool hasLastMoveX;
         private bool hasLastMoveY;
         private bool hasIsMoving;
+
+        #endregion
+
+        #region Unity Methods
 
         private void Awake()
         {
@@ -40,11 +57,6 @@ namespace ITAA.Player.Movement
             if (animator == null)
             {
                 animator = GetComponent<Animator>();
-            }
-
-            if (spriteRenderer == null)
-            {
-                spriteRenderer = GetComponent<SpriteRenderer>();
             }
 
             CacheAnimatorParameters();
@@ -60,6 +72,10 @@ namespace ITAA.Player.Movement
         {
             Move(movementInput);
         }
+
+        #endregion
+
+        #region Private Methods
 
         private Vector2 ReadInput()
         {
@@ -78,6 +94,11 @@ namespace ITAA.Player.Movement
                 lastMoveDirection = input;
             }
 
+            if (enableDebugLogs && input != Vector2.zero)
+            {
+                Debug.Log($"[PlayerController] Input erkannt: {input}");
+            }
+
             return input;
         }
 
@@ -85,6 +106,7 @@ namespace ITAA.Player.Movement
         {
             if (rb == null)
             {
+                Debug.LogError("[PlayerController] Rigidbody2D fehlt.");
                 return;
             }
 
@@ -94,24 +116,60 @@ namespace ITAA.Player.Movement
                 return;
             }
 
-            if (IsBlocked(direction))
+            if (useBlockingCheck && IsBlocked(direction))
             {
+                if (enableDebugLogs)
+                {
+                    Debug.Log($"[PlayerController] Bewegung blockiert: {direction}");
+                }
+
                 rb.linearVelocity = Vector2.zero;
                 return;
             }
 
             rb.linearVelocity = direction * moveSpeed;
+
+            if (enableDebugLogs)
+            {
+                Debug.Log($"[PlayerController] Velocity gesetzt: {rb.linearVelocity}");
+            }
         }
 
         private bool IsBlocked(Vector2 direction)
         {
-            RaycastHit2D hit = Physics2D.Raycast(
-                transform.position,
-                direction,
-                collisionCheckDistance,
-                blockingLayer);
+            if (rb == null)
+            {
+                return false;
+            }
 
-            return hit.collider != null;
+            ContactFilter2D filter = new ContactFilter2D
+            {
+                useLayerMask = true,
+                layerMask = blockingLayer,
+                useTriggers = false
+            };
+
+            float castDistance = moveSpeed * Time.fixedDeltaTime + skinWidth;
+            int hitCount = rb.Cast(direction, filter, castResults, castDistance);
+
+            for (int i = 0; i < hitCount; i++)
+            {
+                RaycastHit2D hit = castResults[i];
+
+                if (hit.collider == null)
+                {
+                    continue;
+                }
+
+                if (enableDebugLogs)
+                {
+                    Debug.Log($"[PlayerController] Blockiert durch: {hit.collider.name}");
+                }
+
+                return true;
+            }
+
+            return false;
         }
 
         private void UpdateVisuals(Vector2 direction)
@@ -123,11 +181,6 @@ namespace ITAA.Player.Movement
                 if (hasLastMoveX) animator.SetFloat("LastMoveX", lastMoveDirection.x);
                 if (hasLastMoveY) animator.SetFloat("LastMoveY", lastMoveDirection.y);
                 if (hasIsMoving) animator.SetBool("IsMoving", direction != Vector2.zero);
-            }
-
-            if (spriteRenderer != null && Mathf.Abs(direction.x) > 0.01f)
-            {
-                spriteRenderer.flipX = direction.x < 0f;
             }
         }
 
@@ -157,5 +210,7 @@ namespace ITAA.Player.Movement
 
             return false;
         }
+
+        #endregion
     }
 }
