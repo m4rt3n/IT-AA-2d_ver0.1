@@ -1,31 +1,52 @@
 using TMPro;
 using UnityEngine;
 
-public class PlayerNameTag : MonoBehaviour
+namespace ITAA.Player.UI
 {
-    [SerializeField] private TMP_Text playerNameText;
-
-    private void Start()
+    public class PlayerNameTag : MonoBehaviour
     {
-        Refresh();
-    }
+        [SerializeField] private Transform target;
+        [SerializeField] private Vector3 worldOffset = new(0f, 1.25f, 0f);
+        [SerializeField] private TMP_Text nameText;
 
-    public void Refresh()
-    {
-        if (playerNameText == null)
+        private Camera mainCamera;
+
+        private void Start()
         {
-            Debug.LogWarning("[PlayerNameTag] TMP_Text Referenz fehlt.");
-            return;
+            mainCamera = Camera.main;
+
+            if (nameText == null)
+            {
+                nameText = GetComponentInChildren<TMP_Text>();
+            }
         }
 
-        if (PlayerSession.Instance == null || !PlayerSession.Instance.IsLoggedIn)
+        private void LateUpdate()
         {
-            playerNameText.text = "Gast";
-            Debug.Log("[PlayerNameTag] Keine aktive Session.");
-            return;
+            if (target == null)
+            {
+                return;
+            }
+
+            transform.position = target.position + worldOffset;
+
+            if (mainCamera != null)
+            {
+                transform.forward = mainCamera.transform.forward;
+            }
         }
 
-        playerNameText.text = PlayerSession.Instance.Username;
-        Debug.Log($"[PlayerNameTag] Name gesetzt: {PlayerSession.Instance.Username}");
+        public void SetTarget(Transform newTarget)
+        {
+            target = newTarget;
+        }
+
+        public void SetName(string playerName)
+        {
+            if (nameText != null)
+            {
+                nameText.text = playerName;
+            }
+        }
     }
 }

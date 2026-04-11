@@ -1,37 +1,34 @@
+using ITAA.Player.Session;
 using TMPro;
 using UnityEngine;
 
-public class PlayerNameDisplay : MonoBehaviour
+namespace ITAA.Player.UI
 {
-    [SerializeField] private TMP_Text nameText;
-    [SerializeField] private TMP_Text progressText;
-
-    private void Start()
+    public class PlayerNameDisplay : MonoBehaviour
     {
-        Refresh();
-    }
+        [SerializeField] private TMP_Text targetText;
+        [SerializeField] private string fallbackName = "Spieler";
 
-    public void Refresh()
-    {
-        if (PlayerSession.Instance == null || !PlayerSession.Instance.IsLoggedIn)
+        private void Start()
         {
-            if (nameText != null) nameText.text = "Gast";
-            if (progressText != null) progressText.text = string.Empty;
+            if (targetText == null)
+            {
+                targetText = GetComponent<TMP_Text>();
+            }
 
-            Debug.Log("[PlayerNameDisplay] Keine aktive Session.");
-            return;
+            if (targetText == null)
+            {
+                return;
+            }
+
+            string playerName = fallbackName;
+
+            if (PlayerSession.Instance != null && !string.IsNullOrWhiteSpace(PlayerSession.Instance.Username))
+            {
+                playerName = PlayerSession.Instance.Username;
+            }
+
+            targetText.text = playerName;
         }
-
-        if (nameText != null)
-        {
-            nameText.text = PlayerSession.Instance.Username;
-        }
-
-        if (progressText != null)
-        {
-            progressText.text = $"Level {PlayerSession.Instance.Level} | Score {PlayerSession.Instance.Score}";
-        }
-
-        Debug.Log($"[PlayerNameDisplay] Anzeige aktualisiert: {PlayerSession.Instance.Username}");
     }
 }

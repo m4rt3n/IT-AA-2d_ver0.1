@@ -1,51 +1,26 @@
 using UnityEngine;
 
-public class ArthurDetectionZone : MonoBehaviour
+namespace ITAA.NPC.Arthur
 {
-    #region Inspector
-
-    [SerializeField] private ArthurAutoInteraction arthurAutoInteraction;
-
-    #endregion
-
-    #region Unity Methods
-
-    private void Reset()
+    public class ArthurDetectionZone : MonoBehaviour
     {
-        // Wird automatisch gesetzt, wenn das Script neu hinzugefügt wird
-        arthurAutoInteraction = GetComponentInParent<ArthurAutoInteraction>();
-    }
+        [SerializeField] private ArthurAutoInteraction arthurAutoInteraction;
+        [SerializeField] private string playerTag = "Player";
 
-    private void Awake()
-    {
-        // Falls im Inspector nichts gesetzt ist, beim Start noch einmal suchen
-        if (arthurAutoInteraction == null)
+        private void Start()
         {
-            arthurAutoInteraction = GetComponentInParent<ArthurAutoInteraction>();
-        }
-    }
-
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        Debug.Log("[ArthurDetectionZone] Trigger von: " + other.name);
-
-        // Nur der Player darf Arthur auslösen
-        if (!other.CompareTag("Player"))
-        {
-            Debug.Log("[ArthurDetectionZone] Ignoriert, da Objekt nicht Player ist.");
-            return;
+            if (arthurAutoInteraction == null)
+            {
+                arthurAutoInteraction = GetComponentInParent<ArthurAutoInteraction>();
+            }
         }
 
-        if (arthurAutoInteraction != null)
+        private void OnTriggerEnter2D(Collider2D other)
         {
-            Debug.Log("[ArthurDetectionZone] ArthurAutoInteraction wird ausgelöst.");
-            arthurAutoInteraction.TriggerAutoInteraction(other.gameObject);
-        }
-        else
-        {
-            Debug.LogWarning("[ArthurDetectionZone] ArthurAutoInteraction Referenz fehlt.");
+            if (other.CompareTag(playerTag))
+            {
+                arthurAutoInteraction?.SetTargetPlayer(other.transform);
+            }
         }
     }
-
-    #endregion
 }

@@ -1,68 +1,58 @@
+using ITAA.NPC.Interfaces;
+using ITAA.UI.Managers;
 using UnityEngine;
 
-public class NPCInteraction : MonoBehaviour
+namespace ITAA.NPC.Interactions
 {
-    #region Inspector
-
-    [Header("UI")]
-    [SerializeField] private MenuManager menuManager;
-
-    #endregion
-
-    #region State
-
-    private bool isInteractionOpen;
-
-    #endregion
-
-    #region Unity
-
-    private void Start()
+    public class NPCInteraction : MonoBehaviour, IInteractable
     {
-        if (menuManager == null)
+        [Header("Interaction")]
+        [SerializeField] private KeyCode interactKey = KeyCode.E;
+        [SerializeField] private string playerTag = "Player";
+
+        [Header("References")]
+        [SerializeField] private MenuManager menuManager;
+
+        private bool playerInRange;
+
+        private void Start()
         {
-            menuManager = FindFirstObjectByType<MenuManager>();
+            if (menuManager == null)
+            {
+                menuManager = FindAnyObjectByType<MenuManager>();
+            }
+        }
+
+        private void Update()
+        {
+            if (playerInRange && Input.GetKeyDown(interactKey))
+            {
+                Interact();
+            }
+        }
+
+        public void Interact()
+        {
+            if (menuManager != null)
+            {
+                menuManager.ShowStartMenu();
+            }
+        }
+
+        private void OnTriggerEnter2D(Collider2D other)
+        {
+            if (other.CompareTag(playerTag))
+            {
+                playerInRange = true;
+            }
+        }
+
+        private void OnTriggerExit2D(Collider2D other)
+        {
+            if (other.CompareTag(playerTag))
+            {
+                playerInRange = false;
+            }
         }
     }
-
-    #endregion
-
-    #region Public Methods
-
-    public void OpenStartMenu()
-    {
-        if (isInteractionOpen)
-        {
-            return;
-        }
-
-        isInteractionOpen = true;
-
-        if (menuManager != null)
-        {
-            Debug.Log("[NPCInteraction] Öffne Startmenü.");
-            menuManager.ShowStartMenu();
-        }
-        else
-        {
-            Debug.LogError("[NPCInteraction] MenuManager nicht gesetzt.");
-        }
-    }
-
-    public void CloseStartMenu()
-    {
-        isInteractionOpen = false;
-
-        if (menuManager != null)
-        {
-            Debug.Log("[NPCInteraction] Schließe Startmenü.");
-            menuManager.HideAllMenus();
-        }
-        else
-        {
-            Debug.LogError("[NPCInteraction] MenuManager nicht gesetzt.");
-        }
-    }
-
-    #endregion
 }

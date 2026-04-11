@@ -1,59 +1,56 @@
+using ITAA.UI.Managers;
 using UnityEngine;
 
-public class StartMenuController : MonoBehaviour
+namespace ITAA.UI.Menus
 {
-    #region Inspector
-
-    [SerializeField] private MenuManager menuManager;
-
-    #endregion
-
-    #region Unity
-
-    private void Awake()
+    public class StartMenuController : MonoBehaviour
     {
-        if (menuManager == null)
+        [Header("References")]
+        [SerializeField] private MenuManager menuManager;
+
+        [Header("State")]
+        [SerializeField] private bool openOnStart;
+
+        private void Start()
         {
-            menuManager = FindFirstObjectByType<MenuManager>();
-        }
-    }
+            if (menuManager == null)
+            {
+                menuManager = FindAnyObjectByType<MenuManager>();
+            }
 
-    #endregion
-
-    #region Public Button Events
-
-    public void OnClickLoadGame()
-    {
-        if (menuManager == null)
-        {
-            Debug.LogError("[StartMenuController] MenuManager fehlt.");
-            return;
+            if (openOnStart && menuManager != null)
+            {
+                menuManager.ShowStartMenu();
+            }
+            else
+            {
+                gameObject.SetActive(false);
+            }
         }
 
-        menuManager.ShowLoadGameMenu();
-    }
-
-    public void OnClickBackToStartMenu()
-    {
-        if (menuManager == null)
+        public void OpenLoadGame()
         {
-            Debug.LogError("[StartMenuController] MenuManager fehlt.");
-            return;
+            if (menuManager != null)
+            {
+                menuManager.ShowLoadGamePanel();
+            }
         }
 
-        menuManager.ShowStartMenu();
-    }
-
-    public void OnClickClose()
-    {
-        if (menuManager == null)
+        public void CloseMenu()
         {
-            Debug.LogError("[StartMenuController] MenuManager fehlt.");
-            return;
+            if (menuManager != null)
+            {
+                menuManager.HideAll();
+            }
         }
 
-        menuManager.HideAllMenus();
+        public void QuitGame()
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
+        }
     }
-
-    #endregion
 }

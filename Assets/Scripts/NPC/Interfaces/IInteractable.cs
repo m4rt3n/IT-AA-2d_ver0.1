@@ -1,4 +1,4 @@
-namespace NPC
+namespace ITAA.NPC.Interfaces
 {
     public interface IInteractable
     {

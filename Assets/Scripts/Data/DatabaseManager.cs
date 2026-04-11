@@ -1,215 +1,149 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ITAA.Core.Runtime;
+using ITAA.Data.Models;
+using ITAA.Data.Storage;
 using UnityEngine;
 
-public class DatabaseManager : MonoBehaviour
+namespace ITAA.Data
 {
-    #region Singleton
-
-    public static DatabaseManager Instance { get; private set; }
-
-    #endregion
-
-    #region Serializable Models
-
-    [Serializable]
-    private class SaveDatabaseFile
+    public class DatabaseManager : PersistentSingleton<DatabaseManager>
     {
-        public List<SaveSlotInfo> SaveSlots = new List<SaveSlotInfo>();
-        public int NextSaveSlotId = 1;
-    }
+        [Header("Storage")]
+        [SerializeField] private string saveDatabaseFileName = "saveSlots.json";
+        [SerializeField] private string userDatabaseFileName = "users.json";
 
-    #endregion
+        [Header("Debug")]
+        [SerializeField] private bool createDemoSaveSlotsIfEmpty = true;
 
-    #region Inspector
+        private SaveDatabaseFile saveDatabase;
+        private UserDatabaseFile userDatabase;
+        private string saveFilePath;
+        private string userFilePath;
 
-    [Header("Storage")]
-    [SerializeField] private string databaseFileName = "saveSlots.json";
-
-    [Header("Debug Seed")]
-    [SerializeField] private bool createDemoSaveSlotsIfEmpty = true;
-
-    #endregion
-
-    #region Private Fields
-
-    private SaveDatabaseFile database;
-    private string filePath;
-
-    #endregion
-
-    #region Unity
-
-    private void Awake()
-    {
-        if (Instance != null && Instance != this)
+        protected override void Awake()
         {
-            Destroy(gameObject);
-            return;
+            base.Awake();
+
+            if (Instance != this)
+            {
+                return;
+            }
+
+            saveFilePath = Path.Combine(Application.persistentDataPath, saveDatabaseFileName);
+            userFilePath = Path.Combine(Application.persistentDataPath, userDatabaseFileName);
+
+            LoadAll();
+
+            if (createDemoSaveSlotsIfEmpty)
+            {
+                EnsureDemoSaveSlots();
+            }
         }
 
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-
-        filePath = Path.Combine(Application.persistentDataPath, databaseFileName);
-        LoadDatabase();
-
-        if (createDemoSaveSlotsIfEmpty)
+        public IReadOnlyList<SaveSlotData> GetAllSaveSlots()
         {
-            EnsureDemoSaveSlots();
+            return saveDatabase.SaveSlots
+                .OrderBy(slot => slot.SaveSlotId)
+                .Select(slot => slot.Clone())
+                .ToList();
         }
 
-        Debug.Log($"[DatabaseManager] Initialisiert. Datei: {filePath}");
-    }
-
-    #endregion
-
-    #region Public Save Methods
-
-    public List<SaveSlotInfo> GetAllSaveSlots()
-    {
-        return database.SaveSlots
-            .OrderBy(s => s.SaveSlotId)
-            .Select(CloneSave)
-            .ToList();
-    }
-
-    public SaveSlotInfo GetSaveSlotById(int saveSlotId)
-    {
-        SaveSlotInfo found = database.SaveSlots.FirstOrDefault(s => s.SaveSlotId == saveSlotId);
-        return found == null ? null : CloneSave(found);
-    }
-
-    public SaveSlotInfo CreateSaveSlot(
-        string username,
-        string saveSlotName,
-        int level = 1,
-        int score = 0,
-        int progressPercent = 0,
-        int userId = 0)
-    {
-        SaveSlotInfo save = new SaveSlotInfo
+        public SaveSlotData GetSaveSlotById(int saveSlotId)
         {
-            SaveSlotId = database.NextSaveSlotId++,
-            UserId = userId,
-            Username = string.IsNullOrWhiteSpace(username) ? "Gast" : username.Trim(),
-            SaveSlotName = string.IsNullOrWhiteSpace(saveSlotName) ? $"Slot {database.NextSaveSlotId - 1}" : saveSlotName.Trim(),
-            Level = Mathf.Max(1, level),
-            Score = Mathf.Max(0, score),
-            ProgressPercent = Mathf.Clamp(progressPercent, 0, 100),
-            LastPlayedUtc = DateTime.UtcNow.ToString("o")
-        };
-
-        database.SaveSlots.Add(save);
-        SaveDatabase();
-
-        Debug.Log($"[DatabaseManager] SaveSlot erstellt: {save.SaveSlotName}");
-        return CloneSave(save);
-    }
-
-    public void UpdateSaveProgress(int saveSlotId, int level, int score, int progressPercent)
-    {
-        SaveSlotInfo save = database.SaveSlots.FirstOrDefault(s => s.SaveSlotId == saveSlotId);
-
-        if (save == null)
-        {
-            Debug.LogWarning("[DatabaseManager] SaveSlot für Fortschrittsupdate nicht gefunden.");
-            return;
+            SaveSlotData match = saveDatabase.SaveSlots.FirstOrDefault(slot => slot.SaveSlotId == saveSlotId);
+            return match?.Clone();
         }
 
-        save.Level = Mathf.Max(1, level);
-        save.Score = Mathf.Max(0, score);
-        save.ProgressPercent = Mathf.Clamp(progressPercent, 0, 100);
-        save.LastPlayedUtc = DateTime.UtcNow.ToString("o");
-
-        SaveDatabase();
-
-        Debug.Log($"[DatabaseManager] SaveSlot aktualisiert: {save.SaveSlotName} | Level {save.Level} | Score {save.Score} | {save.ProgressPercent}%");
-    }
-
-    public bool HasAnySaveSlots()
-    {
-        return database.SaveSlots != null && database.SaveSlots.Count > 0;
-    }
-
-    #endregion
-
-    #region Private Methods
-
-    private void LoadDatabase()
-    {
-        if (!File.Exists(filePath))
+        public void SaveProgress(int saveSlotId, int level, int score, int progressPercent)
         {
-            database = new SaveDatabaseFile();
-            SaveDatabase();
-            return;
+            SaveSlotData slot = saveDatabase.SaveSlots.FirstOrDefault(item => item.SaveSlotId == saveSlotId);
+
+            if (slot == null)
+            {
+                Debug.LogWarning($"[DatabaseManager] SaveSlot {saveSlotId} nicht gefunden.");
+                return;
+            }
+
+            slot.Level = Mathf.Max(1, level);
+            slot.Score = Mathf.Max(0, score);
+            slot.ProgressPercent = Mathf.Clamp(progressPercent, 0, 100);
+
+            SaveSaveDatabase();
         }
 
-        string json = File.ReadAllText(filePath);
-
-        if (string.IsNullOrWhiteSpace(json))
+        public SaveSlotData CreateSaveSlot(string username, string slotName)
         {
-            database = new SaveDatabaseFile();
-            SaveDatabase();
-            return;
+            SaveSlotData saveSlot = new()
+            {
+                SaveSlotId = saveDatabase.NextSaveSlotId++,
+                UserId = 0,
+                Username = username,
+                SaveSlotName = string.IsNullOrWhiteSpace(slotName) ? "Neuer Spielstand" : slotName.Trim(),
+                Level = 1,
+                Score = 0,
+                ProgressPercent = 0
+            };
+
+            saveDatabase.SaveSlots.Add(saveSlot);
+            SaveSaveDatabase();
+            return saveSlot.Clone();
         }
 
-        database = JsonUtility.FromJson<SaveDatabaseFile>(json);
-
-        if (database == null)
+        private void LoadAll()
         {
-            database = new SaveDatabaseFile();
+            saveDatabase = LoadJson<SaveDatabaseFile>(saveFilePath) ?? new SaveDatabaseFile();
+            userDatabase = LoadJson<UserDatabaseFile>(userFilePath) ?? new UserDatabaseFile();
         }
 
-        if (database.SaveSlots == null)
+        private T LoadJson<T>(string path) where T : class
         {
-            database.SaveSlots = new List<SaveSlotInfo>();
+            if (!File.Exists(path))
+            {
+                return null;
+            }
+
+            string json = File.ReadAllText(path);
+            return string.IsNullOrWhiteSpace(json) ? null : JsonUtility.FromJson<T>(json);
         }
 
-        if (database.NextSaveSlotId <= 0)
+        private void SaveSaveDatabase()
         {
-            database.NextSaveSlotId = database.SaveSlots.Count > 0
-                ? database.SaveSlots.Max(s => s.SaveSlotId) + 1
-                : 1;
+            string json = JsonUtility.ToJson(saveDatabase, true);
+            File.WriteAllText(saveFilePath, json);
+        }
+
+        private void EnsureDemoSaveSlots()
+        {
+            if (saveDatabase.SaveSlots.Count > 0)
+            {
+                return;
+            }
+
+            saveDatabase.SaveSlots.Add(new SaveSlotData
+            {
+                SaveSlotId = saveDatabase.NextSaveSlotId++,
+                UserId = 1,
+                Username = "Martin",
+                SaveSlotName = "Arthur Start",
+                Level = 1,
+                Score = 0,
+                ProgressPercent = 5
+            });
+
+            saveDatabase.SaveSlots.Add(new SaveSlotData
+            {
+                SaveSlotId = saveDatabase.NextSaveSlotId++,
+                UserId = 1,
+                Username = "Martin",
+                SaveSlotName = "Schneepfad",
+                Level = 3,
+                Score = 120,
+                ProgressPercent = 30
+            });
+
+            SaveSaveDatabase();
         }
     }
-
-    private void SaveDatabase()
-    {
-        string json = JsonUtility.ToJson(database, true);
-        File.WriteAllText(filePath, json);
-    }
-
-    private void EnsureDemoSaveSlots()
-    {
-        if (database.SaveSlots.Count > 0)
-        {
-            return;
-        }
-
-        CreateSaveSlot("Martin", "Slot 1", 3, 1250, 25, 1);
-        CreateSaveSlot("Martin", "Slot 2", 7, 4820, 58, 1);
-        CreateSaveSlot("Martin", "Slot 3", 12, 9900, 91, 1);
-
-        Debug.Log("[DatabaseManager] Demo-Spielstände erstellt.");
-    }
-
-    private static SaveSlotInfo CloneSave(SaveSlotInfo source)
-    {
-        return new SaveSlotInfo
-        {
-            SaveSlotId = source.SaveSlotId,
-            UserId = source.UserId,
-            Username = source.Username,
-            SaveSlotName = source.SaveSlotName,
-            Level = source.Level,
-            Score = source.Score,
-            ProgressPercent = source.ProgressPercent,
-            LastPlayedUtc = source.LastPlayedUtc
-        };
-    }
-
-    #endregion
 }

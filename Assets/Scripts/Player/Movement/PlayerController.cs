@@ -1,258 +1,118 @@
-using System.Collections;
 using UnityEngine;
-using NPC;
 
-public class PlayerController : MonoBehaviour
+namespace ITAA.Player.Movement
 {
-    #region Inspector - Movement
-
-    [Header("Movement")]
-    [SerializeField] private float moveSpeed = 3f;   // Geschwindigkeit beim Bewegen zum Zielpunkt
-    [SerializeField] private float step = 0.5f;      // Raster-/Schrittweite pro Eingabe
-
-    #endregion
-
-    #region Inspector - Collision
-
-    [Header("Collision")]
-    [SerializeField] private LayerMask solidObjectsLayer;     // Layer für Hindernisse / blockierende Objekte
-    [SerializeField] private float footRadius = 0.08f;        // Prüf-Radius für Kollisionsabfrage
-    [SerializeField] private Vector2 footOffset = new(0f, -0.3f); // Offset zur "Fußposition"
-
-    #endregion
-
-    #region Inspector - Interaction
-
-    [Header("Interaction")]
-    [SerializeField] private LayerMask interactableLayer;     // Layer für NPCs / Interaktionsobjekte
-    [SerializeField] private float interactDistance = 0.7f;   // Distanz nach vorne für direkte Interaktion
-    [SerializeField] private float interactRadius = 0.35f;    // Radius für Front-Check
-    [SerializeField] private float fallbackInteractRadius = 0.9f; // Radius für Notfall-/Nahbereichs-Check
-
-    #endregion
-
-    #region Runtime State
-
-    private bool isMoving;
-    private bool canMove = true;
-
-    private Vector2 input;
-    private Vector2 lastMoveDirection = Vector2.down; // Merkt sich die letzte Blick-/Bewegungsrichtung
-
-    private Animator animator;
-
-    #endregion
-
-    #region Unity Lifecycle
-
-    private void Awake()
+    public class PlayerController : MonoBehaviour
     {
-        // Animator einmal cachen, damit wir nicht wiederholt GetComponent aufrufen
-        animator = GetComponent<Animator>();
-    }
+        [Header("Movement")]
+        [SerializeField] private float moveSpeed = 4f;
+        [SerializeField] private LayerMask blockingLayer;
+        [SerializeField] private float collisionCheckDistance = 0.55f;
 
-    private void Update()
-    {
-        // Reihenfolge bewusst:
-        // 1. Interaktion prüfen
-        // 2. Bewegung verarbeiten
-        HandleInteraction();
-        HandleMovement();
-    }
+        [Header("References")]
+        [SerializeField] private Rigidbody2D rb;
+        [SerializeField] private Animator animator;
+        [SerializeField] private SpriteRenderer spriteRenderer;
 
-    #endregion
+        private Vector2 movementInput;
+        private Vector2 lastMoveDirection = Vector2.down;
 
-    #region Public API
-
-    /// <summary>
-    /// Aktiviert oder deaktiviert die Spielersteuerung.
-    /// Wird z. B. bei NPC-Dialogen verwendet.
-    /// </summary>
-    public void SetPlayerControlEnabled(bool enabled)
-    {
-        canMove = enabled;
-
-        if (!enabled)
+        private void Awake()
         {
-            // Laufende Bewegungs-Coroutines stoppen
-            StopAllCoroutines();
-            isMoving = false;
-
-            if (animator != null)
+            if (rb == null)
             {
-                animator.SetBool("isMoving", false);
-            }
-        }
-    }
-
-    #endregion
-
-    #region Movement
-
-    /// <summary>
-    /// Liest Eingaben aus und startet bei gültiger Richtung eine Schrittbewegung.
-    /// </summary>
-    private void HandleMovement()
-    {
-        if (!canMove || isMoving)
-            return;
-
-        input = new Vector2(
-            Input.GetAxisRaw("Horizontal"),
-            Input.GetAxisRaw("Vertical")
-        );
-
-        // Verhindert diagonale Bewegung:
-        // Sobald horizontaler Input vorhanden ist, wird vertikaler ignoriert.
-        if (input.x != 0)
-            input.y = 0;
-
-        // Rasterbewegung: Eingaben auf volle Werte runden (-1, 0, 1)
-        input.x = Mathf.Round(input.x);
-        input.y = Mathf.Round(input.y);
-
-        if (input != Vector2.zero)
-        {
-            lastMoveDirection = input;
-
-            if (animator != null)
-            {
-                animator.SetFloat("moveX", input.x);
-                animator.SetFloat("moveY", input.y);
+                rb = GetComponent<Rigidbody2D>();
             }
 
-            Vector3 targetPos = transform.position;
-            targetPos.x += input.x * step;
-            targetPos.y += input.y * step;
-
-            if (IsWalkable(targetPos))
+            if (animator == null)
             {
-                StartCoroutine(Move(targetPos));
+                animator = GetComponent<Animator>();
+            }
+
+            if (spriteRenderer == null)
+            {
+                spriteRenderer = GetComponent<SpriteRenderer>();
             }
         }
-        else
+
+        private void Update()
         {
-            if (animator != null)
+            movementInput = ReadInput();
+            UpdateVisuals(movementInput);
+        }
+
+        private void FixedUpdate()
+        {
+            Move(movementInput);
+        }
+
+        private Vector2 ReadInput()
+        {
+            float x = Input.GetAxisRaw("Horizontal");
+            float y = Input.GetAxisRaw("Vertical");
+
+            if (Mathf.Abs(x) > 0f)
             {
-                animator.SetBool("isMoving", false);
+                y = 0f;
             }
-        }
-    }
 
-    /// <summary>
-    /// Bewegt den Spieler weich zum Zielpunkt.
-    /// </summary>
-    private IEnumerator Move(Vector3 targetPos)
-    {
-        isMoving = true;
+            Vector2 input = new Vector2(x, y).normalized;
 
-        if (animator != null)
-        {
-            animator.SetBool("isMoving", true);
+            if (input != Vector2.zero)
+            {
+                lastMoveDirection = input;
+            }
+
+            return input;
         }
 
-        while ((targetPos - transform.position).sqrMagnitude > 0.001f)
+        private void Move(Vector2 direction)
         {
-            transform.position = Vector3.MoveTowards(
+            if (rb == null || direction == Vector2.zero)
+            {
+                return;
+            }
+
+            if (IsBlocked(direction))
+            {
+                rb.velocity = Vector2.zero;
+                return;
+            }
+
+            rb.velocity = direction * moveSpeed;
+        }
+
+        private bool IsBlocked(Vector2 direction)
+        {
+            RaycastHit2D hit = Physics2D.Raycast(
                 transform.position,
-                targetPos,
-                moveSpeed * Time.deltaTime
-            );
+                direction,
+                collisionCheckDistance,
+                blockingLayer);
 
-            yield return null;
+            return hit.collider != null;
         }
 
-        transform.position = targetPos;
-        isMoving = false;
-
-        if (animator != null)
+        private void UpdateVisuals(Vector2 direction)
         {
-            animator.SetBool("isMoving", false);
-        }
-    }
-
-    /// <summary>
-    /// Prüft, ob das Zielfeld frei begehbar ist.
-    /// </summary>
-    private bool IsWalkable(Vector3 targetPos)
-    {
-        Vector2 checkPos = (Vector2)targetPos + footOffset;
-        return Physics2D.OverlapCircle(checkPos, footRadius, solidObjectsLayer) == null;
-    }
-
-    #endregion
-
-    #region Interaction
-
-    /// <summary>
-    /// Prüft bei E-Tastendruck, ob vor dem Spieler oder im Nahbereich
-    /// ein Interaktionsobjekt vorhanden ist.
-    /// </summary>
-    private void HandleInteraction()
-    {
-        if (!canMove)
-            return;
-
-        if (!Input.GetKeyDown(KeyCode.E))
-            return;
-
-        Vector2 origin = transform.position;
-        Vector2 direction = lastMoveDirection == Vector2.zero ? Vector2.down : lastMoveDirection;
-        Vector2 forwardPos = origin + direction * interactDistance;
-
-        // Primäre Interaktion: gezielt vor dem Spieler
-        Collider2D hit = Physics2D.OverlapCircle(forwardPos, interactRadius, interactableLayer);
-
-        if (hit != null)
-        {
-            IInteractable interactable = hit.GetComponent<IInteractable>();
-
-            if (interactable != null)
+            if (animator != null)
             {
-                interactable.Interact();
-                return;
+                animator.SetFloat("MoveX", direction.x);
+                animator.SetFloat("MoveY", direction.y);
+                animator.SetFloat("LastMoveX", lastMoveDirection.x);
+                animator.SetFloat("LastMoveY", lastMoveDirection.y);
+                animator.SetBool("IsMoving", direction != Vector2.zero);
             }
-        }
 
-        // Fallback: Suche im direkten Umfeld
-        Collider2D[] nearby = Physics2D.OverlapCircleAll(origin, fallbackInteractRadius, interactableLayer);
-
-        foreach (Collider2D col in nearby)
-        {
-            IInteractable interactable = col.GetComponent<IInteractable>();
-
-            if (interactable != null)
+            if (spriteRenderer != null && Mathf.Abs(direction.x) > 0.01f)
             {
-                interactable.Interact();
-                return;
+                spriteRenderer.flipX = direction.x < 0f;
+            }
+
+            if (direction == Vector2.zero && rb != null)
+            {
+                rb.velocity = Vector2.zero;
             }
         }
     }
-
-    #endregion
-
-    #region Debug
-
-    /// <summary>
-    /// Zeichnet Debug-Hilfen im Editor:
-    /// - rote Kugel für Kollisionsprüfung
-    /// - gelbe Kugel für Interaktionsbereich vorne
-    /// - cyanfarbene Kugel für Fallback-Bereich
-    /// </summary>
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.red;
-        Vector3 collisionPos = transform.position + new Vector3(0f, footOffset.y, 0f);
-        Gizmos.DrawWireSphere(collisionPos, footRadius);
-
-        Gizmos.color = Color.yellow;
-        Vector2 dir = lastMoveDirection == Vector2.zero ? Vector2.down : lastMoveDirection;
-        Vector3 interactPos = transform.position + (Vector3)(dir * interactDistance);
-        Gizmos.DrawWireSphere(interactPos, interactRadius);
-
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawWireSphere(transform.position, fallbackInteractRadius);
-    }
-
-    #endregion
 }

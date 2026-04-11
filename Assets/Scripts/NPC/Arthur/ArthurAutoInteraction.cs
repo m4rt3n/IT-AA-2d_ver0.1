@@ -1,257 +1,99 @@
+using ITAA.UI.Managers;
 using UnityEngine;
 
-public class ArthurAutoInteraction : MonoBehaviour
+namespace ITAA.NPC.Arthur
 {
-    #region Inspector
-
-    [Header("Movement")]
-    [SerializeField] private float moveSpeed = 2.5f;
-    [SerializeField] private float stopDistance = 1.2f;
-
-    [Header("References")]
-    [SerializeField] private MenuManager menuManager;
-    [SerializeField] private Animator animator;
-    [SerializeField] private SpriteRenderer spriteRenderer;
-    [SerializeField] private Rigidbody2D rb;
-
-    #endregion
-
-    #region Private Fields
-
-    private Transform targetPlayer;
-    private bool isMovingToPlayer;
-    private bool interactionTriggered;
-    private bool menuOpened;
-
-    // Letzte Blickrichtung für Idle
-    private Vector2 lastMoveDirection = Vector2.down;
-
-    #endregion
-
-    #region Unity Methods
-
-    private void Start()
+    public class ArthurAutoInteraction : MonoBehaviour
     {
-        if (menuManager == null)
+        [Header("Movement")]
+        [SerializeField] private float moveSpeed = 2.5f;
+        [SerializeField] private float stopDistance = 1.2f;
+        [SerializeField] private LayerMask obstacleLayer;
+
+        [Header("References")]
+        [SerializeField] private MenuManager menuManager;
+        [SerializeField] private Animator animator;
+        [SerializeField] private SpriteRenderer spriteRenderer;
+
+        private Transform targetPlayer;
+        private bool interactionTriggered;
+
+        private void Start()
         {
-            menuManager = FindAnyObjectByType<MenuManager>();
-        }
-
-        if (animator == null)
-        {
-            animator = GetComponent<Animator>();
-        }
-
-        if (spriteRenderer == null)
-        {
-            spriteRenderer = GetComponent<SpriteRenderer>();
-        }
-
-        if (rb == null)
-        {
-            rb = GetComponent<Rigidbody2D>();
-        }
-
-        ApplyDirectionToAnimator(lastMoveDirection);
-        SetWalking(false);
-
-        Debug.Log("[ArthurAutoInteraction] Initialisiert.");
-    }
-
-    private void Update()
-    {
-        if (!isMovingToPlayer || targetPlayer == null)
-        {
-            if (rb != null)
+            if (menuManager == null)
             {
-                rb.linearVelocity = Vector2.zero;
+                menuManager = FindAnyObjectByType<MenuManager>();
             }
 
-            SetWalking(false);
-            return;
-        }
-
-        MoveTowardsPlayer();
-    }
-
-    #endregion
-
-    #region Public API
-
-    public void TriggerAutoInteraction(GameObject player)
-    {
-        if (interactionTriggered)
-        {
-            Debug.Log("[ArthurAutoInteraction] Bereits ausgelöst.");
-            return;
-        }
-
-        if (player == null)
-        {
-            Debug.LogWarning("[ArthurAutoInteraction] Player ist null.");
-            return;
-        }
-
-        if (rb == null)
-        {
-            Debug.LogError("[ArthurAutoInteraction] Rigidbody2D fehlt.");
-            return;
-        }
-
-        targetPlayer = player.transform;
-        isMovingToPlayer = true;
-        interactionTriggered = true;
-        menuOpened = false;
-
-        SetWalking(true);
-
-        Debug.Log($"[ArthurAutoInteraction] Arthur läuft zu: {player.name}");
-    }
-
-    public void ResetInteraction()
-    {
-        targetPlayer = null;
-        isMovingToPlayer = false;
-        interactionTriggered = false;
-        menuOpened = false;
-
-        if (rb != null)
-        {
-            rb.linearVelocity = Vector2.zero;
-        }
-
-        SetWalking(false);
-        ApplyDirectionToAnimator(lastMoveDirection);
-
-        Debug.Log("[ArthurAutoInteraction] Interaktion zurückgesetzt.");
-    }
-
-    #endregion
-
-    #region Private Methods
-
-    private void MoveTowardsPlayer()
-    {
-        if (rb == null || targetPlayer == null)
-        {
-            return;
-        }
-
-        Vector2 currentPosition = rb.position;
-        Vector2 targetPosition = targetPlayer.position;
-
-        float distance = Vector2.Distance(currentPosition, targetPosition);
-
-        if (distance <= stopDistance)
-        {
-            rb.linearVelocity = Vector2.zero;
-
-            isMovingToPlayer = false;
-            SetWalking(false);
-            ApplyDirectionToAnimator(lastMoveDirection);
-
-            if (!menuOpened)
+            if (animator == null)
             {
-                OpenStartMenu();
+                animator = GetComponent<Animator>();
             }
 
-            return;
-        }
-
-        Vector2 direction = (targetPosition - currentPosition).normalized;
-
-        if (direction.sqrMagnitude > 0.001f)
-        {
-            lastMoveDirection = direction;
-        }
-
-        // Bewegung über Rigidbody2D, damit Kollisionen respektiert werden
-        rb.linearVelocity = direction * moveSpeed;
-
-        UpdateFacing(direction);
-        ApplyDirectionToAnimator(direction);
-        SetWalking(true);
-    }
-
-    private void UpdateFacing(Vector2 direction)
-    {
-        // Wenn du echte Left/Right Animationen hast, kann diese Methode leer bleiben.
-        // Wenn du nur eine Seitenanimation hast, kannst du flipX weiter nutzen.
-
-        if (spriteRenderer == null)
-        {
-            return;
-        }
-
-        // Optionales Spiegeln nur bei horizontaler Dominanz
-        if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y))
-        {
-            if (direction.x > 0.05f)
+            if (spriteRenderer == null)
             {
-                spriteRenderer.flipX = false;
+                spriteRenderer = GetComponent<SpriteRenderer>();
             }
-            else if (direction.x < -0.05f)
+        }
+
+        private void Update()
+        {
+            if (targetPlayer == null || interactionTriggered)
             {
-                spriteRenderer.flipX = true;
+                SetAnimation(false);
+                return;
+            }
+
+            Vector2 direction = targetPlayer.position - transform.position;
+            float distance = direction.magnitude;
+
+            if (distance <= stopDistance)
+            {
+                SetAnimation(false);
+                interactionTriggered = true;
+                menuManager?.ShowStartMenu();
+                return;
+            }
+
+            direction.Normalize();
+
+            if (IsPathBlocked(direction))
+            {
+                SetAnimation(false);
+                return;
+            }
+
+            transform.position += (Vector3)(direction * moveSpeed * Time.deltaTime);
+            UpdateFacing(direction);
+            SetAnimation(true);
+        }
+
+        public void SetTargetPlayer(Transform player)
+        {
+            targetPlayer = player;
+            interactionTriggered = false;
+        }
+
+        private bool IsPathBlocked(Vector2 direction)
+        {
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, direction, 0.5f, obstacleLayer);
+            return hit.collider != null;
+        }
+
+        private void UpdateFacing(Vector2 direction)
+        {
+            if (spriteRenderer != null && Mathf.Abs(direction.x) > 0.01f)
+            {
+                spriteRenderer.flipX = direction.x < 0f;
+            }
+        }
+
+        private void SetAnimation(bool isMoving)
+        {
+            if (animator != null)
+            {
+                animator.SetBool("IsMoving", isMoving);
             }
         }
     }
-
-    private void ApplyDirectionToAnimator(Vector2 direction)
-    {
-        if (animator == null)
-        {
-            return;
-        }
-
-        if (animator.runtimeAnimatorController == null)
-        {
-            return;
-        }
-
-        // Nur Hauptachse verwenden, damit die Richtung sauber bleibt
-        if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y))
-        {
-            animator.SetFloat("MoveX", direction.x > 0 ? 1f : -1f);
-            animator.SetFloat("MoveY", 0f);
-        }
-        else
-        {
-            animator.SetFloat("MoveX", 0f);
-            animator.SetFloat("MoveY", direction.y > 0 ? 1f : -1f);
-        }
-    }
-
-    private void SetWalking(bool isWalking)
-    {
-        if (animator == null)
-        {
-            return;
-        }
-
-        if (animator.runtimeAnimatorController == null)
-        {
-            return;
-        }
-
-        animator.SetBool("IsWalking", isWalking);
-    }
-
-    private void OpenStartMenu()
-    {
-        menuOpened = true;
-
-        Debug.Log("[ArthurAutoInteraction] Arthur hat den Player erreicht. Öffne StartMenu.");
-
-        if (menuManager != null)
-        {
-            menuManager.ShowStartMenu();
-        }
-        else
-        {
-            Debug.LogError("[ArthurAutoInteraction] MenuManager fehlt.");
-        }
-    }
-
-    #endregion
 }

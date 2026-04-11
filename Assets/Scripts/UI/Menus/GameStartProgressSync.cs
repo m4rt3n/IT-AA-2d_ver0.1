@@ -1,61 +1,59 @@
+using ITAA.Data;
+using ITAA.Player.Session;
+using TMPro;
 using UnityEngine;
 
-public class GameStartProgressSync : MonoBehaviour
+namespace ITAA.UI.Menus
 {
-    #region Inspector
-
-    [Header("Test / Initial Progress")]
-    [SerializeField] private int currentLevel = 1;
-    [SerializeField] private int currentScore = 0;
-    [SerializeField] private int currentProgressPercent = 0;
-
-    [Header("Auto Save")]
-    [SerializeField] private bool saveOnStart = true;
-
-    #endregion
-
-    #region Unity
-
-    private void Start()
+    public class GameStartProgressSync : MonoBehaviour
     {
-        if (!saveOnStart)
+        [Header("Optional UI Targets")]
+        [SerializeField] private TMP_Text levelText;
+        [SerializeField] private TMP_Text scoreText;
+        [SerializeField] private TMP_Text progressText;
+        [SerializeField] private TMP_Text slotNameText;
+
+        private void Start()
         {
-            return;
+            if (PlayerSession.Instance == null || !PlayerSession.Instance.HasSaveLoaded)
+            {
+                Debug.LogWarning("[GameStartProgressSync] Kein geladener Save vorhanden.");
+                return;
+            }
+
+            UpdateTexts();
+
+            if (DatabaseManager.Instance != null)
+            {
+                DatabaseManager.Instance.SaveProgress(
+                    PlayerSession.Instance.SaveSlotId,
+                    PlayerSession.Instance.Level,
+                    PlayerSession.Instance.Score,
+                    PlayerSession.Instance.ProgressPercent);
+            }
         }
 
-        SaveCurrentProgress();
-    }
-
-    #endregion
-
-    #region Public Methods
-
-    public void SaveCurrentProgress()
-    {
-        if (PlayerSession.Instance == null || !PlayerSession.Instance.HasSaveLoaded)
+        private void UpdateTexts()
         {
-            Debug.LogWarning("[GameStartProgressSync] Kein geladener SaveSlot vorhanden.");
-            return;
+            if (slotNameText != null)
+            {
+                slotNameText.text = PlayerSession.Instance.SaveSlotName;
+            }
+
+            if (levelText != null)
+            {
+                levelText.text = $"Level: {PlayerSession.Instance.Level}";
+            }
+
+            if (scoreText != null)
+            {
+                scoreText.text = $"Score: {PlayerSession.Instance.Score}";
+            }
+
+            if (progressText != null)
+            {
+                progressText.text = $"Fortschritt: {PlayerSession.Instance.ProgressPercent}%";
+            }
         }
-
-        DatabaseManager.Instance?.UpdateSaveProgress(
-            PlayerSession.Instance.SaveSlotId,
-            currentLevel,
-            currentScore,
-            currentProgressPercent
-        );
-
-        PlayerSession.Instance.UpdateProgress(currentLevel, currentScore, currentProgressPercent);
-
-        Debug.Log("[GameStartProgressSync] Fortschritt gespeichert.");
     }
-
-    public void SetProgress(int level, int score, int progressPercent)
-    {
-        currentLevel = level;
-        currentScore = score;
-        currentProgressPercent = Mathf.Clamp(progressPercent, 0, 100);
-    }
-
-    #endregion
 }

@@ -1,69 +1,60 @@
+using ITAA.UI.Menus;
 using UnityEngine;
 
-public class MenuManager : MonoBehaviour
+namespace ITAA.UI.Managers
 {
-    #region Inspector
-
-    [Header("Root")]
-    [SerializeField] private GameObject backgroundDim;
-    [SerializeField] private GameObject menuPanel;
-
-    [Header("Panels")]
-    [SerializeField] private GameObject startMenuPanel;
-    [SerializeField] private GameObject loadGamePanel;
-
-    #endregion
-
-    #region Unity
-
-    private void Awake()
+    public class MenuManager : MonoBehaviour
     {
-        HideAllMenus();
+        [Header("Panels")]
+        [SerializeField] private StartMenuController startMenuController;
+        [SerializeField] private LoadGamePanel loadGamePanel;
+        [SerializeField] private GameObject backgroundDim;
+
+        private void Start()
+        {
+            HideAll();
+        }
+
+        public void ShowStartMenu()
+        {
+            SetDim(true);
+            SetActive(startMenuController, true);
+            SetActive(loadGamePanel, false);
+        }
+
+        public void ShowLoadGamePanel()
+        {
+            SetDim(true);
+            SetActive(startMenuController, false);
+            SetActive(loadGamePanel, true);
+
+            if (loadGamePanel != null)
+            {
+                loadGamePanel.Refresh();
+            }
+        }
+
+        public void HideAll()
+        {
+            SetDim(false);
+            SetActive(startMenuController, false);
+            SetActive(loadGamePanel, false);
+        }
+
+        private void SetDim(bool visible)
+        {
+            if (backgroundDim != null)
+            {
+                backgroundDim.SetActive(visible);
+            }
+        }
+
+        private void SetActive(MonoBehaviour target, bool visible)
+        {
+            if (target != null)
+            {
+                target.gameObject.SetActive(visible);
+            }
+        }
     }
-
-    #endregion
-
-    #region Public Methods
-
-    public void ShowStartMenu()
-    {
-        SetRoot(true);
-
-        if (startMenuPanel != null) startMenuPanel.SetActive(true);
-        if (loadGamePanel != null) loadGamePanel.SetActive(false);
-
-        Debug.Log("[MenuManager] Startmenü aktiv.");
-    }
-
-    public void ShowLoadGameMenu()
-    {
-        SetRoot(true);
-
-        if (startMenuPanel != null) startMenuPanel.SetActive(false);
-        if (loadGamePanel != null) loadGamePanel.SetActive(true);
-
-        Debug.Log("[MenuManager] LoadGamePanel aktiv.");
-    }
-
-    public void HideAllMenus()
-    {
-        SetRoot(false);
-
-        if (startMenuPanel != null) startMenuPanel.SetActive(false);
-        if (loadGamePanel != null) loadGamePanel.SetActive(false);
-
-        Debug.Log("[MenuManager] Alle Menüs verborgen.");
-    }
-
-    #endregion
-
-    #region Private Methods
-
-    private void SetRoot(bool visible)
-    {
-        if (backgroundDim != null) backgroundDim.SetActive(visible);
-        if (menuPanel != null) menuPanel.SetActive(visible);
-    }
-
-    #endregion
 }
