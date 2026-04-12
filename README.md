@@ -1,303 +1,224 @@
-import pypandoc
+# IT-AA 2D – Unity Game
 
-content = """# IT-AA 2D -- Unity Game
+<p align="center">
+  <img src="https://img.shields.io/badge/Unity-2D-black?logo=unity&style=for-the-badge" />
+  <img src="https://img.shields.io/badge/C%23-Game%20Dev-blue?logo=csharp&style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Status-In%20Development-yellow?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Architecture-Feature--Based-green?style=for-the-badge" />
+</p>
+
+<p align="center">
+  <b>Modulares 2D-Game-Framework mit sauberer Architektur & skalierbarem Design</b>
+</p>
+
+---
+
+## 📸 Screenshots
+
+> ⚠️ Platzhalter – hier später echte Screens einfügen
+
+<p align="center">
+  <img src="https://via.placeholder.com/600x300?text=Gameplay+Preview" width="45%" />
+  <img src="https://via.placeholder.com/600x300?text=UI+System" width="45%" />
+</p>
+
+---
 
 ## 📖 Overview
 
-**IT-AA 2D** ist ein modular aufgebautes 2D-Spielprojekt auf Basis von
-Unity.\\
-Ziel ist der Aufbau eines skalierbaren Game-Frameworks mit klarer
-Architektur, das sich sowohl für Lernzwecke als auch für komplexe
-Spielsysteme eignet.
+**IT-AA 2D** ist ein modular aufgebautes Unity-2D-Projekt mit Fokus auf **saubere Architektur**, **Erweiterbarkeit** und **klare Systemtrennung**.
 
-Der Fokus liegt auf:
-- sauberer Code-Struktur\\
-- Feature-basierter Entwicklung\\
-- einfacher Erweiterbarkeit (z. B. NPCs, UI, Quiz-Systeme)
+Ziel ist der Aufbau eines **skalierbaren Game-Frameworks**, das als Grundlage für komplexe Spielsysteme dient.
 
-------------------------------------------------------------------------
+**Fokus:**
+- Feature-basierte Architektur  
+- Wartbarer & erweiterbarer Code  
+- Klare Trennung von Systemen  
+- Vorbereitung für KI- & Datenintegration  
+
+---
+
+## ✨ Features
+
+- 🧍 Player Movement System (2D)
+- 🤖 NPC Interaction System
+- 🧩 Modulares UI System
+- 💾 Save/Session Architektur (in Vorbereitung)
+- 🧠 Erweiterbar für Quiz / LLM Systeme
+- 🏗️ Saubere Projektstruktur (Production Ready)
+
+---
 
 ## 🧠 Architektur
 
-Das Projekt folgt einer **Feature-driven Architecture**.\\
-Jedes System ist in sich abgeschlossen und unabhängig erweiterbar.
+Das Projekt basiert auf einer **Feature-driven Architecture**:
 
-Wichtige Prinzipien:
-- Separation of Concerns\\
-- Single Responsibility\\
-- Lose Kopplung\\
-- Wiederverwendbarkeit\\
-- Skalierbarkeit
+- Jedes Feature ist **isoliert & erweiterbar**
+- Minimale Abhängigkeiten zwischen Systemen
+- Klare Verantwortlichkeiten pro Script
 
-------------------------------------------------------------------------
+**Prinzipien:**
+- Separation of Concerns  
+- Single Responsibility  
+- Lose Kopplung  
+- Wiederverwendbarkeit  
+- Skalierbarkeit  
+
+---
 
 ## 📂 Projektstruktur
 
 Assets/Projekt/Runtime
 
 ### Core
-
-Basis-Systeme wie Manager, Utilities und globale Logik.
+Globale Systeme (Manager, Utilities)
 
 ### Features
 
 #### Player
-
-- Movement (Bewegung, Input, Physik)
-- Session (Spielerzustand, Fortschritt, Position)
-- UI (Anzeige von Spielerinfos)
+- Movement  
+- Session  
+- UI  
 
 #### NPC
-
-- Behaviour (Verhalten)
-- Detection (Spieler erkennen)
-- Interaction (Interaktionen & Events)
+- Behaviour  
+- Detection  
+- Interaction  
 
 #### UI
-
-- Menüs (Start, Login, Game UI)
-- Widgets (wiederverwendbare UI-Komponenten)
+- Menus  
+- Widgets  
 
 ### Data
-
-- Models (Datenstrukturen)
-- Storage (Speicherung, Save/Load)
+- Models  
+- Storage  
 
 ### Systems
+GameFlow & globale Logik
 
-Übergreifende Systeme wie GameFlow oder globale Logik.
+---
 
-------------------------------------------------------------------------
+## 🎮 Game Flow
 
-## 🎮 Kernfeatures
+StartScene  
+→ Menü / Login  
+→ Spieler spawnt  
+→ Bewegung & Exploration  
+→ NPC erkennt Spieler  
+→ Interaktion  
+→ UI reagiert  
+→ Fortschritt wird gespeichert  
 
-### Player System
+---
 
-- 2D Bewegungssystem
-- Sprint & Steuerung
-- Session-Handling (Position, Fortschritt)
+## 🚀 Roadmap
 
-### NPC System
+### 🧱 Phase 1 – Foundation
+- 🟢 Architektur  
+- 🟢 Struktur  
+- 🟡 Core  
 
-- Spielererkennung über Trigger
-- Automatische Interaktionen
-- Erweiterbar für Dialoge und KI
+### 🧍 Phase 2 – Player
+- 🟢 Movement  
+- 🟡 Animation  
+- 🟡 States  
 
-### UI System
+### 🤖 Phase 3 – NPC
+- 🟡 Detection  
+- 🟡 Interaction  
+- 🔴 AI  
 
-- Menüverwaltung
-- Dynamische UI-Elemente
-- Zustandssteuerung
+### 🧩 Phase 4 – UI
+- 🟡 Menu Manager  
+- 🔴 Widgets  
+- 🔴 HUD  
 
-### Daten & Speicherung
+### 💾 Phase 5 – Data
+- 🟡 Models  
+- 🔴 Save/Load  
 
-- Speicherung von Spielständen
-- Benutzerverwaltung
-- Vorbereitung für Datenbanken
+---
 
-------------------------------------------------------------------------
+## 📋 GitHub Project Board
 
-## 🔄 Game Flow
+### Workflow
 
-StartScene\\
-→ Menü / Login\\
-→ Spieler spawnt\\
-→ Bewegung & Exploration\\
-→ NPC erkennt Spieler\\
-→ Interaktion wird ausgelöst\\
-→ UI reagiert\\
-→ Fortschritt wird gespeichert
+Backlog → Ready → In Progress → Review → Done  
 
-------------------------------------------------------------------------
+### Beispiel Tasks
 
-## 🚀 Ziel des Projekts
+**Backlog**
+- NPC AI entwickeln  
+- Dialogsystem bauen  
 
-- Aufbau eines modularen Game-Frameworks\\
-- Integration dynamischer Inhalte (z. B. generierte Fragen)\\
-- Grundlage für komplexe Spielsysteme
+**In Progress**
+- NPC Interaction  
+- UI Fixes  
 
-Geplante Erweiterungen:
-- Quest-System\\
-- Dialogsystem\\
-- Fortschrittssystem\\
-- Multiplayer / Online-Funktionen
+**Done**
+- Player Movement  
+- StartScene Setup  
 
-------------------------------------------------------------------------
+---
 
-## 🧪 Entwicklungsstatus
+## 🛠️ Tech Stack
 
-- Architektur steht\\
-- Player Movement implementiert\\
-- NPC-System im Aufbau\\
-- UI-System in Entwicklung\\
-- Datenstruktur vorbereitet
+- Unity (2D)  
+- C#  
+- Scriptable Architecture  
 
-------------------------------------------------------------------------
+**Geplant:**
+- SQLite  
+- LLM Integration  
 
-## 🛠️ Technologien
-
-- Unity (2D)\\
-- C#\\
-- Modulare Architektur
-
-Geplant:
-- Datenbank (z. B. SQLite)\\
-- KI / LLM Integration
-
-------------------------------------------------------------------------
+---
 
 ## 📦 Installation
 
-Repository klonen und im Unity Hub öffnen.\\
-StartScene laden und Spiel starten.
+1. Repository klonen  
+2. In Unity Hub öffnen  
+3. StartScene laden  
+4. Play drücken  
 
-------------------------------------------------------------------------
-
-## 📌 Roadmap
-
-### 🧱 Phase 1 -- Foundation
-
-- Architektur: 🟢 Fertig\\
-- Projektstruktur: 🟢 Fertig\\
-- Core: 🟡 Teilweise\\
-- Scene Setup: 🟢 Fertig\\
-- Basis UI: 🟡 In Arbeit
-
-### 🧍 Phase 2 -- Player System
-
-- Movement: 🟢 Fertig\\
-- Animation: 🟡 In Arbeit\\
-- Sprint / States: 🟡 In Arbeit\\
-- Session System: 🟡 Teilweise\\
-- UI: 🔴 Offen
-
-### 🤖 Phase 3 -- NPC System
-
-- Detection: 🟡 In Arbeit\\
-- Auto Interaction: 🟡 Teilweise\\
-- Movement / AI: 🔴 Offen\\
-- Interaction System: 🟡 In Arbeit\\
-- Dialog System: 🔴 Offen
-
-### 🧩 Phase 4 -- UI System
-
-- Menu Manager: 🟡 In Arbeit\\
-- UI States: 🔴 Offen\\
-- Widgets: 🔴 Offen\\
-- HUD: 🔴 Offen
-
-### 💾 Phase 5 -- Data & Persistence
-
-- Data Models: 🟡 Teilweise\\
-- Save System: 🔴 Offen\\
-- Load System: 🔴 Offen\\
-- Save Slots: 🔴 Offen\\
-- DB Integration: 🔴 Offen
-
-### 🧠 Phase 6 -- Gameplay Systems
-
-- Quiz System: 🔴 Offen\\
-- Level System: 🔴 Offen\\
-- Reward System: 🔴 Offen\\
-- Event System: 🔴 Offen
-
-### 🤖 Phase 7 -- AI & Dynamic Content
-
-- LLM Integration: 🔴 Offen\\
-- Adaptive Difficulty: 🔴 Offen\\
-- Advanced NPC AI: 🔴 Offen
-
-### 📱 Phase 8 -- Polishing & Deployment
-
-- UI Polish: 🔴 Offen\\
-- Performance: 🔴 Offen\\
-- Sound: 🔴 Offen\\
-- Mobile Build: 🔴 Offen\\
-- Testing: 🔴 Offen
-
-------------------------------------------------------------------------
-
-## 📊 Gesamtfortschritt
-
-- Foundation: 80%\\
-- Player System: 60%\\
-- NPC System: 40%\\
-- UI System: 30%\\
-- Data System: 20%\\
-- Gameplay Systems: 0%\\
-- AI / LLM: 0%\\
-- Polishing: 0%
-
-------------------------------------------------------------------------
-
-## 🚀 Nächste Schritte
-
-1. NPC Interaction stabilisieren\\
-2. UI System fertigstellen (Menu + HUD)\\
-3. Save/Load implementieren\\
-4. Grundlegendes Gameplay (Quiz-System) starten
-
-------------------------------------------------------------------------
-
-## 📋 GitHub Project Board (Kanban)
-
-### Spalten
-- Backlog  
-- Ready  
-- In Progress  
-- Review / Testing  
-- Done  
-
-### Labels
-- feature, bug, refactor, architecture  
-- ui, npc, player, data, system  
-- high-priority, low-priority  
-
-### Beispiel-Tasks
-
-#### Backlog
-- NPC Movement / AI entwickeln  
-- Dialogsystem erstellen  
-- Save/Load System bauen  
-
-#### Ready
-- NPC Interaction stabilisieren  
-- Menu Manager fixen  
-
-#### In Progress
-- Player Movement Feinschliff  
-- UI Menü Anzeige Fix  
-
-#### Review / Testing
-- Collision System testen  
-- UI Verhalten prüfen  
-
-#### Done
-- Grundstruktur erstellt  
-- Player Movement Basis  
-- StartScene Setup  
-
-------------------------------------------------------------------------
+---
 
 ## 🤝 Contribution
 
 Beiträge sind willkommen.
 
-Richtlinien:
-- Feature-basiert arbeiten\\
-- Klare Namensgebung verwenden\\
-- Ein Script = eine Verantwortung\\
-- Dokumentation pro Feature
+**Guidelines:**
+- Feature-basiert entwickeln  
+- Klare Namensgebung  
+- Ein Script = eine Verantwortung  
+- Dokumentation pro Feature  
 
-------------------------------------------------------------------------
+---
+
+## 📊 Status
+
+| Bereich        | Fortschritt |
+|----------------|------------|
+| Foundation     | 80%        |
+| Player         | 60%        |
+| NPC            | 40%        |
+| UI             | 30%        |
+| Data           | 20%        |
+| Gameplay       | 0%         |
+
+---
 
 ## 📄 Lizenz
 
-Dieses Projekt dient aktuell Lern- und Entwicklungszwecken.\\
-Lizenzdetails folgen.
-"""
+Dieses Projekt dient aktuell Lern- und Entwicklungszwecken.  
+Lizenzdetails folgen.  
 
-output_path = "/mnt/data/README_complete.md"
-pypandoc.convert_text(content, 'md', format='md', outputfile=output_path, extra_args=['--standalone'])
+---
 
-output_path
+## ⭐ Vision
+
+Ein **sauberes, skalierbares Unity-Framework**, das als Grundlage für:
+- Lernprojekte  
+- Game Prototypen  
+- KI-gestützte Spielsysteme  
+
+dient.
