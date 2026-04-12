@@ -1,84 +1,74 @@
 /*
  * Datei: MenuManager.cs
- * Zweck: Steuert den Wechsel zwischen zentralen Menü-Panels.
- * Verantwortung: Öffnet und schließt Startmenü, LoadGamePanel und das Hintergrund-Overlay.
- * Abhängigkeiten: StartMenuController, LoadGamePanel, Hintergrundobjekt.
- * Verwendet von: UI-Buttons, NPC-Interaktionen und Menüfluss in der Startszene.
+ * Zweck: Verwaltet das Öffnen und Schließen von UI-Panels.
+ * Verantwortung:
+ *   - Panels gezielt öffnen
+ *   - andere Panels optional schließen
+ *   - zentrale UI-Steuerung
+ *
+ * Abhängigkeiten:
+ *   - BasePanel
+ *
+ * Verwendet von:
+ *   - Buttons
+ *   - Gameplay-Systeme
+ *   - Hauptmenü
  */
-
-using ITAA.UI.Menus;
 using UnityEngine;
 
-namespace ITAA.UI.Managers
+public class MenuManager : MonoBehaviour
 {
-    public class MenuManager : MonoBehaviour
+    #region Inspector
+
+    [Header("Panels")]
+    [SerializeField] private BasePanel startMenuPanel;
+    [SerializeField] private BasePanel loadGamePanel;
+    [SerializeField] private BasePanel pauseMenuPanel;
+    [SerializeField] private BasePanel settingsPanel;
+    [SerializeField] private BasePanel dialoguePanel;
+
+    #endregion
+
+    #region Public Methods
+
+    public void OpenStartMenu()
     {
-        #region Inspector
-
-        [Header("Panels")]
-        [SerializeField] private StartMenuController startMenuController;
-        [SerializeField] private LoadGamePanel loadGamePanel;
-        [SerializeField] private GameObject backgroundDim;
-
-        #endregion
-
-        #region Unity Methods
-
-        private void Start()
-        {
-            HideAll();
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        public void ShowStartMenu()
-        {
-            SetDim(true);
-            SetActive(startMenuController, true);
-            SetActive(loadGamePanel, false);
-        }
-
-        public void ShowLoadGamePanel()
-        {
-            SetDim(true);
-            SetActive(startMenuController, false);
-            SetActive(loadGamePanel, true);
-
-            if (loadGamePanel != null)
-            {
-                loadGamePanel.Refresh();
-            }
-        }
-
-        public void HideAll()
-        {
-            SetDim(false);
-            SetActive(startMenuController, false);
-            SetActive(loadGamePanel, false);
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        private void SetDim(bool visible)
-        {
-            if (backgroundDim != null)
-            {
-                backgroundDim.SetActive(visible);
-            }
-        }
-
-        private void SetActive(MonoBehaviour target, bool visible)
-        {
-            if (target != null)
-            {
-                target.gameObject.SetActive(visible);
-            }
-        }
-
-        #endregion
+        CloseAll();
+        startMenuPanel?.Open();
     }
+
+    public void OpenLoadGame()
+    {
+        CloseAll();
+        loadGamePanel?.Open();
+    }
+
+    public void OpenPauseMenu()
+    {
+        CloseAll();
+        pauseMenuPanel?.Open();
+    }
+
+    public void OpenSettings()
+    {
+        CloseAll();
+        settingsPanel?.Open();
+    }
+
+    public void OpenDialogue()
+    {
+        CloseAll();
+        dialoguePanel?.Open();
+    }
+
+    public void CloseAll()
+    {
+        startMenuPanel?.Close();
+        loadGamePanel?.Close();
+        pauseMenuPanel?.Close();
+        settingsPanel?.Close();
+        dialoguePanel?.Close();
+    }
+
+    #endregion
 }
