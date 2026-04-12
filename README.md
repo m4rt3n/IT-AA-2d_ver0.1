@@ -1,190 +1,82 @@
-# 🎮 IT-AA 2D Game
-
-Ein modulares 2D-Spielprojekt auf Basis von Unity mit Fokus auf:
-
-* sauberer Architektur (SOLID)
-* skalierbaren Systemen
-* Kombination aus Gameplay und Backend
-
+🎮 IT-AA 2D Projekt
+Ein modulares 2D-Spielprojekt in Unity mit Fokus auf sauberer Architektur, klarer Trennung von Content und Runtime sowie langfristiger Erweiterbarkeit.
 ---
-
-## 🚀 Features
-
-* 🔐 Authentifizierungssystem (Login / User)
-* 💾 Datenbank-Anbindung (lokal / erweiterbar)
-* 🧍 Spielersteuerung (Movement + Animation)
-* 🤖 NPC-Interaktion (Trigger + Menüsystem)
-* 🧭 UI-System (Startmenü, Ingame-Menüs)
-* 🌍 Welt & Kollision (Tilemap-basiert)
-
+📁 Projektstruktur
+Root
+Assets/ → Hauptinhalt des Projekts
+Database/ → Externe Datenbank (z. B. SQLite)
+Packages/ → Unity Package Manager
+ProjectSettings/ → Unity Projekteinstellungen
 ---
-
-## 📁 Projektstruktur
-
-```
-Assets/
-├── Player/         # Spieler-System (Movement, Animation, Input)
-├── NPC/            # NPC-Systeme und Interaktionen
-├── UI/             # Globale UI-Systeme
-├── Data/           # Datenmodelle und Speicherung
-├── Core/           # Basis-Systeme (Manager, Utilities)
-├── Authentication/ # Login / Benutzerverwaltung
-├── Scenes/         # Unity Szenen
-├── Art/            # Grafiken und Animationen
-├── Prefabs/        # Wiederverwendbare Objekte
-└── Settings/       # Konfigurationen
-
-Database/           # Datenbank / externe Speicherung
-Packages/           # Unity Package Manager
-ProjectSettings/    # Unity Einstellungen
-```
-
+🧩 Assets
+Assets/  
+├── Projekt/  
+│   ├── Content/  
+│   │   ├── Art/ → Sprites, Animationen, Tiles  
+│   │   ├── Audio/ → Musik und Soundeffekte  
+│   │   ├── Materials/ → Materialien  
+│   │   ├── Prefabs/ → Wiederverwendbare GameObjects  
+│   │   └── Scenes/ → Unity Szenen  
+│   │  
+│   └── Runtime/  
+│       ├── Core/ → Basis-Systeme (Bootstrap, Events, Utilities)  
+│       ├── Data/ → Datenmodelle und Speicherung  
+│       ├── Features/ → Gameplay-Systeme (Player, NPC, UI, World)  
+│       ├── System/ → Globale Manager (Game, Save, Scene)  
+│       └── PersistentSingleton.cs  
+│  
+├── Settings/ → Input, Render, globale Settings  
+└── PlayerControls.inputactions
 ---
-
-## 🧩 Architekturprinzip
-
-Das Projekt folgt einer **Feature-basierten Struktur**:
-
-* Code ist nach **Funktion (Feature)** organisiert, nicht nach Typ
-* Jedes System ist **isoliert und erweiterbar**
-* Fokus auf **lose Kopplung und klare Verantwortlichkeiten**
-
-**Vorteile:**
-
-* bessere Skalierbarkeit
-* einfachere Wartung
-* klare Systemtrennung
-
+🧠 Architekturprinzip
+Das Projekt folgt einer klaren Trennung zwischen Content und Runtime.
+Content enthält alle statischen Daten wie Grafiken, Sounds und Prefabs.  
+Runtime enthält sämtliche Logik, Systeme und Code.
 ---
-
-## 🔁 System-Flow
-
-```
-Input
-  ↓
-Player (Movement, Animation)
-  ↓
-NPC Interaction
-  ↓
-UI (Menüs, Dialoge)
-  ↓
-Data (Speichern / Laden)
-```
-
+🎮 Wichtige Systeme
+👤 Player
+Player/  
+├── Movement/ → Bewegungssystem  
+├── Session/ → Spielzustand (Stats, Progress, Position)  
+└── UI/ → Spieleranzeige
+🤖 NPC
+NPC/  
+├── Interactions/ → Interaktion (Trigger, Input, Prompt)  
+├── Dialogue/ → Dialogsystem (geplant)  
+├── Behaviour/ → Verhalten (geplant)
+🧭 UI
+UI/  
+├── Panels/ → Menüs (Start, LoadGame, Pause)  
+├── Items/ → Listenelemente (z. B. SaveSlots)  
+├── Widgets/ → UI-Komponenten (Bars, Timer etc.)
 ---
-
-## 🧠 Wichtige Systeme
-
-### 🧍 Player
-
-* Bewegung
-* Animation
-* Input-Verarbeitung
-
-### 🤖 NPC
-
-* Trigger-basierte Interaktion
-* Menü-Auslösung
-
-### 🧭 UI
-
-* Menüverwaltung
-* Anzeige von Spielzuständen
-
-### 💾 Data
-
-* Speicherung von Spielständen
-* Benutzerdaten
-
-### 🔐 Authentication
-
-* Login / Registrierung
-* Nutzerverwaltung
-
+🔄 Gameplay-Flow
+StartScene → NPC Interaktion → StartMenu → LoadGamePanel → Slot Auswahl → Gameplay
 ---
-
-## 🏁 Einstieg für Entwickler
-
-1. Projekt in Unity öffnen
-
-2. Szene starten: **StartScene**
-
-3. Einstieg in den Code:
-
-* Player → `PlayerController`
-* NPC → `NPCInteraction`
-* UI → `MenuManager`
-
+🧱 Code-Standards
+Eine Klasse = eine Verantwortung
+Feature-basierte Struktur
+Trennung von Input, Logik und UI
 ---
-
-## 🧱 Code-Standards
-
-### Script-Header (Pflicht)
-
-```
-/*
- * Datei:
- * Modul:
- * Zweck:
- * Verantwortung:
- * Abhängigkeiten:
- * Verwendung:
- */
-```
-
+🚀 Aktueller Stand
+StartMenu implementiert
+LoadGamePanel mit dynamischen Slots
+Horizontales Scroll-System
+NPC Interaktion
+Grundstruktur vorhanden
 ---
-
-### Struktur im Code
-
-```
-#region Inspector
-#endregion
-
-#region Unity Methods
-#endregion
-
-#region Private Methods
-#endregion
-```
-
+🔮 Geplante Features
+Dialogsystem
+Quest-System
+Inventory-System
+SaveGame mit echten Daten
+UI-Verbesserungen
 ---
-
-## 🔧 Technologien
-
-* Unity (2D)
-* C#
-* SQLite (optional)
-
+🛠 Entwicklung
+Repo klonen
+In Unity öffnen
+StartScene laden
+Play drücken
 ---
-
-## 📈 Roadmap
-
-* [ ] Dialogsystem (LLM-Integration)
-* [ ] Quest-System
-* [ ] Save/Load-System erweitern
-* [ ] Mobile Version
-* [ ] Backend-Anbindung (API)
-
----
-
-## 📌 Ziel des Projekts
-
-Dieses Projekt dient als:
-
-* Lernplattform für Game Development
-* Testumgebung für Architekturkonzepte
-* Grundlage für ein skalierbares Spielsystem
-
----
-
-## 👤 Autor
-
-Martin
-
-Ingenieur / IT-Support / Entwickler
-
----
-
-## 📄 Lizenz
-
-Noch nicht definiert
+👨‍💻 Ziel
+Saubere, skalierbare Architektur für modulare Erweiterbarkeit.

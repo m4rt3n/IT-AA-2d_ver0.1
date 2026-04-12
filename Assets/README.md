@@ -1,82 +1,92 @@
-🎮 IT-AA 2D Projekt
-Ein modulares 2D-Spielprojekt in Unity mit Fokus auf sauberer Architektur, klarer Trennung von Content und Runtime sowie langfristiger Erweiterbarkeit.
+# 📦 Assets
+
+## Zweck
+Der `Assets`-Ordner enthält alle Inhalte des Unity-Projekts – sowohl visuelle Ressourcen als auch die komplette Spiellogik.
+
+Er ist in zwei Hauptbereiche unterteilt:
+- Content → Spielinhalte (Grafik, Audio, Szenen)
+- Runtime → Spiellogik und Systeme
+
 ---
-📁 Projektstruktur
-Root
-Assets/ → Hauptinhalt des Projekts
-Database/ → Externe Datenbank (z. B. SQLite)
-Packages/ → Unity Package Manager
-ProjectSettings/ → Unity Projekteinstellungen
+
+## 📁 Struktur
+
+    Assets/
+    ├── _Recovery/        # Unity interne Wiederherstellung (ignorieren)
+    ├── Projekt/
+    │   ├── Content/      # Spielinhalte (keine Logik)
+    │   └── Runtime/      # Spiellogik
+    ├── Settings/         # Projekt-Konfigurationen
+    ├── ScriptableObjects/# Daten-Assets
+    ├── TextMesh Pro/     # UI/Text-System
+    └── PlayerControls.inputactions # Input-Konfiguration
+
 ---
-🧩 Assets
-Assets/  
-├── Projekt/  
-│   ├── Content/  
-│   │   ├── Art/ → Sprites, Animationen, Tiles  
-│   │   ├── Audio/ → Musik und Soundeffekte  
-│   │   ├── Materials/ → Materialien  
-│   │   ├── Prefabs/ → Wiederverwendbare GameObjects  
-│   │   └── Scenes/ → Unity Szenen  
-│   │  
-│   └── Runtime/  
-│       ├── Core/ → Basis-Systeme (Bootstrap, Events, Utilities)  
-│       ├── Data/ → Datenmodelle und Speicherung  
-│       ├── Features/ → Gameplay-Systeme (Player, NPC, UI, World)  
-│       ├── System/ → Globale Manager (Game, Save, Scene)  
-│       └── PersistentSingleton.cs  
-│  
-├── Settings/ → Input, Render, globale Settings  
-└── PlayerControls.inputactions
+
+## 🧩 Content vs Runtime
+
+### 🎨 Content
+
+Enthält alles Visuelle und Statische:
+
+- Art → Grafiken und Animationen  
+- Audio → Sounds und Musik  
+- Materials → Materialien  
+- Prefabs → wiederverwendbare Objekte  
+- Scenes → Unity Szenen  
+
+👉 Keine Spiellogik
+
 ---
-🧠 Architekturprinzip
-Das Projekt folgt einer klaren Trennung zwischen Content und Runtime.
-Content enthält alle statischen Daten wie Grafiken, Sounds und Prefabs.  
-Runtime enthält sämtliche Logik, Systeme und Code.
+
+### ⚙️ Runtime
+
+Enthält die komplette Spiellogik:
+
+- Core → technische Basis (Singletons, Events, SceneManagement)  
+- Data → Daten und Speicherung  
+- Features → Gameplay-Systeme (Player, NPC, UI, World)  
+- System → globale Logik  
+
+👉 Hier passiert das Verhalten des Spiels
+
 ---
-🎮 Wichtige Systeme
-👤 Player
-Player/  
-├── Movement/ → Bewegungssystem  
-├── Session/ → Spielzustand (Stats, Progress, Position)  
-└── UI/ → Spieleranzeige
-🤖 NPC
-NPC/  
-├── Interactions/ → Interaktion (Trigger, Input, Prompt)  
-├── Dialogue/ → Dialogsystem (geplant)  
-├── Behaviour/ → Verhalten (geplant)
-🧭 UI
-UI/  
-├── Panels/ → Menüs (Start, LoadGame, Pause)  
-├── Items/ → Listenelemente (z. B. SaveSlots)  
-├── Widgets/ → UI-Komponenten (Bars, Timer etc.)
+
+## 🔗 Verbindung Content ↔ Runtime
+
+- Content stellt Objekte bereit (Prefabs, Scenes)
+- Runtime steuert deren Verhalten (Scripts)
+
+### Beispiel
+
+Ein Player:
+- liegt als Prefab in `Content/Prefabs`
+- wird in einer Scene platziert
+- wird durch `Runtime/Features/Player/` gesteuert
+
 ---
-🔄 Gameplay-Flow
-StartScene → NPC Interaktion → StartMenu → LoadGamePanel → Slot Auswahl → Gameplay
+
+## 🧠 Architekturprinzip
+
+Das Projekt folgt einer **Feature-basierten Struktur**:
+
+- Code ist nach Systemen organisiert (Player, NPC, UI)
+- nicht nach Typen (kein Scripts-Ordner)
+- klare Trennung von Verantwortung
+
 ---
-🧱 Code-Standards
-Eine Klasse = eine Verantwortung
-Feature-basierte Struktur
-Trennung von Input, Logik und UI
+
+## ⚠️ Hinweise
+
+- `_Recovery/` wird von Unity automatisch verwaltet
+- `TextMesh Pro/` ist ein externes UI-System
+- `PlayerControls.inputactions` definiert Input
+
 ---
-🚀 Aktueller Stand
-StartMenu implementiert
-LoadGamePanel mit dynamischen Slots
-Horizontales Scroll-System
-NPC Interaktion
-Grundstruktur vorhanden
----
-🔮 Geplante Features
-Dialogsystem
-Quest-System
-Inventory-System
-SaveGame mit echten Daten
-UI-Verbesserungen
----
-🛠 Entwicklung
-Repo klonen
-In Unity öffnen
-StartScene laden
-Play drücken
----
-👨‍💻 Ziel
-Saubere, skalierbare Architektur für modulare Erweiterbarkeit.
+
+## 🎯 Ziel
+
+Der `Assets`-Ordner ist so aufgebaut, dass:
+- Logik klar getrennt ist
+- Systeme modular erweitert werden können
+- das Projekt skalierbar bleibt
