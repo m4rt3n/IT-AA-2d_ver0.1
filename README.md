@@ -18,7 +18,7 @@
 > ⚠️ Platzhalter – hier später echte Screens einfügen
 
 <p align="center">
-  <img src="https://via.placeholder.com/600x300?text=Gameplay+Preview" width="45%" />
+ 
  <img width="45%" alt="image" src="https://github.com/user-attachments/assets/f9c9c1ed-5d41-4121-8219-51f510543883" />
 
 </p>
