@@ -1,82 +1,166 @@
-🎮 IT-AA 2D Projekt
-Ein modulares 2D-Spielprojekt in Unity mit Fokus auf sauberer Architektur, klarer Trennung von Content und Runtime sowie langfristiger Erweiterbarkeit.
+# IT-AA 2D – Unity Game
+
+## 📖 Overview
+**IT-AA 2D** ist ein modular aufgebautes 2D-Spielprojekt auf Basis von Unity.  
+Ziel ist der Aufbau eines skalierbaren Game-Frameworks mit klarer Architektur, das sich sowohl für Lernzwecke als auch für komplexe Spielsysteme eignet.
+
+Der Fokus liegt auf:
+- sauberer Code-Struktur  
+- Feature-basierter Entwicklung  
+- einfacher Erweiterbarkeit (z. B. NPCs, UI, Quiz-Systeme)
+
 ---
-📁 Projektstruktur
-Root
-Assets/ → Hauptinhalt des Projekts
-Database/ → Externe Datenbank (z. B. SQLite)
-Packages/ → Unity Package Manager
-ProjectSettings/ → Unity Projekteinstellungen
+
+## 🧠 Architektur
+
+Das Projekt folgt einer **Feature-driven Architecture**.  
+Jedes System ist in sich abgeschlossen und unabhängig erweiterbar.
+
+Wichtige Prinzipien:
+- Separation of Concerns  
+- Single Responsibility  
+- Lose Kopplung  
+- Wiederverwendbarkeit  
+- Skalierbarkeit
+
 ---
-🧩 Assets
-Assets/  
-├── Projekt/  
-│   ├── Content/  
-│   │   ├── Art/ → Sprites, Animationen, Tiles  
-│   │   ├── Audio/ → Musik und Soundeffekte  
-│   │   ├── Materials/ → Materialien  
-│   │   ├── Prefabs/ → Wiederverwendbare GameObjects  
-│   │   └── Scenes/ → Unity Szenen  
-│   │  
-│   └── Runtime/  
-│       ├── Core/ → Basis-Systeme (Bootstrap, Events, Utilities)  
-│       ├── Data/ → Datenmodelle und Speicherung  
-│       ├── Features/ → Gameplay-Systeme (Player, NPC, UI, World)  
-│       ├── System/ → Globale Manager (Game, Save, Scene)  
-│       └── PersistentSingleton.cs  
-│  
-├── Settings/ → Input, Render, globale Settings  
-└── PlayerControls.inputactions
+
+## 📂 Projektstruktur
+
+Assets/Projekt/Runtime
+
+### Core
+Basis-Systeme wie Manager, Utilities und globale Logik.
+
+### Features
+
+#### Player
+- Movement (Bewegung, Input, Physik)
+- Session (Spielerzustand, Fortschritt, Position)
+- UI (Anzeige von Spielerinfos)
+
+#### NPC
+- Behaviour (Verhalten)
+- Detection (Spieler erkennen)
+- Interaction (Interaktionen & Events)
+
+#### UI
+- Menüs (Start, Login, Game UI)
+- Widgets (wiederverwendbare UI-Komponenten)
+
+### Data
+- Models (Datenstrukturen)
+- Storage (Speicherung, Save/Load)
+
+### Systems
+Übergreifende Systeme wie GameFlow oder globale Logik.
+
 ---
-🧠 Architekturprinzip
-Das Projekt folgt einer klaren Trennung zwischen Content und Runtime.
-Content enthält alle statischen Daten wie Grafiken, Sounds und Prefabs.  
-Runtime enthält sämtliche Logik, Systeme und Code.
+
+## 🎮 Kernfeatures
+
+### Player System
+- 2D Bewegungssystem
+- Sprint & Steuerung
+- Session-Handling (Position, Fortschritt)
+
+### NPC System
+- Spielererkennung über Trigger
+- Automatische Interaktionen
+- Erweiterbar für Dialoge und KI
+
+### UI System
+- Menüverwaltung
+- Dynamische UI-Elemente
+- Zustandssteuerung
+
+### Daten & Speicherung
+- Speicherung von Spielständen
+- Benutzerverwaltung
+- Vorbereitung für Datenbanken
+
 ---
-🎮 Wichtige Systeme
-👤 Player
-Player/  
-├── Movement/ → Bewegungssystem  
-├── Session/ → Spielzustand (Stats, Progress, Position)  
-└── UI/ → Spieleranzeige
-🤖 NPC
-NPC/  
-├── Interactions/ → Interaktion (Trigger, Input, Prompt)  
-├── Dialogue/ → Dialogsystem (geplant)  
-├── Behaviour/ → Verhalten (geplant)
-🧭 UI
-UI/  
-├── Panels/ → Menüs (Start, LoadGame, Pause)  
-├── Items/ → Listenelemente (z. B. SaveSlots)  
-├── Widgets/ → UI-Komponenten (Bars, Timer etc.)
+
+## 🔄 Game Flow
+
+StartScene  
+→ Menü / Login  
+→ Spieler spawnt  
+→ Bewegung & Exploration  
+→ NPC erkennt Spieler  
+→ Interaktion wird ausgelöst  
+→ UI reagiert  
+→ Fortschritt wird gespeichert  
+
 ---
-🔄 Gameplay-Flow
-StartScene → NPC Interaktion → StartMenu → LoadGamePanel → Slot Auswahl → Gameplay
+
+## 🚀 Ziel des Projekts
+
+- Aufbau eines modularen Game-Frameworks  
+- Integration dynamischer Inhalte (z. B. generierte Fragen)  
+- Grundlage für komplexe Spielsysteme  
+
+Geplante Erweiterungen:
+- Quest-System  
+- Dialogsystem  
+- Fortschrittssystem  
+- Multiplayer / Online-Funktionen  
+
 ---
-🧱 Code-Standards
-Eine Klasse = eine Verantwortung
-Feature-basierte Struktur
-Trennung von Input, Logik und UI
+
+## 🧪 Entwicklungsstatus
+
+- Architektur steht  
+- Player Movement implementiert  
+- NPC-System im Aufbau  
+- UI-System in Entwicklung  
+- Datenstruktur vorbereitet  
+
 ---
-🚀 Aktueller Stand
-StartMenu implementiert
-LoadGamePanel mit dynamischen Slots
-Horizontales Scroll-System
-NPC Interaktion
-Grundstruktur vorhanden
+
+## 🛠️ Technologien
+
+- Unity (2D)  
+- C#  
+- Modulare Architektur  
+
+Geplant:
+- Datenbank (z. B. SQLite)  
+- KI / LLM Integration  
+
 ---
-🔮 Geplante Features
-Dialogsystem
-Quest-System
-Inventory-System
-SaveGame mit echten Daten
-UI-Verbesserungen
+
+## 📦 Installation
+
+Repository klonen und im Unity Hub öffnen.  
+StartScene laden und Spiel starten.
+
 ---
-🛠 Entwicklung
-Repo klonen
-In Unity öffnen
-StartScene laden
-Play drücken
+
+## 📌 Roadmap
+
+- NPC-System erweitern  
+- Dialogsystem entwickeln  
+- Quiz-/Fragensystem integrieren  
+- Save/Load finalisieren  
+- UI verbessern  
+- Mobile Version vorbereiten  
+
 ---
-👨‍💻 Ziel
-Saubere, skalierbare Architektur für modulare Erweiterbarkeit.
+
+## 🤝 Contribution
+
+Beiträge sind willkommen.
+
+Richtlinien:
+- Feature-basiert arbeiten  
+- Klare Namensgebung verwenden  
+- Ein Script = eine Verantwortung  
+- Dokumentation pro Feature  
+
+---
+
+## 📄 Lizenz
+
+Dieses Projekt dient aktuell Lern- und Entwicklungszwecken.  
+Lizenzdetails folgen.
