@@ -17,103 +17,127 @@
  *   - StartMenuController
  *   - LoadGamePanel im UI
  */
+// Datei: Assets/Projekt/Runtime/Features/UI/Panels/LoadGamePanel.cs
+
+using System.Collections.Generic;
+using ITAA.System.Savegame;
+using ITAA.UI.Items;
 using UnityEngine;
 
-public class LoadGamePanel : MonoBehaviour
+namespace ITAA.UI.Panels
 {
-    #region Inspector
-
-    [Header("References")]
-    [SerializeField] private Transform contentRoot;
-    [SerializeField] private GameObject saveSlotItemPrefab;
-
-    [Header("Debug / Test")]
-    [SerializeField] private int testSlotCount = 5;
-
-    #endregion
-
-    #region Public Methods
-
-    /// <summary>
-    /// Öffentliche Aktualisierungsmethode für externe Aufrufe.
-    /// </summary>
-    public void Refresh()
+    public class LoadGamePanel : BasePanel
     {
-        RefreshSlots();
-    }
+        #region Inspector
 
-    #endregion
+        [Header("References")]
+        [SerializeField] private Transform contentRoot;
+        [SerializeField] private GameObject saveSlotItemPrefab;
 
-    #region Unity Methods
+        [Header("Settings")]
+        [SerializeField] private int slotCount = 5;
 
-    private void OnEnable()
-    {
-        RefreshSlots();
-    }
+        #endregion
 
-    #endregion
+        #region Private Fields
 
-    #region Private Methods
+        private SaveSystem saveSystem;
 
-    /// <summary>
-    /// Baut die Save-Slot-Liste neu auf.
-    /// </summary>
-    private void RefreshSlots()
-    {
-        if (contentRoot == null)
+        #endregion
+
+        #region Unity Methods
+
+        private void Awake()
         {
-            Debug.LogWarning($"[{nameof(LoadGamePanel)}] ContentRoot ist nicht zugewiesen.");
-            return;
+            saveSystem = new SaveSystem();
         }
 
-        if (saveSlotItemPrefab == null)
+        #endregion
+
+        #region Public Methods
+
+        public void Refresh()
         {
-            Debug.LogWarning($"[{nameof(LoadGamePanel)}] SaveSlotItemPrefab ist nicht zugewiesen.");
-            return;
+            RefreshSlots();
         }
 
-        ClearSlots();
+        #endregion
 
-        for (int i = 1; i <= testSlotCount; i++)
+        #region Protected Methods
+
+        protected override void OnOpened()
         {
-            CreateSlot(i);
+            RefreshSlots();
         }
+
+        #endregion
+
+        #region Private Methods
+
+        private void RefreshSlots()
+        {
+            if (contentRoot == null)
+            {
+                Debug.LogWarning($"[{nameof(LoadGamePanel)}] ContentRoot ist nicht zugewiesen.");
+                return;
+            }
+
+            if (saveSlotItemPrefab == null)
+            {
+                Debug.LogWarning($"[{nameof(LoadGamePanel)}] SaveSlotItemPrefab ist nicht zugewiesen.");
+                return;
+            }
+
+            ClearSlots();
+
+            IReadOnlyList<SaveSlotEntity> slots = saveSystem.GetAllSlots(slotCount);
+
+            foreach (SaveSlotEntity slot in slots)
+            {
+                CreateSlot(slot);
+            }
+        }
+
+        private void ClearSlots()
+        {
+            for (int i = contentRoot.childCount - 1; i >= 0; i--)
+            {
+                Destroy(contentRoot.GetChild(i).gameObject);
+            }
+        }
+
+        private void CreateSlot(SaveSlotEntity slot)
+        {
+            GameObject instance = Instantiate(saveSlotItemPrefab, contentRoot);
+            SaveSlotListItemUI itemUi = instance.GetComponent<SaveSlotListItemUI>();
+
+            if (itemUi == null)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(LoadGamePanel)}] Prefab '{saveSlotItemPrefab.name}' hat keine {nameof(SaveSlotListItemUI)}-Komponente.");
+                return;
+            }
+
+            itemUi.Setup(slot, HandleSlotSelected);
+        }
+
+        private void HandleSlotSelected(SaveSlotEntity slot)
+        {
+            if (slot == null)
+            {
+                return;
+            }
+
+            if (!slot.hasData)
+            {
+                Debug.Log($"[{nameof(LoadGamePanel)}] Slot {slot.slotId} ist leer.");
+                return;
+            }
+
+            Debug.Log($"[{nameof(LoadGamePanel)}] Lade Slot {slot.slotId} aus Szene '{slot.sceneName}'.");
+            // Hier später echte Ladelogik anbinden.
+        }
+
+        #endregion
     }
-
-    /// <summary>
-    /// Entfernt alle vorhandenen Slot-Elemente aus dem Content.
-    /// </summary>
-    private void ClearSlots()
-    {
-        for (int i = contentRoot.childCount - 1; i >= 0; i--)
-        {
-            Destroy(contentRoot.GetChild(i).gameObject);
-        }
-    }
-
-    /// <summary>
-    /// Erstellt einen einzelnen Slot-Eintrag.
-    /// </summary>
-    /// <param name="index">Slot-Nummer.</param>
-    private void CreateSlot(int index)
-    {
-        GameObject slotObject = Instantiate(saveSlotItemPrefab, contentRoot);
-
-        SaveSlotListItemUI slotUI = slotObject.GetComponent<SaveSlotListItemUI>();
-
-        if (slotUI == null)
-        {
-            Debug.LogWarning($"[{nameof(LoadGamePanel)}] SaveSlotListItemUI fehlt auf Prefab {saveSlotItemPrefab.name}.");
-            return;
-        }
-
-        slotUI.Setup(
-            index,
-            $"Level {index}",
-            index * 100,
-            index * 10
-        );
-    }
-
-    #endregion
 }

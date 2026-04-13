@@ -13,51 +13,54 @@
  * Verwendet von:
  *   - Gameplay-Szenen
  */
+// Datei: Assets/Projekt/Runtime/Features/UI/Panels/PauseMenuPanel.cs
+
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PauseMenuPanel : BasePanel
+namespace ITAA.UI.Panels
 {
-    #region Inspector
-
-    [Header("Buttons")]
-    [SerializeField] private Button closeButton;
-    [SerializeField] private Button resumeButton;
-
-    #endregion
-
-    #region Unity Methods
-
-    private void Awake()
+    public class PauseMenuPanel : BasePanel
     {
-        if (closeButton != null)
+        #region Inspector
+
+        [Header("Buttons")]
+        [SerializeField] private Button closeButton;
+        [SerializeField] private Button resumeButton;
+
+        #endregion
+
+        #region Unity Methods
+
+        private void Awake()
         {
-            closeButton.onClick.RemoveAllListeners();
-            closeButton.onClick.AddListener(Close);
+            if (closeButton != null)
+            {
+                closeButton.onClick.RemoveAllListeners();
+                closeButton.onClick.AddListener(Close);
+            }
+
+            if (resumeButton != null)
+            {
+                resumeButton.onClick.RemoveAllListeners();
+                resumeButton.onClick.AddListener(Close);
+            }
         }
 
-        if (resumeButton != null)
+        #endregion
+
+        #region Protected Methods
+
+        protected override void OnOpened()
         {
-            resumeButton.onClick.RemoveAllListeners();
-            resumeButton.onClick.AddListener(Close);
+            Time.timeScale = 0f;
         }
+
+        protected override void OnClosed()
+        {
+            Time.timeScale = 1f;
+        }
+
+        #endregion
     }
-
-    #endregion
-
-    #region Protected Methods
-
-    protected override void OnOpened()
-    {
-        Time.timeScale = 0f;
-        Debug.Log("PauseMenuPanel geöffnet.");
-    }
-
-    protected override void OnClosed()
-    {
-        Time.timeScale = 1f;
-        Debug.Log("PauseMenuPanel geschlossen.");
-    }
-
-    #endregion
 }

@@ -5,7 +5,9 @@
  * Abhängigkeiten: IInteractable, MenuManager, 2D-Trigger-Collider.
  * Verwendet von: Interagierbare NPCs in der Szene.
  */
- using ITAA.NPC.Interfaces;
+// Datei: Assets/Projekt/Runtime/Features/NPC/Interactions/NPCInteraction.cs
+
+using ITAA.NPC.Interfaces;
 using ITAA.UI.Managers;
 using UnityEngine;
 
@@ -13,6 +15,8 @@ namespace ITAA.NPC.Interactions
 {
     public class NPCInteraction : MonoBehaviour, IInteractable
     {
+        #region Inspector
+
         [Header("Interaction")]
         [SerializeField] private KeyCode interactKey = KeyCode.E;
         [SerializeField] private string playerTag = "Player";
@@ -20,9 +24,17 @@ namespace ITAA.NPC.Interactions
         [Header("References")]
         [SerializeField] private MenuManager menuManager;
 
+        #endregion
+
+        #region Private Fields
+
         private bool playerInRange;
 
-        private void Start()
+        #endregion
+
+        #region Unity Methods
+
+        private void Awake()
         {
             if (menuManager == null)
             {
@@ -35,14 +47,6 @@ namespace ITAA.NPC.Interactions
             if (playerInRange && Input.GetKeyDown(interactKey))
             {
                 Interact();
-            }
-        }
-
-        public void Interact()
-        {
-            if (menuManager != null)
-            {
-                menuManager.ShowStartMenu();
             }
         }
 
@@ -61,5 +65,22 @@ namespace ITAA.NPC.Interactions
                 playerInRange = false;
             }
         }
+
+        #endregion
+
+        #region Public Methods
+
+        public void Interact()
+        {
+            if (menuManager == null)
+            {
+                Debug.LogWarning($"[{nameof(NPCInteraction)}] Kein {nameof(MenuManager)} gefunden.");
+                return;
+            }
+
+            menuManager.ShowStartMenu();
+        }
+
+        #endregion
     }
 }

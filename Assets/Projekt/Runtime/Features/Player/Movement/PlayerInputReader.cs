@@ -12,25 +12,27 @@
  *   - PlayerController
  *   - PlayerMotor2D
  */
+// Datei: Assets/Projekt/Runtime/Features/Player/Movement/PlayerInputReader.cs
+
 using UnityEngine;
 
-public class PlayerInputReader : MonoBehaviour
+namespace ITAA.Player.Movement
 {
-    #region Public Properties
-
-    public Vector2 MoveInput { get; private set; }
-
-    #endregion
-
-    #region Unity Methods
-
-    private void Update()
+    public class PlayerInputReader : MonoBehaviour
     {
-        float horizontal = Input.GetAxisRaw("Horizontal");
-        float vertical = Input.GetAxisRaw("Vertical");
+        public Vector2 MoveInput { get; private set; }
 
-        MoveInput = new Vector2(horizontal, vertical).normalized;
+        private void Update()
+        {
+            float horizontal = Input.GetAxisRaw("Horizontal");
+            float vertical = Input.GetAxisRaw("Vertical");
+
+            if (Mathf.Abs(horizontal) > 0f)
+            {
+                vertical = 0f;
+            }
+
+            MoveInput = new Vector2(horizontal, vertical).normalized;
+        }
     }
-
-    #endregion
 }

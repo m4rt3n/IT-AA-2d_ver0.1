@@ -14,61 +14,78 @@
  *   - Gameplay-Systeme
  *   - Hauptmenü
  */
+
+// Datei: Assets/Projekt/Runtime/Features/UI/Managers/MenuManager.cs
+
+using ITAA.UI.Panels;
 using UnityEngine;
 
-public class MenuManager : MonoBehaviour
+namespace ITAA.UI.Managers
 {
-    #region Inspector
-
-    [Header("Panels")]
-    [SerializeField] private BasePanel startMenuPanel;
-    [SerializeField] private BasePanel loadGamePanel;
-    [SerializeField] private BasePanel pauseMenuPanel;
-    [SerializeField] private BasePanel settingsPanel;
-    [SerializeField] private BasePanel dialoguePanel;
-
-    #endregion
-
-    #region Public Methods
-
-    public void OpenStartMenu()
+    public class MenuManager : MonoBehaviour
     {
-        CloseAll();
-        startMenuPanel?.Open();
-    }
+        #region Inspector
 
-    public void OpenLoadGame()
-    {
-        CloseAll();
-        loadGamePanel?.Open();
-    }
+        [Header("Panels")]
+        [SerializeField] private BasePanel startMenuPanel;
+        [SerializeField] private BasePanel loadGamePanel;
+        [SerializeField] private BasePanel pauseMenuPanel;
+        [SerializeField] private BasePanel settingsPanel;
+        [SerializeField] private BasePanel dialoguePanel;
 
-    public void OpenPauseMenu()
-    {
-        CloseAll();
-        pauseMenuPanel?.Open();
-    }
+        #endregion
 
-    public void OpenSettings()
-    {
-        CloseAll();
-        settingsPanel?.Open();
-    }
+        #region Public Methods
 
-    public void OpenDialogue()
-    {
-        CloseAll();
-        dialoguePanel?.Open();
-    }
+        public void OpenStartMenu()
+        {
+            CloseAll();
+            startMenuPanel?.Open();
+        }
 
-    public void CloseAll()
-    {
-        startMenuPanel?.Close();
-        loadGamePanel?.Close();
-        pauseMenuPanel?.Close();
-        settingsPanel?.Close();
-        dialoguePanel?.Close();
-    }
+        public void ShowStartMenu()
+        {
+            OpenStartMenu();
+        }
 
-    #endregion
+        public void OpenLoadGame()
+        {
+            CloseAll();
+            loadGamePanel?.Open();
+        }
+
+        public void ShowLoadGame()
+        {
+            OpenLoadGame();
+        }
+
+        public void OpenPauseMenu()
+        {
+            CloseAll();
+            pauseMenuPanel?.Open();
+        }
+
+        public void OpenSettings()
+        {
+            CloseAll();
+            settingsPanel?.Open();
+        }
+
+        public void OpenDialogue()
+        {
+            CloseAll();
+            dialoguePanel?.Open();
+        }
+
+        public void CloseAll()
+        {
+            startMenuPanel?.Close();
+            loadGamePanel?.Close();
+            pauseMenuPanel?.Close();
+            settingsPanel?.Close();
+            dialoguePanel?.Close();
+        }
+
+        #endregion
+    }
 }

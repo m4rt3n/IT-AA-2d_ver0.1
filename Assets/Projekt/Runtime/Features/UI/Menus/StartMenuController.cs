@@ -13,56 +13,58 @@
  * Verwendet von:
  *   - StartMenuPanel (Canvas UI)
  */
+// Datei: Assets/Projekt/Runtime/Features/UI/Menus/StartMenuController.cs
+
+using ITAA.UI.Managers;
 using UnityEngine;
 
-public class StartMenuController : MonoBehaviour
+namespace ITAA.UI.Menus
 {
-    #region Inspector
-
-    [Header("Panels")]
-    [SerializeField] private GameObject startMenuPanel;
-    [SerializeField] private GameObject loadGamePanel;
-
-    #endregion
-
-    #region Public Methods
-
-    /// <summary>
-    /// Öffnet das LoadGamePanel.
-    /// </summary>
-    public void OpenLoadGame()
+    public class StartMenuController : MonoBehaviour
     {
-        Debug.Log("OpenLoadGame wurde aufgerufen.");
+        #region Inspector
 
-        if (loadGamePanel == null)
+        [Header("References")]
+        [SerializeField] private MenuManager menuManager;
+
+        #endregion
+
+        #region Unity Methods
+
+        private void Awake()
         {
-            Debug.LogWarning("LoadGamePanel ist nicht zugewiesen!");
-            return;
+            if (menuManager == null)
+            {
+                menuManager = FindAnyObjectByType<MenuManager>();
+            }
         }
 
-        loadGamePanel.SetActive(true);
+        #endregion
 
-        if (startMenuPanel != null)
+        #region Public Methods
+
+        public void OpenLoadGame()
         {
-            startMenuPanel.SetActive(false);
+            if (menuManager == null)
+            {
+                Debug.LogWarning($"[{nameof(StartMenuController)}] Kein {nameof(MenuManager)} gefunden.");
+                return;
+            }
+
+            menuManager.OpenLoadGame();
         }
+
+        public void CloseLoadGame()
+        {
+            if (menuManager == null)
+            {
+                Debug.LogWarning($"[{nameof(StartMenuController)}] Kein {nameof(MenuManager)} gefunden.");
+                return;
+            }
+
+            menuManager.OpenStartMenu();
+        }
+
+        #endregion
     }
-
-    /// <summary>
-    /// Schließt das LoadGamePanel und kehrt zum Startmenü zurück.
-    /// </summary>
-    public void CloseLoadGame()
-    {
-        if (loadGamePanel != null)
-        {
-            loadGamePanel.SetActive(false);
-        }
-
-        if (startMenuPanel != null)
-        {
-            startMenuPanel.SetActive(true);
-        }
-    }
-
-    #endregion
 }

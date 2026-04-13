@@ -6,37 +6,31 @@
  * Verwendet von: Player-GameObject in Gameplay-Szenen.
  */
 
+// Datei: Assets/Projekt/Runtime/Features/Player/Movement/PlayerController.cs
+
 using UnityEngine;
 
 namespace ITAA.Player.Movement
 {
+    [RequireComponent(typeof(PlayerInputReader))]
+    [RequireComponent(typeof(PlayerMotor2D))]
     public class PlayerController : MonoBehaviour
     {
         #region Inspector
 
-        [Header("Movement")]
-        [SerializeField] private float moveSpeed = 4f;
-        [SerializeField] private bool useBlockingCheck = true;
-        [SerializeField] private float skinWidth = 0.01f;
-
-        [Header("Blocking")]
-        [SerializeField] private LayerMask blockingLayer;
+        [Header("References")]
+        [SerializeField] private PlayerInputReader inputReader;
+        [SerializeField] private PlayerMotor2D motor;
+        [SerializeField] private Animator animator;
 
         [Header("Debug")]
-        [SerializeField] private bool enableDebugLogs = false;
-
-        [Header("References")]
-        [SerializeField] private Rigidbody2D rb;
-        [SerializeField] private Animator animator;
+        [SerializeField] private bool enableDebugLogs;
 
         #endregion
 
         #region Private Fields
 
-        private Vector2 movementInput;
         private Vector2 lastMoveDirection = Vector2.down;
-        private readonly RaycastHit2D[] castResults = new RaycastHit2D[8];
-
         private bool hasMoveX;
         private bool hasMoveY;
         private bool hasLastMoveX;
@@ -49,9 +43,14 @@ namespace ITAA.Player.Movement
 
         private void Awake()
         {
-            if (rb == null)
+            if (inputReader == null)
             {
-                rb = GetComponent<Rigidbody2D>();
+                inputReader = GetComponent<PlayerInputReader>();
+            }
+
+            if (motor == null)
+            {
+                motor = GetComponent<PlayerMotor2D>();
             }
 
             if (animator == null)
@@ -64,124 +63,53 @@ namespace ITAA.Player.Movement
 
         private void Update()
         {
-            movementInput = ReadInput();
-            UpdateVisuals(movementInput);
-        }
-
-        private void FixedUpdate()
-        {
-            Move(movementInput);
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        private Vector2 ReadInput()
-        {
-            float x = Input.GetAxisRaw("Horizontal");
-            float y = Input.GetAxisRaw("Vertical");
-
-            if (Mathf.Abs(x) > 0f)
+            if (inputReader == null)
             {
-                y = 0f;
+                Debug.LogError($"[{nameof(PlayerController)}] {nameof(PlayerInputReader)} fehlt.");
+                return;
             }
 
-            Vector2 input = new Vector2(x, y).normalized;
+            Vector2 input = inputReader.MoveInput;
 
             if (input != Vector2.zero)
             {
                 lastMoveDirection = input;
             }
 
+            UpdateVisuals(input);
+
             if (enableDebugLogs && input != Vector2.zero)
             {
-                Debug.Log($"[PlayerController] Input erkannt: {input}");
+                Debug.Log($"[{nameof(PlayerController)}] Input erkannt: {input}");
             }
-
-            return input;
         }
 
-        private void Move(Vector2 direction)
+        private void FixedUpdate()
         {
-            if (rb == null)
+            if (inputReader == null || motor == null)
             {
-                Debug.LogError("[PlayerController] Rigidbody2D fehlt.");
                 return;
             }
 
-            if (direction == Vector2.zero)
-            {
-                rb.linearVelocity = Vector2.zero;
-                return;
-            }
-
-            if (useBlockingCheck && IsBlocked(direction))
-            {
-                if (enableDebugLogs)
-                {
-                    Debug.Log($"[PlayerController] Bewegung blockiert: {direction}");
-                }
-
-                rb.linearVelocity = Vector2.zero;
-                return;
-            }
-
-            rb.linearVelocity = direction * moveSpeed;
-
-            if (enableDebugLogs)
-            {
-                Debug.Log($"[PlayerController] Velocity gesetzt: {rb.linearVelocity}");
-            }
+            motor.SetMovementInput(inputReader.MoveInput);
         }
 
-        private bool IsBlocked(Vector2 direction)
-        {
-            if (rb == null)
-            {
-                return false;
-            }
+        #endregion
 
-            ContactFilter2D filter = new ContactFilter2D
-            {
-                useLayerMask = true,
-                layerMask = blockingLayer,
-                useTriggers = false
-            };
-
-            float castDistance = moveSpeed * Time.fixedDeltaTime + skinWidth;
-            int hitCount = rb.Cast(direction, filter, castResults, castDistance);
-
-            for (int i = 0; i < hitCount; i++)
-            {
-                RaycastHit2D hit = castResults[i];
-
-                if (hit.collider == null)
-                {
-                    continue;
-                }
-
-                if (enableDebugLogs)
-                {
-                    Debug.Log($"[PlayerController] Blockiert durch: {hit.collider.name}");
-                }
-
-                return true;
-            }
-
-            return false;
-        }
+        #region Private Methods
 
         private void UpdateVisuals(Vector2 direction)
         {
-            if (animator != null)
+            if (animator == null)
             {
-                if (hasMoveX) animator.SetFloat("MoveX", direction.x);
-                if (hasMoveY) animator.SetFloat("MoveY", direction.y);
-                if (hasLastMoveX) animator.SetFloat("LastMoveX", lastMoveDirection.x);
-                if (hasLastMoveY) animator.SetFloat("LastMoveY", lastMoveDirection.y);
-                if (hasIsMoving) animator.SetBool("IsMoving", direction != Vector2.zero);
+                return;
             }
+
+            if (hasMoveX) animator.SetFloat("MoveX", direction.x);
+            if (hasMoveY) animator.SetFloat("MoveY", direction.y);
+            if (hasLastMoveX) animator.SetFloat("LastMoveX", lastMoveDirection.x);
+            if (hasLastMoveY) animator.SetFloat("LastMoveY", lastMoveDirection.y);
+            if (hasIsMoving) animator.SetBool("IsMoving", direction != Vector2.zero);
         }
 
         private void CacheAnimatorParameters()

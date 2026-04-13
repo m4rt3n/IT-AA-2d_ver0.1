@@ -14,73 +14,75 @@
  *   - LoadGamePanel
  *   - SaveSlotItem-Prefab im ScrollView-Content
  */
+// Datei: Assets/Projekt/Runtime/Features/UI/Items/SaveSlotListItemUI.cs
+
+using ITAA.System.Savegame;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
-public class SaveSlotItemUI : MonoBehaviour
+namespace ITAA.UI.Items
 {
-    #region Inspector
-
-    [Header("UI References")]
-    [SerializeField] private TextMeshProUGUI labelText;
-    [SerializeField] private Button loadButton;
-
-    #endregion
-
-    #region Private Fields
-
-    private int slotIndex;
-
-    #endregion
-
-    #region Public Methods
-
-    /// <summary>
-    /// Initialisiert den Save-Slot mit anzuzeigenden Daten.
-    /// </summary>
-    /// <param name="index">Index des Slots.</param>
-    /// <param name="level">Aktuelles Level oder Szenenname.</param>
-    /// <param name="score">Aktueller Score.</param>
-    /// <param name="progressPercent">Spielfortschritt in Prozent.</param>
-    public void Setup(int index, string level, int score, int progressPercent)
+    public class SaveSlotListItemUI : MonoBehaviour
     {
-        slotIndex = index;
+        #region Inspector
 
-        if (labelText != null)
+        [Header("Texts")]
+        [SerializeField] private TMP_Text slotTitleText;
+        [SerializeField] private TMP_Text sceneNameText;
+        [SerializeField] private TMP_Text savedAtText;
+
+        [Header("Buttons")]
+        [SerializeField] private Button selectButton;
+
+        #endregion
+
+        #region Private Fields
+
+        private SaveSlotEntity slotData;
+        private UnityAction<SaveSlotEntity> onSelected;
+
+        #endregion
+
+        #region Public Methods
+
+        public void Setup(SaveSlotEntity data, UnityAction<SaveSlotEntity> onSelectedCallback)
         {
-            labelText.text = $"Slot {index}\n{level}\nScore {score}\n{progressPercent}%";
-        }
-        else
-        {
-            Debug.LogWarning($"[{nameof(SaveSlotItemUI)}] LabelText ist nicht zugewiesen auf {gameObject.name}.");
+            slotData = data;
+            onSelected = onSelectedCallback;
+
+            if (slotTitleText != null)
+            {
+                slotTitleText.text = data != null ? data.displayName : "Unbekannter Slot";
+            }
+
+            if (sceneNameText != null)
+            {
+                sceneNameText.text = data != null ? $"Szene: {data.sceneName}" : "Szene: -";
+            }
+
+            if (savedAtText != null)
+            {
+                savedAtText.text = data != null ? $"Gespeichert: {data.savedAtText}" : "Gespeichert: -";
+            }
+
+            if (selectButton != null)
+            {
+                selectButton.onClick.RemoveAllListeners();
+                selectButton.onClick.AddListener(HandleClicked);
+            }
         }
 
-        if (loadButton != null)
+        #endregion
+
+        #region Private Methods
+
+        private void HandleClicked()
         {
-            loadButton.onClick.RemoveAllListeners();
-            loadButton.onClick.AddListener(OnLoadClicked);
+            onSelected?.Invoke(slotData);
         }
-        else
-        {
-            Debug.LogWarning($"[{nameof(SaveSlotItemUI)}] LoadButton ist nicht zugewiesen auf {gameObject.name}.");
-        }
+
+        #endregion
     }
-
-    #endregion
-
-    #region Private Methods
-
-    /// <summary>
-    /// Wird beim Klick auf den Lade-Button ausgeführt.
-    /// </summary>
-    private void OnLoadClicked()
-    {
-        Debug.Log($"Load angeklickt: Slot {slotIndex}");
-
-        // TODO:
-        // Hier später echtes Laden über SaveSystem / DatabaseManager anschließen.
-    }
-
-    #endregion
 }
