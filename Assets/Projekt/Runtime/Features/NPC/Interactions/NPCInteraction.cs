@@ -1,34 +1,45 @@
 /*
  * Datei: NPCInteraction.cs
- * Zweck: Ermöglicht die direkte Interaktion eines NPCs mit dem Spieler per Taste.
- * Verantwortung: Erkennt den Spieler im Triggerbereich und öffnet bei Interaktion das Startmenü.
- * Abhängigkeiten: IInteractable, MenuManager, 2D-Trigger-Collider.
- * Verwendet von: Interagierbare NPCs in der Szene.
+ * Zweck: Steuert die Interaktion mit einem NPC über das neue Unity Input System.
+ * Verantwortung:
+ * - Erkennt, ob der Spieler im Interaktionsbereich ist
+ * - Zeigt optional einen Hinweis an
+ * - Löst bei Tastendruck ein konfiguriertes Event aus
+ * Abhängigkeiten:
+ * - Unity Input System
+ * - Optional: Collider2D oder Collider für den Interaktionsbereich
+ * Verwendet von:
+ * - NPC-Objekten mit Trigger-Zone
  */
-// Datei: Assets/Projekt/Runtime/Features/NPC/Interactions/NPCInteraction.cs
 
-using ITAA.NPC.Interfaces;
-using ITAA.UI.Managers;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.InputSystem;
 
 namespace ITAA.NPC.Interactions
 {
-    public class NPCInteraction : MonoBehaviour, IInteractable
+    public class NPCInteraction : MonoBehaviour
     {
         #region Inspector
 
         [Header("Interaction")]
-        [SerializeField] private KeyCode interactKey = KeyCode.E;
+        [SerializeField] private Key interactionKey = Key.E;
         [SerializeField] private string playerTag = "Player";
+        [SerializeField] private bool requirePlayerInsideTrigger = true;
+        [SerializeField] private bool triggerOnlyOnce;
 
-        [Header("References")]
-        [SerializeField] private MenuManager menuManager;
+        [Header("Optional UI")]
+        [SerializeField] private GameObject interactionPrompt;
+
+        [Header("Events")]
+        [SerializeField] private UnityEvent onInteract;
 
         #endregion
 
         #region Private Fields
 
-        private bool playerInRange;
+        private bool isPlayerInRange;
+        private bool hasTriggered;
 
         #endregion
 
@@ -36,33 +47,106 @@ namespace ITAA.NPC.Interactions
 
         private void Awake()
         {
-            if (menuManager == null)
-            {
-                menuManager = FindAnyObjectByType<MenuManager>();
-            }
+            SetPromptVisible(false);
         }
 
         private void Update()
         {
-            if (playerInRange && Input.GetKeyDown(interactKey))
+            if (hasTriggered && triggerOnlyOnce)
             {
-                Interact();
+                return;
+            }
+
+            if (requirePlayerInsideTrigger && !isPlayerInRange)
+            {
+                return;
+            }
+
+            Keyboard keyboard = Keyboard.current;
+            if (keyboard == null)
+            {
+                return;
+            }
+
+            if (keyboard[interactionKey].wasPressedThisFrame)
+            {
+                ExecuteInteraction();
             }
         }
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            if (other.CompareTag(playerTag))
+            if (!other.CompareTag(playerTag))
             {
-                playerInRange = true;
+                return;
             }
+
+            isPlayerInRange = true;
+            SetPromptVisible(true);
         }
 
         private void OnTriggerExit2D(Collider2D other)
         {
-            if (other.CompareTag(playerTag))
+            if (!other.CompareTag(playerTag))
             {
-                playerInRange = false;
+                return;
+            }
+
+            isPlayerInRange = false;
+            SetPromptVisible(false);
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            if (!other.CompareTag(playerTag))
+            {
+                return;
+            }
+
+            isPlayerInRange = true;
+            SetPromptVisible(true);
+        }
+
+        private void OnTriggerExit(Collider other)
+        {
+            if (!other.CompareTag(playerTag))
+            {
+                return;
+            }
+
+            isPlayerInRange = false;
+            SetPromptVisible(false);
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void ExecuteInteraction()
+        {
+            if (hasTriggered && triggerOnlyOnce)
+            {
+                return;
+            }
+
+            hasTriggered = true;
+            SetPromptVisible(false);
+
+            if (onInteract != null)
+            {
+                onInteract.Invoke();
+            }
+            else
+            {
+                Debug.LogWarning($"[{nameof(NPCInteraction)}] Kein onInteract-Event konfiguriert auf {gameObject.name}.", this);
+            }
+        }
+
+        private void SetPromptVisible(bool visible)
+        {
+            if (interactionPrompt != null)
+            {
+                interactionPrompt.SetActive(visible);
             }
         }
 
@@ -70,15 +154,19 @@ namespace ITAA.NPC.Interactions
 
         #region Public Methods
 
-        public void Interact()
+        public void ResetInteraction()
         {
-            if (menuManager == null)
-            {
-                Debug.LogWarning($"[{nameof(NPCInteraction)}] Kein {nameof(MenuManager)} gefunden.");
-                return;
-            }
+            hasTriggered = false;
 
-            menuManager.ShowStartMenu();
+            if (isPlayerInRange)
+            {
+                SetPromptVisible(true);
+            }
+        }
+
+        public void ForceInteract()
+        {
+            ExecuteInteraction();
         }
 
         #endregion

@@ -1,94 +1,96 @@
 /*
- * Datei: SaveSlotItemUI.cs
- * Zweck: Stellt einen einzelnen Save-Slot im Load-Game-Menü dar.
+ * Datei: SaveSlotListItemUI.cs
+ * Pfad: Assets/Projekt/Runtime/Features/UI/Items/SaveSlotListItemUI.cs
+ * Zweck: Steuert die Darstellung eines einzelnen Save-Slot-Eintrags in der UI-Liste.
  * Verantwortung:
- *   - Zeigt Slot-Informationen im UI an
- *   - Reagiert auf Klick auf den Lade-Button
- *   - Verbindet Slot-Daten mit dem visuellen Prefab
- *
- * Abhängigkeiten:
- *   - TMPro.TextMeshProUGUI
- *   - UnityEngine.UI.Button
- *
- * Verwendet von:
- *   - LoadGamePanel
- *   - SaveSlotItem-Prefab im ScrollView-Content
+ * - Übernimmt ein SaveSlotEntity und zeigt dessen Daten an
+ * - Aktiviert oder deaktiviert den Button je nach Slot-Zustand
+ * - Meldet Klicks an den aufrufenden Panel-Controller zurück
  */
-// Datei: Assets/Projekt/Runtime/Features/UI/Items/SaveSlotListItemUI.cs
 
+using System;
 using ITAA.System.Savegame;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace ITAA.UI.Items
 {
     public class SaveSlotListItemUI : MonoBehaviour
     {
-        #region Inspector
-
         [Header("Texts")]
-        [SerializeField] private TMP_Text slotTitleText;
+        [SerializeField] private TMP_Text displayNameText;
         [SerializeField] private TMP_Text sceneNameText;
         [SerializeField] private TMP_Text savedAtText;
 
-        [Header("Buttons")]
+        [Header("Interaction")]
         [SerializeField] private Button selectButton;
 
-        #endregion
+        private SaveSlotEntity currentSlot;
+        private Action<SaveSlotEntity> onSelected;
 
-        #region Private Fields
-
-        private SaveSlotEntity slotData;
-        private UnityAction<SaveSlotEntity> onSelected;
-
-        #endregion
-
-        #region Public Methods
-public class SaveSlotEntity
-{
-    public int slotId;
-    public string displayName;
-    public string sceneName;
-    public string saveTime;
-}
-        public void Setup(SaveSlotEntity data, UnityAction<SaveSlotEntity> onSelectedCallback)
+        public void Setup(SaveSlotEntity slot, Action<SaveSlotEntity> onSelectedCallback)
         {
-            slotData = data;
+            currentSlot = slot;
             onSelected = onSelectedCallback;
 
-            if (slotTitleText != null)
+            RefreshView();
+            BindButton();
+        }
+
+        private void RefreshView()
+        {
+            if (currentSlot == null)
             {
-                slotTitleText.text = data != null ? data.displayName : "Unbekannter Slot";
+                SetText(displayNameText, "Unbekannter Slot");
+                SetText(sceneNameText, "Szene: -");
+                SetText(savedAtText, "Gespeichert: -");
+
+                if (selectButton != null)
+                {
+                    selectButton.interactable = false;
+                }
+
+                return;
             }
 
-            if (sceneNameText != null)
-            {
-                sceneNameText.text = data != null ? $"Szene: {data.sceneName}" : "Szene: -";
-            }
-
-            if (savedAtText != null)
-            {
-                savedAtText.text = data != null ? $"Gespeichert: {data.savedAtText}" : "Gespeichert: -";
-            }
+            SetText(displayNameText, currentSlot.DisplayName);
+            SetText(sceneNameText, $"Szene: {currentSlot.SceneName}");
+            SetText(savedAtText, $"Gespeichert: {currentSlot.SavedAtText}");
 
             if (selectButton != null)
             {
-                selectButton.onClick.RemoveAllListeners();
-                selectButton.onClick.AddListener(HandleClicked);
+                selectButton.interactable = currentSlot.HasData;
             }
         }
 
-        #endregion
-
-        #region Private Methods
-
-        private void HandleClicked()
+        private void BindButton()
         {
-            onSelected?.Invoke(slotData);
+            if (selectButton == null)
+            {
+                return;
+            }
+
+            selectButton.onClick.RemoveAllListeners();
+            selectButton.onClick.AddListener(HandleSelected);
         }
 
-        #endregion
+        private void HandleSelected()
+        {
+            if (currentSlot == null || !currentSlot.HasData)
+            {
+                return;
+            }
+
+            onSelected?.Invoke(currentSlot);
+        }
+
+        private void SetText(TMP_Text target, string value)
+        {
+            if (target != null)
+            {
+                target.text = value;
+            }
+        }
     }
 }

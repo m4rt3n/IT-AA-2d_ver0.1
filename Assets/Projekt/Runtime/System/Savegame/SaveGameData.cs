@@ -1,3 +1,12 @@
+/*
+ * Datei: SaveGameData.cs
+ * Pfad: Assets/Projekt/Runtime/System/Savegame/SaveGameData.cs
+ * Zweck: Enthält die rohen Speicherdaten eines Spielstands.
+ * Verantwortung:
+ * - Speichert Slot-ID, Spielername, Szene und Zeitstempel
+ * - Dient als Serialisierungsmodell für Save/Load
+ */
+
 using System;
 
 namespace ITAA.System.Savegame
@@ -8,11 +17,6 @@ namespace ITAA.System.Savegame
         public int SlotId;
         public string PlayerName;
         public string SceneName;
-        public float PlayerPositionX;
-        public float PlayerPositionY;
-        public float PlayerPositionZ;
         public string SavedAtUtc;
-        public int PlayerLevel;
-        public int PlayTimeSeconds;
     }
 }

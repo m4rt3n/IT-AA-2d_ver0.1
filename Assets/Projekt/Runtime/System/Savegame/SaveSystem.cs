@@ -1,17 +1,20 @@
-// Datei: Assets/Projekt/Runtime/System/Savegame/SaveSystem.cs
+/*
+ * Datei: SaveSystem.cs
+ * Pfad: Assets/Projekt/Runtime/System/Savegame/SaveSystem.cs
+ * Zweck: Verwaltet Laden, Speichern und Auflisten von Spielständen.
+ * Verantwortung:
+ * - Lädt SaveGameData aus der Persistenz
+ * - Baut daraus UI-taugliche SaveSlotEntity-Einträge
+ * - Liefert alle Slots für das LoadGamePanel
+ */
 
-using System;
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
 
 namespace ITAA.System.Savegame
 {
     public class SaveSystem
     {
-        private const string FilePrefix = "save_slot_";
-        private const string FileExtension = ".json";
-
         public IReadOnlyList<SaveSlotEntity> GetAllSlots(int slotCount)
         {
             List<SaveSlotEntity> slots = new List<SaveSlotEntity>(slotCount);
@@ -27,52 +30,36 @@ namespace ITAA.System.Savegame
                         SlotId = i,
                         DisplayName = $"Slot {i}",
                         SceneName = "-",
-                        SavedAtText = "Leer",
+                        SavedAtText = "-",
                         HasData = false
                     });
 
                     continue;
                 }
 
-                slots.Add(SaveSlotEntity.FromSaveData(data));
+                SaveSlotEntity slot = SaveSlotEntity.FromSaveData(data);
+
+                if (slot.SlotId <= 0)
+                {
+                    slot.SlotId = i;
+                }
+
+                slots.Add(slot);
             }
 
             return slots;
         }
 
-        public void Save(SaveGameData data)
-        {
-            if (data == null)
-            {
-                Debug.LogWarning($"[{nameof(SaveSystem)}] SaveGameData ist null.");
-                return;
-            }
-
-            if (data.SlotId <= 0)
-            {
-                Debug.LogWarning($"[{nameof(SaveSystem)}] Ungültige Slot-ID: {data.SlotId}");
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(data.SavedAtUtc))
-            {
-                data.SavedAtUtc = DateTime.UtcNow.ToString("O");
-            }
-
-            string json = JsonUtility.ToJson(data, true);
-            File.WriteAllText(GetPath(data.SlotId), json);
-        }
-
         public SaveGameData Load(int slotId)
         {
-            string path = GetPath(slotId);
+            string key = GetSlotKey(slotId);
 
-            if (!File.Exists(path))
+            if (!PlayerPrefs.HasKey(key))
             {
                 return null;
             }
 
-            string json = File.ReadAllText(path);
+            string json = PlayerPrefs.GetString(key);
 
             if (string.IsNullOrWhiteSpace(json))
             {
@@ -82,24 +69,35 @@ namespace ITAA.System.Savegame
             return JsonUtility.FromJson<SaveGameData>(json);
         }
 
-        public bool HasSave(int slotId)
+        public void Save(SaveGameData data)
         {
-            return File.Exists(GetPath(slotId));
+            if (data == null || data.SlotId <= 0)
+            {
+                Debug.LogError("SaveSystem.Save: Ungültige Speicherdaten.");
+                return;
+            }
+
+            string key = GetSlotKey(data.SlotId);
+            string json = JsonUtility.ToJson(data);
+
+            PlayerPrefs.SetString(key, json);
+            PlayerPrefs.Save();
         }
 
         public void Delete(int slotId)
         {
-            string path = GetPath(slotId);
+            string key = GetSlotKey(slotId);
 
-            if (File.Exists(path))
+            if (PlayerPrefs.HasKey(key))
             {
-                File.Delete(path);
+                PlayerPrefs.DeleteKey(key);
+                PlayerPrefs.Save();
             }
         }
 
-        private static string GetPath(int slotId)
+        private string GetSlotKey(int slotId)
         {
-            return Path.Combine(Application.persistentDataPath, $"{FilePrefix}{slotId}{FileExtension}");
+            return $"save_slot_{slotId}";
         }
     }
 }
