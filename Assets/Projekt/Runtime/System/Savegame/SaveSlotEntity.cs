@@ -2,8 +2,7 @@ using System;
 
 namespace ITAA.System.Savegame
 {
-    [Serializable]
-    public class SaveSlotEntity
+    [Serializable] public class SaveSlotEntity
     {
         public int SlotId;
         public string DisplayName;

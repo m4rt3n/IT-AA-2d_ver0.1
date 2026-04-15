@@ -46,7 +46,13 @@ namespace ITAA.UI.Items
         #endregion
 
         #region Public Methods
-
+public class SaveSlotEntity
+{
+    public int slotId;
+    public string displayName;
+    public string sceneName;
+    public string saveTime;
+}
         public void Setup(SaveSlotEntity data, UnityAction<SaveSlotEntity> onSelectedCallback)
         {
             slotData = data;
