@@ -50,6 +50,7 @@ namespace ITAA.NPC.Arthur
 
         private Vector2 lastLookDirection = Vector2.down;
         private string currentStatePath;
+        private int cachedLayerIndex = -1;
 
         #endregion
 
@@ -75,59 +76,7 @@ namespace ITAA.NPC.Arthur
 
             if (animator.runtimeAnimatorController == null)
             {
-                Debug.LogWarning($"[{nameof(ArthurAnimationController)}] Animator hat keinen RuntimeAnimatorController auf '{gameObject.name}'.");
-            }
-            else
-            {
-                Debug.Log($"[{nameof(ArthurAnimationController)}] Animator Controller: {animator.runtimeAnimatorController.name}");
-            }
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        public void SetMovement(Vector2 movement)
-        {
-            if (animator == null)
-            {
-                return;
-            }
-
-            if (movement.sqrMagnitude <= 0.0001f)
-            {
-                PlayIdle();
-                return;
-            }
-
-            lastLookDirection = movement.normalized;
-            PlayWalk(lastLookDirection);
-        }
-
-        public void ForceIdle()
-        {
-            PlayIdle();
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        private void PlayWalk(Vector2 direction)
-        {
-            string nextStateName;
-
-            if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y))
-            {
-                nextStateName = direction.x > 0f ? walkRightState : walkLeftState;
-            }
-            else
-            {
-                nextStateName = direction.y > 0f ? walkUpState : walkDownState;
-            }
-
-            PlayState(nextStateName);
-        }
+@@ -131,57 +132,86 @@ namespace ITAA.NPC.Arthur
 
         private void PlayIdle()
         {
@@ -153,15 +102,20 @@ namespace ITAA.NPC.Arthur
             }
 
             string fullStatePath = $"{layerName}.{shortStateName}";
+            int layerIndex = GetLayerIndex();
 
             if (currentStatePath == fullStatePath)
             {
                 return;
             }
 
-            int stateHash = Animator.StringToHash(fullStatePath);
+            int fullStateHash = Animator.StringToHash(fullStatePath);
+            int shortStateHash = Animator.StringToHash(shortStateName);
+            bool hasFullPathState = HasStateOnLayer(layerIndex, fullStateHash);
+            bool hasShortState = HasStateOnLayer(layerIndex, shortStateHash);
 
-            if (!HasStateOnLayer(0, stateHash))
+
+            if (!hasFullPathState && !hasShortState)
             {
                 Debug.LogWarning(
                     $"[{nameof(ArthurAnimationController)}] State nicht gefunden: '{fullStatePath}' " +
@@ -173,13 +127,39 @@ namespace ITAA.NPC.Arthur
 
             Debug.Log($"[ArthurAnimation] Play: {fullStatePath}");
 
-            animator.Play(stateHash, 0, 0f);
+    
+            animator.Play(hasFullPathState ? fullStateHash : shortStateHash, layerIndex, 0f);
             currentStatePath = fullStatePath;
         }
 
         private bool HasStateOnLayer(int layerIndex, int stateHash)
         {
             return animator != null && animator.HasState(layerIndex, stateHash);
+        }
+
+        private int GetLayerIndex()
+        {
+            if (animator == null)
+            {
+                return 0;
+            }
+
+            if (cachedLayerIndex >= 0 && cachedLayerIndex < animator.layerCount)
+            {
+                return cachedLayerIndex;
+            }
+
+            cachedLayerIndex = animator.GetLayerIndex(layerName);
+
+            if (cachedLayerIndex < 0)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(ArthurAnimationController)}] Layer '{layerName}' nicht gefunden auf Animator '{animator.gameObject.name}'. Fallback auf Layer 0."
+                );
+                cachedLayerIndex = 0;
+            }
+
+            return cachedLayerIndex;
         }
 
         #endregion
