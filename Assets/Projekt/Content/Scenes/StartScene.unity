@@ -94682,9 +94682,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43d849dba24e4c24eb5c7344d55948b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPCInteraction
-  interactKey: 101
+  interactionKey: 19
   playerTag: Player
-  menuManager: {fileID: 0}
+  requirePlayerInsideTrigger: 1
+  triggerOnlyOnce: 0
+  interactionPrompt: {fileID: 0}
+  onInteract:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &745381516
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -96063,7 +96068,7 @@ Transform:
   m_GameObject: {fileID: 1672437180}
   serializedVersion: 2
   m_LocalRotation: {x: -0.000016790813, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 6.08, y: 2.58, z: -0}
+  m_LocalPosition: {x: 13.9, y: 2.58, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -98500,9 +98505,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1f97d3b69a2fd44e8a720ec1a5c2ed5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LoadGamePanel
-  slotCount: 3
+  itemPrefab: {fileID: 0}
   contentRoot: {fileID: 1949223833}
-  slotItemPrefab: {fileID: 0}
+  slotCount: 3
+  titleText: {fileID: 0}
+  infoText: {fileID: 0}
+  refreshButton: {fileID: 0}
+  closeButton: {fileID: 0}
+  loadSceneOnSelection: 1
+  fallbackSceneName: GameScene
 --- !u!1 &2102773475
 GameObject:
   m_ObjectHideFlags: 0

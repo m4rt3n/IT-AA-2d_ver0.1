@@ -1,96 +1,203 @@
 /*
- * Datei: SaveSlotListItemUI.cs
- * Pfad: Assets/Projekt/Runtime/Features/UI/Items/SaveSlotListItemUI.cs
- * Zweck: Steuert die Darstellung eines einzelnen Save-Slot-Eintrags in der UI-Liste.
+ * Datei: SaveSlotItemUI.cs
+ * Zweck: Stellt einen einzelnen Save-Slot in der UI dar.
  * Verantwortung:
- * - Übernimmt ein SaveSlotEntity und zeigt dessen Daten an
- * - Aktiviert oder deaktiviert den Button je nach Slot-Zustand
- * - Meldet Klicks an den aufrufenden Panel-Controller zurück
+ * - Zeigt Slot-Daten an
+ * - Löst Auswahl per Button aus
+ * - Unterstützt belegte und leere Slots
  */
 
 using System;
-using ITAA.System.Savegame;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using ITAA.System.Savegame;
 
 namespace ITAA.UI.Items
 {
-    public class SaveSlotListItemUI : MonoBehaviour
+    public class SaveSlotItemUI : MonoBehaviour
     {
-        [Header("Texts")]
-        [SerializeField] private TMP_Text displayNameText;
+        #region Inspector
+
+        [Header("References")]
+        [SerializeField] private Button selectButton;
+        [SerializeField] private TMP_Text slotNameText;
         [SerializeField] private TMP_Text sceneNameText;
         [SerializeField] private TMP_Text savedAtText;
+        [SerializeField] private TMP_Text statusText;
 
-        [Header("Interaction")]
-        [SerializeField] private Button selectButton;
+        [Header("Optional Visuals")]
+        [SerializeField] private GameObject hasDataRoot;
+        [SerializeField] private GameObject emptyRoot;
+        [SerializeField] private Image backgroundImage;
+        [SerializeField] private Color normalColor = Color.white;
+        [SerializeField] private Color emptyColor = new Color(0.85f, 0.85f, 0.85f, 1f);
+
+        #endregion
+
+        #region Private Fields
 
         private SaveSlotEntity currentSlot;
         private Action<SaveSlotEntity> onSelected;
+
+        #endregion
+
+        #region Unity Methods
+
+        private void Awake()
+        {
+            if (selectButton == null)
+            {
+                selectButton = GetComponent<Button>();
+            }
+
+            if (selectButton != null)
+            {
+                selectButton.onClick.RemoveListener(HandleClick);
+                selectButton.onClick.AddListener(HandleClick);
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (selectButton != null)
+            {
+                selectButton.onClick.RemoveListener(HandleClick);
+            }
+        }
+
+        #endregion
+
+        #region Public Methods
 
         public void Setup(SaveSlotEntity slot, Action<SaveSlotEntity> onSelectedCallback)
         {
             currentSlot = slot;
             onSelected = onSelectedCallback;
 
-            RefreshView();
-            BindButton();
-        }
-
-        private void RefreshView()
-        {
-            if (currentSlot == null)
+            if (slot == null)
             {
-                SetText(displayNameText, "Unbekannter Slot");
-                SetText(sceneNameText, "Szene: -");
-                SetText(savedAtText, "Gespeichert: -");
-
-                if (selectButton != null)
-                {
-                    selectButton.interactable = false;
-                }
-
+                ApplyNullState();
                 return;
             }
 
-            SetText(displayNameText, currentSlot.DisplayName);
-            SetText(sceneNameText, $"Szene: {currentSlot.SceneName}");
-            SetText(savedAtText, $"Gespeichert: {currentSlot.SavedAtText}");
+            bool hasData = slot.HasData;
+
+            if (slotNameText != null)
+            {
+                slotNameText.text = !string.IsNullOrWhiteSpace(slot.DisplayName)
+                    ? slot.DisplayName
+                    : $"Slot {slot.SlotId}";
+            }
+
+            if (sceneNameText != null)
+            {
+                sceneNameText.text = hasData
+                    ? GetSafeText(slot.SceneName, "-")
+                    : "Kein Spielstand";
+            }
+
+            if (savedAtText != null)
+            {
+                savedAtText.text = hasData
+                    ? GetSafeText(slot.SavedAtText, "-")
+                    : "-";
+            }
+
+            if (statusText != null)
+            {
+                statusText.text = hasData ? "Belegt" : "Leer";
+            }
+
+            if (hasDataRoot != null)
+            {
+                hasDataRoot.SetActive(hasData);
+            }
+
+            if (emptyRoot != null)
+            {
+                emptyRoot.SetActive(!hasData);
+            }
+
+            if (backgroundImage != null)
+            {
+                backgroundImage.color = hasData ? normalColor : emptyColor;
+            }
 
             if (selectButton != null)
             {
-                selectButton.interactable = currentSlot.HasData;
+                selectButton.interactable = true;
             }
         }
 
-        private void BindButton()
+        public SaveSlotEntity GetSlot()
         {
-            if (selectButton == null)
-            {
-                return;
-            }
-
-            selectButton.onClick.RemoveAllListeners();
-            selectButton.onClick.AddListener(HandleSelected);
+            return currentSlot;
         }
 
-        private void HandleSelected()
+        #endregion
+
+        #region Private Methods
+
+        private void HandleClick()
         {
-            if (currentSlot == null || !currentSlot.HasData)
+            if (currentSlot == null)
             {
+                Debug.LogWarning($"[{nameof(SaveSlotItemUI)}] Kein SaveSlotEntity gesetzt auf {gameObject.name}.", this);
                 return;
             }
 
             onSelected?.Invoke(currentSlot);
         }
 
-        private void SetText(TMP_Text target, string value)
+        private void ApplyNullState()
         {
-            if (target != null)
+            if (slotNameText != null)
             {
-                target.text = value;
+                slotNameText.text = "Unbekannter Slot";
+            }
+
+            if (sceneNameText != null)
+            {
+                sceneNameText.text = "-";
+            }
+
+            if (savedAtText != null)
+            {
+                savedAtText.text = "-";
+            }
+
+            if (statusText != null)
+            {
+                statusText.text = "Fehler";
+            }
+
+            if (hasDataRoot != null)
+            {
+                hasDataRoot.SetActive(false);
+            }
+
+            if (emptyRoot != null)
+            {
+                emptyRoot.SetActive(true);
+            }
+
+            if (backgroundImage != null)
+            {
+                backgroundImage.color = emptyColor;
+            }
+
+            if (selectButton != null)
+            {
+                selectButton.interactable = false;
             }
         }
+
+        private static string GetSafeText(string value, string fallback)
+        {
+            return string.IsNullOrWhiteSpace(value) ? fallback : value;
+        }
+
+        #endregion
     }
 }
