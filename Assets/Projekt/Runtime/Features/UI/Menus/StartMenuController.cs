@@ -7,13 +7,11 @@
  *   - Steuert Sichtbarkeit der Panels
  *
  * Abhängigkeiten:
- *   - GameObject (StartMenuPanel)
- *   - GameObject (LoadGamePanel)
+ *   - MenuManager
  *
  * Verwendet von:
  *   - StartMenuPanel (Canvas UI)
  */
-// Datei: Assets/Projekt/Runtime/Features/UI/Menus/StartMenuController.cs
 
 using ITAA.UI.Managers;
 using UnityEngine;
@@ -51,7 +49,7 @@ namespace ITAA.UI.Menus
                 return;
             }
 
-            menuManager.OpenLoadGame();
+            menuManager.ShowLoadGamePanel();
         }
 
         public void CloseLoadGame()
@@ -62,7 +60,18 @@ namespace ITAA.UI.Menus
                 return;
             }
 
-            menuManager.OpenStartMenu();
+            menuManager.ShowStartMenu();
+        }
+
+        public void CloseAllMenus()
+        {
+            if (menuManager == null)
+            {
+                Debug.LogWarning($"[{nameof(StartMenuController)}] Kein {nameof(MenuManager)} gefunden.");
+                return;
+            }
+
+            menuManager.HideAll();
         }
 
         #endregion

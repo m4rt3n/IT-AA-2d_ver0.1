@@ -1,23 +1,21 @@
 /*
  * Datei: MenuManager.cs
- * Zweck: Verwaltet das Öffnen und Schließen von UI-Panels.
+ * Zweck: Verwaltet das Öffnen und Schließen der Hauptmenüs.
  * Verantwortung:
- *   - Panels gezielt öffnen
- *   - andere Panels optional schließen
- *   - zentrale UI-Steuerung
+ *   - Aktiviert bei Bedarf den kompletten UI-Root
+ *   - Schließt alle Menüs beim Start
+ *   - Öffnet das Startmenü nur auf Anforderung
+ *   - Wechselt zwischen StartMenuPanel und LoadGamePanel
+ *   - Blendet BackgroundDim und MenuPanel passend ein/aus
  *
  * Abhängigkeiten:
- *   - BasePanel
- *
- * Verwendet von:
- *   - Buttons
- *   - Gameplay-Systeme
- *   - Hauptmenü
+ *   - GameObject canvasRoot
+ *   - GameObject backgroundDim
+ *   - GameObject menuPanel
+ *   - GameObject startMenuPanel
+ *   - GameObject loadGamePanel
  */
 
-// Datei: Assets/Projekt/Runtime/Features/UI/Managers/MenuManager.cs
-
-using ITAA.UI.Panels;
 using UnityEngine;
 
 namespace ITAA.UI.Managers
@@ -26,64 +24,167 @@ namespace ITAA.UI.Managers
     {
         #region Inspector
 
+        [Header("Canvas Root")]
+        [SerializeField] private GameObject canvasRoot;
+
+        [Header("Root")]
+        [SerializeField] private GameObject backgroundDim;
+        [SerializeField] private GameObject menuPanel;
+
         [Header("Panels")]
-        [SerializeField] private BasePanel startMenuPanel;
-        [SerializeField] private BasePanel loadGamePanel;
-        [SerializeField] private BasePanel pauseMenuPanel;
-        [SerializeField] private BasePanel settingsPanel;
-        [SerializeField] private BasePanel dialoguePanel;
+        [SerializeField] private GameObject startMenuPanel;
+        [SerializeField] private GameObject loadGamePanel;
+
+        #endregion
+
+        #region Properties
+
+        public bool IsOpen { get; private set; }
+
+        #endregion
+
+        #region Unity Methods
+
+        private void Awake()
+        {
+            AutoAssignMissingReferences();
+            HideAllImmediate();
+        }
+
+        private void Start()
+        {
+            AutoAssignMissingReferences();
+            HideAllImmediate();
+        }
 
         #endregion
 
         #region Public Methods
 
-        public void OpenStartMenu()
-        {
-            CloseAll();
-            startMenuPanel?.Open();
-        }
-
         public void ShowStartMenu()
         {
-            OpenStartMenu();
+            Debug.Log($"[{nameof(MenuManager)}] ShowStartMenu");
+
+            EnsureCanvasRootActive();
+
+            if (backgroundDim != null) backgroundDim.SetActive(true);
+            if (menuPanel != null) menuPanel.SetActive(true);
+            if (startMenuPanel != null) startMenuPanel.SetActive(true);
+            if (loadGamePanel != null) loadGamePanel.SetActive(false);
+
+            IsOpen = true;
+
+            LogState("ShowStartMenu");
+        }
+
+        public void ShowLoadGamePanel()
+        {
+            Debug.Log($"[{nameof(MenuManager)}] ShowLoadGamePanel");
+
+            EnsureCanvasRootActive();
+
+            if (backgroundDim != null) backgroundDim.SetActive(true);
+            if (menuPanel != null) menuPanel.SetActive(true);
+            if (startMenuPanel != null) startMenuPanel.SetActive(false);
+            if (loadGamePanel != null) loadGamePanel.SetActive(true);
+
+            IsOpen = true;
+
+            LogState("ShowLoadGamePanel");
+        }
+
+        public void HideAll()
+        {
+            HideAllImmediate();
+        }
+
+        public void OpenStartMenu()
+        {
+            ShowStartMenu();
         }
 
         public void OpenLoadGame()
         {
-            CloseAll();
-            loadGamePanel?.Open();
+            ShowLoadGamePanel();
         }
 
-        public void ShowLoadGame()
+        #endregion
+
+        #region Private Methods
+
+        private void HideAllImmediate()
         {
-            OpenLoadGame();
+            if (startMenuPanel != null) startMenuPanel.SetActive(false);
+            if (loadGamePanel != null) loadGamePanel.SetActive(false);
+            if (menuPanel != null) menuPanel.SetActive(false);
+            if (backgroundDim != null) backgroundDim.SetActive(false);
+
+            // CanvasRoot darf aktiv bleiben oder deaktiviert werden.
+            // Hier bewusst AUS, damit beim Spielstart wirklich nichts sichtbar ist.
+            if (canvasRoot != null) canvasRoot.SetActive(false);
+
+            IsOpen = false;
+
+            LogState("HideAllImmediate");
         }
 
-        public void OpenPauseMenu()
+        private void EnsureCanvasRootActive()
         {
-            CloseAll();
-            pauseMenuPanel?.Open();
+            if (canvasRoot != null && !canvasRoot.activeSelf)
+            {
+                canvasRoot.SetActive(true);
+            }
         }
 
-        public void OpenSettings()
+        private void AutoAssignMissingReferences()
         {
-            CloseAll();
-            settingsPanel?.Open();
+            if (canvasRoot == null)
+            {
+                Transform root = transform.Find("CanvasMainMenu");
+                if (root != null)
+                {
+                    canvasRoot = root.gameObject;
+                }
+            }
+
+            if (canvasRoot != null)
+            {
+                if (backgroundDim == null)
+                {
+                    Transform t = canvasRoot.transform.Find("BackgroundDim");
+                    if (t != null) backgroundDim = t.gameObject;
+                }
+
+                if (menuPanel == null)
+                {
+                    Transform t = canvasRoot.transform.Find("MenuPanel");
+                    if (t != null) menuPanel = t.gameObject;
+                }
+
+                if (startMenuPanel == null && menuPanel != null)
+                {
+                    Transform t = menuPanel.transform.Find("StartMenuPanel");
+                    if (t != null) startMenuPanel = t.gameObject;
+                }
+
+                if (loadGamePanel == null && menuPanel != null)
+                {
+                    Transform t = menuPanel.transform.Find("LoadGamePanel");
+                    if (t != null) loadGamePanel = t.gameObject;
+                }
+            }
         }
 
-        public void OpenDialogue()
+        private void LogState(string source)
         {
-            CloseAll();
-            dialoguePanel?.Open();
-        }
-
-        public void CloseAll()
-        {
-            startMenuPanel?.Close();
-            loadGamePanel?.Close();
-            pauseMenuPanel?.Close();
-            settingsPanel?.Close();
-            dialoguePanel?.Close();
+            Debug.Log(
+                $"[{nameof(MenuManager)}::{source}] " +
+                $"canvasRoot={(canvasRoot != null ? canvasRoot.activeSelf.ToString() : "null")}, " +
+                $"backgroundDim={(backgroundDim != null ? backgroundDim.activeSelf.ToString() : "null")}, " +
+                $"menuPanel={(menuPanel != null ? menuPanel.activeSelf.ToString() : "null")}, " +
+                $"startMenuPanel={(startMenuPanel != null ? startMenuPanel.activeSelf.ToString() : "null")}, " +
+                $"loadGamePanel={(loadGamePanel != null ? loadGamePanel.activeSelf.ToString() : "null")}"
+            );
         }
 
         #endregion

@@ -1,13 +1,21 @@
 /*
  * Datei: ArthurAutoInteraction.cs
- * Zweck: Lässt Arthur automatisch auf den Spieler zulaufen und ein Menü öffnen.
- * Verantwortung: Bewegt Arthur zum Ziel, prüft Hindernisse und aktualisiert Bewegungs- und Idle-Animationen.
- * Abhängigkeiten: MenuManager, optional Animator, Physics2D.
- * Verwendet von: Arthur-NPC in der Startszene.
+ * Zweck: Steuert Arthurs Interaktion mit dem Spieler und öffnet bei Bedarf das Menü.
+ * Verantwortung:
+ *   - Merkt sich den Zielspieler aus der DetectionZone
+ *   - Prüft, ob der Spieler in Reichweite ist
+ *   - Wartet optional auf Tastendruck
+ *   - Öffnet dann das Startmenü über den MenuManager
+ *
+ * Abhängigkeiten:
+ *   - MenuManager
+ *   - ArthurDetectionZone
+ *   - Player Transform
  */
 
 using ITAA.UI.Managers;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace ITAA.NPC.Arthur
 {
@@ -15,153 +23,132 @@ namespace ITAA.NPC.Arthur
     {
         #region Inspector
 
-        [Header("Movement")]
-        [SerializeField] private float moveSpeed = 2.5f;
-        [SerializeField] private float stopDistance = 1.2f;
-        [SerializeField] private LayerMask obstacleLayer;
-
-        [Header("Debug")]
-        [SerializeField] private bool enableDebugLogs = false;
-
         [Header("References")]
         [SerializeField] private MenuManager menuManager;
-        [SerializeField] private Animator animator;
+
+        [Header("Interaction")]
+        [SerializeField] private bool requireKeyPress = true;
+        [SerializeField] private Key interactKey = Key.E;
 
         #endregion
 
-        #region Private Fields
+        #region Fields
 
         private Transform targetPlayer;
-        private bool interactionTriggered;
-        private Vector2 lastMoveDirection = Vector2.down;
+        private bool playerInRange;
+        private bool hasTriggered;
 
-        private bool hasMoveX;
-        private bool hasMoveY;
-        private bool hasLastMoveX;
-        private bool hasLastMoveY;
-        private bool hasIsMoving;
+        #endregion
+
+        #region Properties
+
+        public Transform TargetPlayer => targetPlayer;
 
         #endregion
 
         #region Unity Methods
 
-        private void Start()
+        private void Awake()
         {
             if (menuManager == null)
             {
                 menuManager = FindAnyObjectByType<MenuManager>();
             }
 
-            if (animator == null)
-            {
-                animator = GetComponent<Animator>();
-            }
-
-            CacheAnimatorParameters();
+            Debug.Log($"[{nameof(ArthurAutoInteraction)}] Awake. MenuManager gefunden: {menuManager != null}");
         }
 
         private void Update()
         {
-            if (targetPlayer == null || interactionTriggered)
+            if (!playerInRange)
             {
-                UpdateAnimation(Vector2.zero, false);
                 return;
             }
 
-            Vector2 direction = (targetPlayer.position - transform.position);
-            float distance = direction.magnitude;
-
-            if (distance <= stopDistance)
+            if (hasTriggered)
             {
-                UpdateAnimation(Vector2.zero, false);
-                interactionTriggered = true;
-                menuManager?.ShowStartMenu();
                 return;
             }
 
-            direction.Normalize();
-
-            if (IsPathBlocked(direction))
+            if (menuManager == null)
             {
-                UpdateAnimation(Vector2.zero, false);
+                Debug.LogWarning($"[{nameof(ArthurAutoInteraction)}] Kein MenuManager gefunden.");
                 return;
             }
 
-            transform.position += (Vector3)(direction * moveSpeed * Time.deltaTime);
-
-            if (direction != Vector2.zero)
+            if (menuManager.IsOpen)
             {
-                lastMoveDirection = direction;
+                return;
             }
 
-            UpdateAnimation(direction, true);
+            if (requireKeyPress)
+            {
+                if (Keyboard.current == null || !Keyboard.current[interactKey].wasPressedThisFrame)
+                {
+                    return;
+                }
+            }
+
+            Debug.Log($"[{nameof(ArthurAutoInteraction)}] Öffne Startmenü.");
+            menuManager.ShowStartMenu();
+            hasTriggered = true;
+        }
+
+        private void OnTriggerEnter2D(Collider2D other)
+        {
+            if (other.CompareTag("Player"))
+            {
+                playerInRange = true;
+                hasTriggered = false;
+                targetPlayer = other.transform;
+
+                Debug.Log($"[{nameof(ArthurAutoInteraction)}] Spieler in Reichweite.");
+            }
+        }
+
+        private void OnTriggerExit2D(Collider2D other)
+        {
+            if (other.CompareTag("Player"))
+            {
+                playerInRange = false;
+                hasTriggered = false;
+
+                if (targetPlayer == other.transform)
+                {
+                    targetPlayer = null;
+                }
+
+                Debug.Log($"[{nameof(ArthurAutoInteraction)}] Spieler hat Reichweite verlassen.");
+            }
         }
 
         #endregion
 
         #region Public Methods
 
-        public void SetTargetPlayer(Transform player)
+        public void SetTargetPlayer(Transform playerTransform)
         {
-            targetPlayer = player;
-            interactionTriggered = false;
-        }
+            targetPlayer = playerTransform;
+            playerInRange = playerTransform != null;
 
-        #endregion
-
-        #region Private Methods
-
-        private bool IsPathBlocked(Vector2 direction)
-        {
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, direction, 0.5f, obstacleLayer);
-
-            if (enableDebugLogs && hit.collider != null)
+            if (playerTransform == null)
             {
-                Debug.Log($"[ArthurAutoInteraction] Blockiert durch: {hit.collider.name}");
+                hasTriggered = false;
             }
 
-            return hit.collider != null;
+            Debug.Log(
+                $"[{nameof(ArthurAutoInteraction)}] SetTargetPlayer -> " +
+                $"{(playerTransform != null ? playerTransform.name : "null")}"
+            );
         }
 
-        private void UpdateAnimation(Vector2 direction, bool isMoving)
+        public void ClearTargetPlayer()
         {
-            if (animator == null)
-            {
-                return;
-            }
+            targetPlayer = null;
+            playerInRange = false;
+            hasTriggered = false;
 
-            if (hasMoveX) animator.SetFloat("MoveX", direction.x);
-            if (hasMoveY) animator.SetFloat("MoveY", direction.y);
-            if (hasLastMoveX) animator.SetFloat("LastMoveX", lastMoveDirection.x);
-            if (hasLastMoveY) animator.SetFloat("LastMoveY", lastMoveDirection.y);
-            if (hasIsMoving) animator.SetBool("IsMoving", isMoving);
-        }
-
-        private void CacheAnimatorParameters()
-        {
-            if (animator == null)
-            {
-                return;
-            }
-
-            hasMoveX = HasParameter("MoveX");
-            hasMoveY = HasParameter("MoveY");
-            hasLastMoveX = HasParameter("LastMoveX");
-            hasLastMoveY = HasParameter("LastMoveY");
-            hasIsMoving = HasParameter("IsMoving");
-        }
-
-        private bool HasParameter(string parameterName)
-        {
-            foreach (AnimatorControllerParameter parameter in animator.parameters)
-            {
-                if (parameter.name == parameterName)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            Debug.Log($"[{nameof(ArthurAutoInteraction)}] ClearTargetPlayer");
         }
 
         #endregion

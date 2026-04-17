@@ -1,45 +1,38 @@
 /*
  * Datei: NPCInteraction.cs
- * Zweck: Steuert die Interaktion mit einem NPC über das neue Unity Input System.
+ * Zweck: Öffnet das Menü nur dann, wenn der Spieler mit dem NPC interagiert.
  * Verantwortung:
- * - Erkennt, ob der Spieler im Interaktionsbereich ist
- * - Zeigt optional einen Hinweis an
- * - Löst bei Tastendruck ein konfiguriertes Event aus
+ *   - Erkennt, ob der Spieler in Reichweite ist
+ *   - Wartet auf die Interaktionstaste
+ *   - Öffnet dann das Startmenü über den MenuManager
+ *
  * Abhängigkeiten:
- * - Unity Input System
- * - Optional: Collider2D oder Collider für den Interaktionsbereich
- * Verwendet von:
- * - NPC-Objekten mit Trigger-Zone
+ *   - MenuManager
+ *   - Collider2D als Trigger
+ *   - Player-Tag auf dem Spieler
  */
 
+using ITAA.UI.Managers;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
-namespace ITAA.NPC.Interactions
+namespace ITAA.Features.NPC.Interactions
 {
     public class NPCInteraction : MonoBehaviour
     {
         #region Inspector
 
         [Header("Interaction")]
-        [SerializeField] private Key interactionKey = Key.E;
-        [SerializeField] private string playerTag = "Player";
-        [SerializeField] private bool requirePlayerInsideTrigger = true;
-        [SerializeField] private bool triggerOnlyOnce;
+        [SerializeField] private Key interactKey = Key.E;
 
-        [Header("Optional UI")]
-        [SerializeField] private GameObject interactionPrompt;
-
-        [Header("Events")]
-        [SerializeField] private UnityEvent onInteract;
+        [Header("References")]
+        [SerializeField] private MenuManager menuManager;
 
         #endregion
 
-        #region Private Fields
+        #region Fields
 
-        private bool isPlayerInRange;
-        private bool hasTriggered;
+        private bool playerInRange;
 
         #endregion
 
@@ -47,126 +40,59 @@ namespace ITAA.NPC.Interactions
 
         private void Awake()
         {
-            SetPromptVisible(false);
+            if (menuManager == null)
+            {
+                menuManager = FindAnyObjectByType<MenuManager>();
+            }
+
+            Debug.Log($"[{nameof(NPCInteraction)}] Awake auf '{gameObject.name}'. MenuManager gefunden: {menuManager != null}");
         }
 
         private void Update()
         {
-            if (hasTriggered && triggerOnlyOnce)
+            if (!playerInRange)
             {
                 return;
             }
 
-            if (requirePlayerInsideTrigger && !isPlayerInRange)
+            if (menuManager == null)
+            {
+                Debug.LogWarning($"[{nameof(NPCInteraction)}] Kein MenuManager gefunden.");
+                return;
+            }
+
+            if (menuManager.IsOpen)
             {
                 return;
             }
 
-            Keyboard keyboard = Keyboard.current;
-            if (keyboard == null)
+            if (Keyboard.current != null && Keyboard.current[interactKey].wasPressedThisFrame)
             {
-                return;
-            }
-
-            if (keyboard[interactionKey].wasPressedThisFrame)
-            {
-                ExecuteInteraction();
+                Debug.Log($"[{nameof(NPCInteraction)}] Interaktionstaste '{interactKey}' gedrückt. Öffne Startmenü.");
+                menuManager.ShowStartMenu();
             }
         }
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            if (!other.CompareTag(playerTag))
-            {
-                return;
-            }
+            Debug.Log($"[{nameof(NPCInteraction)}] Trigger Enter mit: {other.name}, Tag: {other.tag}");
 
-            isPlayerInRange = true;
-            SetPromptVisible(true);
+            if (other.CompareTag("Player"))
+            {
+                playerInRange = true;
+                Debug.Log($"[{nameof(NPCInteraction)}] Spieler ist in Reichweite.");
+            }
         }
 
         private void OnTriggerExit2D(Collider2D other)
         {
-            if (!other.CompareTag(playerTag))
+            Debug.Log($"[{nameof(NPCInteraction)}] Trigger Exit mit: {other.name}, Tag: {other.tag}");
+
+            if (other.CompareTag("Player"))
             {
-                return;
+                playerInRange = false;
+                Debug.Log($"[{nameof(NPCInteraction)}] Spieler hat Reichweite verlassen.");
             }
-
-            isPlayerInRange = false;
-            SetPromptVisible(false);
-        }
-
-        private void OnTriggerEnter(Collider other)
-        {
-            if (!other.CompareTag(playerTag))
-            {
-                return;
-            }
-
-            isPlayerInRange = true;
-            SetPromptVisible(true);
-        }
-
-        private void OnTriggerExit(Collider other)
-        {
-            if (!other.CompareTag(playerTag))
-            {
-                return;
-            }
-
-            isPlayerInRange = false;
-            SetPromptVisible(false);
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        private void ExecuteInteraction()
-        {
-            if (hasTriggered && triggerOnlyOnce)
-            {
-                return;
-            }
-
-            hasTriggered = true;
-            SetPromptVisible(false);
-
-            if (onInteract != null)
-            {
-                onInteract.Invoke();
-            }
-            else
-            {
-                Debug.LogWarning($"[{nameof(NPCInteraction)}] Kein onInteract-Event konfiguriert auf {gameObject.name}.", this);
-            }
-        }
-
-        private void SetPromptVisible(bool visible)
-        {
-            if (interactionPrompt != null)
-            {
-                interactionPrompt.SetActive(visible);
-            }
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        public void ResetInteraction()
-        {
-            hasTriggered = false;
-
-            if (isPlayerInRange)
-            {
-                SetPromptVisible(true);
-            }
-        }
-
-        public void ForceInteract()
-        {
-            ExecuteInteraction();
         }
 
         #endregion
