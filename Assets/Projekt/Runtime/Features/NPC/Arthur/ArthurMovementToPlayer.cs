@@ -1,18 +1,8 @@
 /*
  * Datei: ArthurMovementToPlayer.cs
  * Zweck:
- *   Bewegt Arthur in Richtung Spieler und übergibt die tatsächliche
- *   Bewegungsrichtung an den ArthurAnimationController.
- *
- * Verantwortung:
- *   - Spieler finden oder gesetztes Ziel verwenden
- *   - Arthur bis zur Stop-Distanz zum Spieler bewegen
- *   - Walk-Animation nur bei echter Bewegung abspielen
- *   - Idle-Animation erzwingen, wenn Arthur steht
- *
- * Voraussetzungen:
- *   - ArthurAnimationController auf demselben GameObject oder Kindobjekt
- *   - Animator nutzt Blend Trees mit MoveX / MoveY
+ *   Bewegt Arthur nur dann zum Spieler, wenn dieser in Reichweite ist.
+ *   Ansonsten bleibt Arthur idle.
  */
 
 using UnityEngine;
@@ -31,9 +21,8 @@ namespace ITAA.NPC.Arthur
         [SerializeField] private float moveSpeed = 2.5f;
         [SerializeField] private float stopDistance = 1.25f;
 
-        [Header("Auto Find")]
-        [SerializeField] private bool autoFindPlayerByTag = true;
-        [SerializeField] private string playerTag = "Player";
+        [Header("Control")]
+        [SerializeField] private bool moveOnlyWhenPlayerInRange = true;
 
         [Header("Debug")]
         [SerializeField] private bool showDebugLogs = false;
@@ -42,11 +31,11 @@ namespace ITAA.NPC.Arthur
 
         #region Fields
 
-        private bool isStopped;
+        private bool canMove;
 
         #endregion
 
-        #region Unity Methods
+        #region Unity
 
         private void Awake()
         {
@@ -59,55 +48,43 @@ namespace ITAA.NPC.Arthur
                     animationController = GetComponentInChildren<ArthurAnimationController>();
                 }
             }
-
-            if (playerTarget == null && autoFindPlayerByTag)
-            {
-                GameObject playerObject = GameObject.FindGameObjectWithTag(playerTag);
-
-                if (playerObject != null)
-                {
-                    playerTarget = playerObject.transform;
-                }
-            }
-        }
-
-        private void Start()
-        {
-            if (animationController == null)
-            {
-                Debug.LogWarning(
-                    $"[{nameof(ArthurMovementToPlayer)}] Kein {nameof(ArthurAnimationController)} gefunden auf '{gameObject.name}'."
-                );
-            }
-
-            if (playerTarget == null)
-            {
-                Debug.LogWarning(
-                    $"[{nameof(ArthurMovementToPlayer)}] Kein Spieler-Ziel gefunden auf '{gameObject.name}'."
-                );
-            }
         }
 
         private void FixedUpdate()
         {
+            // ❌ Movement blockiert
+            if (moveOnlyWhenPlayerInRange && !canMove)
+            {
+                if (animationController != null)
+                {
+                    animationController.ForceIdle();
+                }
+                return;
+            }
+
             if (playerTarget == null)
             {
-                ForceIdleIfNeeded();
+                if (animationController != null)
+                {
+                    animationController.ForceIdle();
+                }
                 return;
             }
 
             Vector2 currentPosition = transform.position;
             Vector2 targetPosition = playerTarget.position;
-            Vector2 toTarget = targetPosition - currentPosition;
-            float distanceToTarget = toTarget.magnitude;
 
-            if (distanceToTarget <= stopDistance)
+            Vector2 toTarget = targetPosition - currentPosition;
+            float distance = toTarget.magnitude;
+
+            if (distance <= stopDistance)
             {
-                ForceIdleIfNeeded();
+                if (animationController != null)
+                {
+                    animationController.ForceIdle();
+                }
                 return;
             }
-
-            isStopped = false;
 
             Vector2 nextPosition = Vector2.MoveTowards(
                 currentPosition,
@@ -115,7 +92,7 @@ namespace ITAA.NPC.Arthur
                 moveSpeed * Time.fixedDeltaTime
             );
 
-            Vector2 actualMovement = nextPosition - currentPosition;
+            Vector2 movement = nextPosition - currentPosition;
 
             transform.position = new Vector3(nextPosition.x, nextPosition.y, transform.position.z);
 
@@ -123,10 +100,10 @@ namespace ITAA.NPC.Arthur
             {
                 if (showDebugLogs)
                 {
-                    Debug.Log($"[{nameof(ArthurMovementToPlayer)}] Move={actualMovement}");
+                    Debug.Log($"[ArthurMovement] Move={movement}");
                 }
 
-                animationController.SetMovement(actualMovement);
+                animationController.SetMovement(movement);
             }
         }
 
@@ -134,44 +111,29 @@ namespace ITAA.NPC.Arthur
 
         #region Public API
 
-        public void SetTarget(Transform newTarget)
+        public void EnableMovement(Transform target)
         {
-            playerTarget = newTarget;
-            isStopped = false;
-        }
+            playerTarget = target;
+            canMove = true;
 
-        public void ClearTarget()
-        {
-            playerTarget = null;
-            ForceIdleIfNeeded();
-        }
-
-        public void StopMoving()
-        {
-            ForceIdleIfNeeded();
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        private void ForceIdleIfNeeded()
-        {
-            if (isStopped)
+            if (showDebugLogs)
             {
-                return;
+                Debug.Log("[ArthurMovement] Movement ENABLED");
             }
+        }
 
-            isStopped = true;
+        public void DisableMovement()
+        {
+            canMove = false;
 
             if (animationController != null)
             {
-                if (showDebugLogs)
-                {
-                    Debug.Log($"[{nameof(ArthurMovementToPlayer)}] ForceIdle");
-                }
-
                 animationController.ForceIdle();
+            }
+
+            if (showDebugLogs)
+            {
+                Debug.Log("[ArthurMovement] Movement DISABLED");
             }
         }
 

@@ -94632,7 +94632,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.037975907, y: 0.07999998}
+  m_Offset: {x: 1.571415, y: 2.0963447}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0}
@@ -94642,7 +94642,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.5064952, y: 0.56036556}
+  m_Size: {x: 13.960388, y: 5.541923}
   m_EdgeRadius: 0
 --- !u!50 &745381514
 Rigidbody2D:
@@ -94684,6 +94684,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ArthurAutoInteraction
   menuManager: {fileID: 749671471}
+  movement: {fileID: 0}
   requireKeyPress: 0
   interactKey: 19
 --- !u!95 &745381517
@@ -94724,8 +94725,7 @@ MonoBehaviour:
   animationController: {fileID: 745381520}
   moveSpeed: 2.5
   stopDistance: 1.25
-  autoFindPlayerByTag: 1
-  playerTag: Player
+  moveOnlyWhenPlayerInRange: 1
   showDebugLogs: 1
 --- !u!114 &745381519
 MonoBehaviour:
@@ -94758,6 +94758,7 @@ MonoBehaviour:
   walkState: Arthur_Walk
   moveXParameter: MoveX
   moveYParameter: MoveY
+  isMovingParameter: IsMoving
 --- !u!1 &749671468
 GameObject:
   m_ObjectHideFlags: 0
@@ -96001,7 +96002,7 @@ Transform:
   m_GameObject: {fileID: 1672437180}
   serializedVersion: 2
   m_LocalRotation: {x: -0.000016790813, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5.55, y: 2.16, z: 0}
+  m_LocalPosition: {x: 14.69, y: 2.22, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

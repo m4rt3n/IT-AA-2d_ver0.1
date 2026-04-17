@@ -4,13 +4,16 @@
  * Verantwortung:
  *   - Anwenden von Bewegung auf den Rigidbody2D
  *   - Trennung von Input und physischer Bewegung
+ *   - Sperren/Freigeben der Bewegung z. B. für NPC-Interaktionen
  *
  * Abhängigkeiten:
  *   - Rigidbody2D
  *
  * Verwendet von:
  *   - PlayerController
+ *   - ArthurAutoInteraction
  */
+
 // Datei: Assets/Projekt/Runtime/Features/Player/Movement/PlayerMotor2D.cs
 
 using UnityEngine;
@@ -40,12 +43,14 @@ namespace ITAA.Player.Movement
         private readonly RaycastHit2D[] castResults = new RaycastHit2D[8];
         private Rigidbody2D rb;
         private Vector2 movementInput;
+        private bool movementLocked;
 
         #endregion
 
         #region Public Properties
 
         public Vector2 CurrentVelocity => rb != null ? rb.linearVelocity : Vector2.zero;
+        public bool IsMovementLocked => movementLocked;
 
         #endregion
 
@@ -60,6 +65,12 @@ namespace ITAA.Player.Movement
         {
             if (rb == null)
             {
+                return;
+            }
+
+            if (movementLocked)
+            {
+                rb.linearVelocity = Vector2.zero;
                 return;
             }
 
@@ -89,12 +100,38 @@ namespace ITAA.Player.Movement
 
         public void SetMovementInput(Vector2 input)
         {
+            if (movementLocked)
+            {
+                movementInput = Vector2.zero;
+                return;
+            }
+
             movementInput = input;
         }
 
         public void SetMoveSpeed(float speed)
         {
             moveSpeed = Mathf.Max(0f, speed);
+        }
+
+        public void SetMovementLocked(bool locked)
+        {
+            movementLocked = locked;
+
+            if (locked)
+            {
+                movementInput = Vector2.zero;
+
+                if (rb != null)
+                {
+                    rb.linearVelocity = Vector2.zero;
+                }
+            }
+
+            if (enableDebugLogs)
+            {
+                Debug.Log($"[{nameof(PlayerMotor2D)}] MovementLocked = {movementLocked}");
+            }
         }
 
         public void Stop()

@@ -1,9 +1,28 @@
+/*
+ * Datei: ArthurAnimationController.cs
+ * Zweck:
+ *   Steuert Arthurs Idle- und Walk-Animationen über Blend Trees
+ *   und setzt zusätzlich den Bool-Parameter "IsMoving".
+ *
+ * Voraussetzungen im Animator:
+ *   - States:
+ *       Arthur_Idle
+ *       Arthur_Walk
+ *   - Blend Tree Parameter:
+ *       MoveX
+ *       MoveY
+ *   - Bool Parameter:
+ *       IsMoving
+ */
+
 using UnityEngine;
 
 namespace ITAA.NPC.Arthur
 {
     public class ArthurAnimationController : MonoBehaviour
     {
+        #region Inspector
+
         [Header("References")]
         [SerializeField] private Animator animator;
 
@@ -14,9 +33,18 @@ namespace ITAA.NPC.Arthur
         [Header("Parameters")]
         [SerializeField] private string moveXParameter = "MoveX";
         [SerializeField] private string moveYParameter = "MoveY";
+        [SerializeField] private string isMovingParameter = "IsMoving";
+
+        #endregion
+
+        #region Fields
 
         private Vector2 lastLookDirection = Vector2.down;
         private string currentState;
+
+        #endregion
+
+        #region Unity
 
         private void Awake()
         {
@@ -36,27 +64,57 @@ namespace ITAA.NPC.Arthur
                 return;
             }
 
+            if (animator.runtimeAnimatorController == null)
+            {
+                Debug.LogWarning($"[{nameof(ArthurAnimationController)}] Kein Animator Controller zugewiesen.");
+                return;
+            }
+
+            animator.SetBool(isMovingParameter, false);
             ApplyDirection(lastLookDirection);
             PlayIdle();
         }
 
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            if (animator == null)
+            {
+                animator = GetComponent<Animator>();
+
+                if (animator == null)
+                {
+                    animator = GetComponentInChildren<Animator>();
+                }
+            }
+        }
+#endif
+
+        #endregion
+
+        #region Public API
+
         public void SetMovement(Vector2 movement)
         {
-            Debug.Log($"[ArthurAnimationController] SetMovement input={movement} sqrMagnitude={movement.sqrMagnitude}");
+            Debug.Log($"[{nameof(ArthurAnimationController)}] SetMovement input={movement} sqrMagnitude={movement.sqrMagnitude}");
 
             if (movement.sqrMagnitude > 0.0001f)
             {
                 Vector2 dir = movement.normalized;
                 lastLookDirection = dir;
 
-                Debug.Log($"[ArthurAnimationController] WALK dir={dir}");
+                animator.SetBool(isMovingParameter, true);
+
+                Debug.Log($"[{nameof(ArthurAnimationController)}] WALK dir={dir}");
 
                 ApplyDirection(dir);
                 PlayWalk();
                 return;
             }
 
-            Debug.Log($"[ArthurAnimationController] IDLE lastLookDirection={lastLookDirection}");
+            animator.SetBool(isMovingParameter, false);
+
+            Debug.Log($"[{nameof(ArthurAnimationController)}] IDLE lastLookDirection={lastLookDirection}");
 
             ApplyDirection(lastLookDirection);
             PlayIdle();
@@ -69,6 +127,7 @@ namespace ITAA.NPC.Arthur
                 lastLookDirection = lookDirection.normalized;
             }
 
+            animator.SetBool(isMovingParameter, false);
             ApplyDirection(lastLookDirection);
             PlayIdle();
         }
@@ -76,6 +135,7 @@ namespace ITAA.NPC.Arthur
         public void ForceIdle()
         {
             currentState = null;
+            animator.SetBool(isMovingParameter, false);
             ApplyDirection(lastLookDirection);
             PlayIdle();
         }
@@ -88,9 +148,14 @@ namespace ITAA.NPC.Arthur
             }
 
             currentState = null;
+            animator.SetBool(isMovingParameter, false);
             ApplyDirection(lastLookDirection);
             PlayIdle();
         }
+
+        #endregion
+
+        #region Private
 
         private void PlayWalk()
         {
@@ -112,7 +177,7 @@ namespace ITAA.NPC.Arthur
             animator.SetFloat(moveXParameter, dir.x);
             animator.SetFloat(moveYParameter, dir.y);
 
-            Debug.Log($"[ArthurAnimationController] SetFloat {moveXParameter}={dir.x}, {moveYParameter}={dir.y}");
+            Debug.Log($"[{nameof(ArthurAnimationController)}] SetFloat {moveXParameter}={dir.x}, {moveYParameter}={dir.y}");
         }
 
         private void PlayState(string stateName)
@@ -139,10 +204,12 @@ namespace ITAA.NPC.Arthur
                 return;
             }
 
-            Debug.Log($"[ArthurAnimationController] PlayState -> {stateName}");
+            Debug.Log($"[{nameof(ArthurAnimationController)}] PlayState -> {stateName}");
 
             animator.Play(hash, layer, 0f);
             currentState = stateName;
         }
+
+        #endregion
     }
 }
