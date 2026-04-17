@@ -1,60 +1,22 @@
-/*
- * Datei: ArthurAnimationController.cs
- * Zweck: Steuert Arthurs Idle- und Walk-Animationen in 4 Richtungen.
- * Verantwortung:
- *   - Spielt passende Walk-Animationen je nach Bewegungsrichtung
- *   - Spielt passende Idle-Animationen anhand der letzten Blickrichtung
- *   - Nutzt den vollständigen State-Pfad auf dem Base Layer
- *
- * Voraussetzungen im Animator:
- *   - States auf Base Layer mit exakt diesen Namen:
- *     Arthur_IdleDown
- *     Arthur_IdleUp
- *     Arthur_IdleLeft
- *     Arthur_IdleRight
- *     Arthur_WalkDown
- *     Arthur_WalkUp
- *     Arthur_WalkLeft
- *     Arthur_WalkRight
- */
-
 using UnityEngine;
 
 namespace ITAA.NPC.Arthur
 {
     public class ArthurAnimationController : MonoBehaviour
     {
-        #region Inspector
-
         [Header("References")]
         [SerializeField] private Animator animator;
 
-        [Header("Animator")]
-        [SerializeField] private string layerName = "Base Layer";
+        [Header("States")]
+        [SerializeField] private string idleState = "Arthur_Idle";
+        [SerializeField] private string walkState = "Arthur_Walk";
 
-        [Header("Idle States")]
-        [SerializeField] private string idleDownState = "Arthur_IdleDown";
-        [SerializeField] private string idleUpState = "Arthur_IdleUp";
-        [SerializeField] private string idleLeftState = "Arthur_IdleLeft";
-        [SerializeField] private string idleRightState = "Arthur_IdleRight";
-
-        [Header("Walk States")]
-        [SerializeField] private string walkDownState = "Arthur_WalkDown";
-        [SerializeField] private string walkUpState = "Arthur_WalkUp";
-        [SerializeField] private string walkLeftState = "Arthur_WalkLeft";
-        [SerializeField] private string walkRightState = "Arthur_WalkRight";
-
-        #endregion
-
-        #region Fields
+        [Header("Parameters")]
+        [SerializeField] private string moveXParameter = "MoveX";
+        [SerializeField] private string moveYParameter = "MoveY";
 
         private Vector2 lastLookDirection = Vector2.down;
-        private string currentStatePath;
-        private int cachedLayerIndex = -1;
-
-        #endregion
-
-        #region Unity Methods
+        private string currentState;
 
         private void Awake()
         {
@@ -74,94 +36,113 @@ namespace ITAA.NPC.Arthur
                 return;
             }
 
-            if (animator.runtimeAnimatorController == null)
+            ApplyDirection(lastLookDirection);
+            PlayIdle();
+        }
+
+        public void SetMovement(Vector2 movement)
+        {
+            Debug.Log($"[ArthurAnimationController] SetMovement input={movement} sqrMagnitude={movement.sqrMagnitude}");
+
+            if (movement.sqrMagnitude > 0.0001f)
             {
-@@ -131,57 +132,86 @@ namespace ITAA.NPC.Arthur
+                Vector2 dir = movement.normalized;
+                lastLookDirection = dir;
+
+                Debug.Log($"[ArthurAnimationController] WALK dir={dir}");
+
+                ApplyDirection(dir);
+                PlayWalk();
+                return;
+            }
+
+            Debug.Log($"[ArthurAnimationController] IDLE lastLookDirection={lastLookDirection}");
+
+            ApplyDirection(lastLookDirection);
+            PlayIdle();
+        }
+
+        public void SetIdleDirection(Vector2 lookDirection)
+        {
+            if (lookDirection.sqrMagnitude > 0.0001f)
+            {
+                lastLookDirection = lookDirection.normalized;
+            }
+
+            ApplyDirection(lastLookDirection);
+            PlayIdle();
+        }
+
+        public void ForceIdle()
+        {
+            currentState = null;
+            ApplyDirection(lastLookDirection);
+            PlayIdle();
+        }
+
+        public void ForceIdle(Vector2 lookDirection)
+        {
+            if (lookDirection.sqrMagnitude > 0.0001f)
+            {
+                lastLookDirection = lookDirection.normalized;
+            }
+
+            currentState = null;
+            ApplyDirection(lastLookDirection);
+            PlayIdle();
+        }
+
+        private void PlayWalk()
+        {
+            PlayState(walkState);
+        }
 
         private void PlayIdle()
         {
-            string nextStateName;
-
-            if (Mathf.Abs(lastLookDirection.x) > Mathf.Abs(lastLookDirection.y))
-            {
-                nextStateName = lastLookDirection.x > 0f ? idleRightState : idleLeftState;
-            }
-            else
-            {
-                nextStateName = lastLookDirection.y > 0f ? idleUpState : idleDownState;
-            }
-
-            PlayState(nextStateName);
+            PlayState(idleState);
         }
 
-        private void PlayState(string shortStateName)
+        private void ApplyDirection(Vector2 dir)
         {
             if (animator == null)
             {
                 return;
             }
 
-            string fullStatePath = $"{layerName}.{shortStateName}";
-            int layerIndex = GetLayerIndex();
+            animator.SetFloat(moveXParameter, dir.x);
+            animator.SetFloat(moveYParameter, dir.y);
 
-            if (currentStatePath == fullStatePath)
-            {
-                return;
-            }
-
-            int fullStateHash = Animator.StringToHash(fullStatePath);
-            int shortStateHash = Animator.StringToHash(shortStateName);
-            bool hasFullPathState = HasStateOnLayer(layerIndex, fullStateHash);
-            bool hasShortState = HasStateOnLayer(layerIndex, shortStateHash);
-
-
-            if (!hasFullPathState && !hasShortState)
-            {
-                Debug.LogWarning(
-                    $"[{nameof(ArthurAnimationController)}] State nicht gefunden: '{fullStatePath}' " +
-                    $"auf Animator '{animator.gameObject.name}' mit Controller " +
-                    $"'{(animator.runtimeAnimatorController != null ? animator.runtimeAnimatorController.name : "NULL")}'."
-                );
-                return;
-            }
-
-            Debug.Log($"[ArthurAnimation] Play: {fullStatePath}");
-
-    
-            animator.Play(hasFullPathState ? fullStateHash : shortStateHash, layerIndex, 0f);
-            currentStatePath = fullStatePath;
+            Debug.Log($"[ArthurAnimationController] SetFloat {moveXParameter}={dir.x}, {moveYParameter}={dir.y}");
         }
 
-        private bool HasStateOnLayer(int layerIndex, int stateHash)
-        {
-            return animator != null && animator.HasState(layerIndex, stateHash);
-        }
-
-        private int GetLayerIndex()
+        private void PlayState(string stateName)
         {
             if (animator == null)
             {
-                return 0;
+                return;
             }
 
-            if (cachedLayerIndex >= 0 && cachedLayerIndex < animator.layerCount)
+            const int layer = 0;
+
+            if (currentState == stateName)
             {
-                return cachedLayerIndex;
+                return;
             }
 
-            cachedLayerIndex = animator.GetLayerIndex(layerName);
+            int hash = Animator.StringToHash(stateName);
 
-            if (cachedLayerIndex < 0)
+            if (!animator.HasState(layer, hash))
             {
                 Debug.LogWarning(
-                    $"[{nameof(ArthurAnimationController)}] Layer '{layerName}' nicht gefunden auf Animator '{animator.gameObject.name}'. Fallback auf Layer 0."
+                    $"[{nameof(ArthurAnimationController)}] State '{stateName}' nicht gefunden auf Animator '{animator.gameObject.name}'."
                 );
-                cachedLayerIndex = 0;
+                return;
             }
 
-            return cachedLayerIndex;
-        }
+            Debug.Log($"[ArthurAnimationController] PlayState -> {stateName}");
 
-        #endregion
+            animator.Play(hash, layer, 0f);
+            currentState = stateName;
+        }
     }
 }

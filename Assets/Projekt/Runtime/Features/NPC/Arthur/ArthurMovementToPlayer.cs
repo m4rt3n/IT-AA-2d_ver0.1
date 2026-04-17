@@ -1,43 +1,48 @@
 /*
  * Datei: ArthurMovementToPlayer.cs
- * Zweck: Lässt Arthur automatisch zum Spieler laufen.
+ * Zweck:
+ *   Bewegt Arthur in Richtung Spieler und übergibt die tatsächliche
+ *   Bewegungsrichtung an den ArthurAnimationController.
+ *
  * Verantwortung:
- *   - Nutzt Ziel aus ArthurAutoInteraction
- *   - Bewegt Arthur in Richtung Spieler
- *   - Stoppt in Interaktionsdistanz
- *   - Übergibt Bewegungsrichtung an ArthurAnimationController
+ *   - Spieler finden oder gesetztes Ziel verwenden
+ *   - Arthur bis zur Stop-Distanz zum Spieler bewegen
+ *   - Walk-Animation nur bei echter Bewegung abspielen
+ *   - Idle-Animation erzwingen, wenn Arthur steht
  *
- * Abhängigkeiten:
- *   - Rigidbody2D
- *   - ArthurAutoInteraction
- *   - ArthurAnimationController
- *
- * Verwendet von:
- *   - Arthur (NPC)
+ * Voraussetzungen:
+ *   - ArthurAnimationController auf demselben GameObject oder Kindobjekt
+ *   - Animator nutzt Blend Trees mit MoveX / MoveY
  */
 
 using UnityEngine;
 
 namespace ITAA.NPC.Arthur
 {
-    [RequireComponent(typeof(Rigidbody2D))]
     public class ArthurMovementToPlayer : MonoBehaviour
     {
         #region Inspector
 
+        [Header("References")]
+        [SerializeField] private Transform playerTarget;
+        [SerializeField] private ArthurAnimationController animationController;
+
         [Header("Movement")]
         [SerializeField] private float moveSpeed = 2.5f;
-        [SerializeField] private float stopDistance = 1.2f;
+        [SerializeField] private float stopDistance = 1.25f;
 
-        [Header("References")]
-        [SerializeField] private ArthurAutoInteraction interaction;
-        [SerializeField] private ArthurAnimationController animationController;
+        [Header("Auto Find")]
+        [SerializeField] private bool autoFindPlayerByTag = true;
+        [SerializeField] private string playerTag = "Player";
+
+        [Header("Debug")]
+        [SerializeField] private bool showDebugLogs = false;
 
         #endregion
 
         #region Fields
 
-        private Rigidbody2D rb;
+        private bool isStopped;
 
         #endregion
 
@@ -45,13 +50,6 @@ namespace ITAA.NPC.Arthur
 
         private void Awake()
         {
-            rb = GetComponent<Rigidbody2D>();
-
-            if (interaction == null)
-            {
-                interaction = GetComponent<ArthurAutoInteraction>();
-            }
-
             if (animationController == null)
             {
                 animationController = GetComponent<ArthurAnimationController>();
@@ -62,65 +60,118 @@ namespace ITAA.NPC.Arthur
                 }
             }
 
+            if (playerTarget == null && autoFindPlayerByTag)
+            {
+                GameObject playerObject = GameObject.FindGameObjectWithTag(playerTag);
+
+                if (playerObject != null)
+                {
+                    playerTarget = playerObject.transform;
+                }
+            }
+        }
+
+        private void Start()
+        {
             if (animationController == null)
             {
-                Debug.LogWarning($"[{nameof(ArthurMovementToPlayer)}] Kein ArthurAnimationController gefunden auf '{gameObject.name}'.");
+                Debug.LogWarning(
+                    $"[{nameof(ArthurMovementToPlayer)}] Kein {nameof(ArthurAnimationController)} gefunden auf '{gameObject.name}'."
+                );
+            }
+
+            if (playerTarget == null)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(ArthurMovementToPlayer)}] Kein Spieler-Ziel gefunden auf '{gameObject.name}'."
+                );
             }
         }
 
         private void FixedUpdate()
         {
-            if (interaction == null || interaction.TargetPlayer == null)
+            if (playerTarget == null)
             {
-                StopMovement();
+                ForceIdleIfNeeded();
                 return;
             }
 
-            Vector2 direction = (Vector2)(interaction.TargetPlayer.position - transform.position);
-            float distance = direction.magnitude;
+            Vector2 currentPosition = transform.position;
+            Vector2 targetPosition = playerTarget.position;
+            Vector2 toTarget = targetPosition - currentPosition;
+            float distanceToTarget = toTarget.magnitude;
 
-            if (distance <= stopDistance)
+            if (distanceToTarget <= stopDistance)
             {
-                StopMovement();
+                ForceIdleIfNeeded();
                 return;
             }
 
-            direction.Normalize();
-            rb.linearVelocity = direction * moveSpeed;
+            isStopped = false;
+
+            Vector2 nextPosition = Vector2.MoveTowards(
+                currentPosition,
+                targetPosition,
+                moveSpeed * Time.fixedDeltaTime
+            );
+
+            Vector2 actualMovement = nextPosition - currentPosition;
+
+            transform.position = new Vector3(nextPosition.x, nextPosition.y, transform.position.z);
 
             if (animationController != null)
             {
-                animationController.SetMovement(direction);
+                if (showDebugLogs)
+                {
+                    Debug.Log($"[{nameof(ArthurMovementToPlayer)}] Move={actualMovement}");
+                }
+
+                animationController.SetMovement(actualMovement);
             }
         }
 
-        private void OnDisable()
-        {
-            if (rb != null)
-            {
-                rb.linearVelocity = Vector2.zero;
-            }
+        #endregion
 
-            if (animationController != null)
-            {
-                animationController.ForceIdle();
-            }
+        #region Public API
+
+        public void SetTarget(Transform newTarget)
+        {
+            playerTarget = newTarget;
+            isStopped = false;
+        }
+
+        public void ClearTarget()
+        {
+            playerTarget = null;
+            ForceIdleIfNeeded();
+        }
+
+        public void StopMoving()
+        {
+            ForceIdleIfNeeded();
         }
 
         #endregion
 
         #region Private Methods
 
-        private void StopMovement()
+        private void ForceIdleIfNeeded()
         {
-            if (rb != null)
+            if (isStopped)
             {
-                rb.linearVelocity = Vector2.zero;
+                return;
             }
+
+            isStopped = true;
 
             if (animationController != null)
             {
-                animationController.SetMovement(Vector2.zero);
+                if (showDebugLogs)
+                {
+                    Debug.Log($"[{nameof(ArthurMovementToPlayer)}] ForceIdle");
+                }
+
+                animationController.ForceIdle();
             }
         }
 
