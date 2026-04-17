@@ -5,13 +5,14 @@
  * - Zeigt Slot-Daten an
  * - Löst Auswahl per Button aus
  * - Unterstützt belegte und leere Slots
+ * - Verdrahtet sich bei Bedarf teilweise automatisch
  */
 
 using System;
+using ITAA.System.Savegame;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using ITAA.System.Savegame;
 
 namespace ITAA.UI.Items
 {
@@ -33,6 +34,10 @@ namespace ITAA.UI.Items
         [SerializeField] private Color normalColor = Color.white;
         [SerializeField] private Color emptyColor = new Color(0.85f, 0.85f, 0.85f, 1f);
 
+        [Header("Debug")]
+        [SerializeField] private bool autoResolveReferences = true;
+        [SerializeField] private bool enableDebugLogs = false;
+
         #endregion
 
         #region Private Fields
@@ -46,15 +51,16 @@ namespace ITAA.UI.Items
 
         private void Awake()
         {
-            if (selectButton == null)
-            {
-                selectButton = GetComponent<Button>();
-            }
+            ResolveReferences();
 
             if (selectButton != null)
             {
                 selectButton.onClick.RemoveListener(HandleClick);
                 selectButton.onClick.AddListener(HandleClick);
+            }
+            else if (enableDebugLogs)
+            {
+                Debug.LogWarning($"[{nameof(SaveSlotItemUI)}] Kein Button gefunden auf '{gameObject.name}'.", this);
             }
         }
 
@@ -65,6 +71,16 @@ namespace ITAA.UI.Items
                 selectButton.onClick.RemoveListener(HandleClick);
             }
         }
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            if (autoResolveReferences)
+            {
+                ResolveReferences();
+            }
+        }
+#endif
 
         #endregion
 
@@ -83,31 +99,22 @@ namespace ITAA.UI.Items
 
             bool hasData = slot.HasData;
 
-            if (slotNameText != null)
-            {
-                slotNameText.text = !string.IsNullOrWhiteSpace(slot.DisplayName)
+            SetText(slotNameText,
+                !string.IsNullOrWhiteSpace(slot.DisplayName)
                     ? slot.DisplayName
-                    : $"Slot {slot.SlotId}";
-            }
+                    : $"Slot {slot.SlotId}");
 
-            if (sceneNameText != null)
-            {
-                sceneNameText.text = hasData
+            SetText(sceneNameText,
+                hasData
                     ? GetSafeText(slot.SceneName, "-")
-                    : "Kein Spielstand";
-            }
+                    : "Kein Spielstand");
 
-            if (savedAtText != null)
-            {
-                savedAtText.text = hasData
+            SetText(savedAtText,
+                hasData
                     ? GetSafeText(slot.SavedAtText, "-")
-                    : "-";
-            }
+                    : "-");
 
-            if (statusText != null)
-            {
-                statusText.text = hasData ? "Belegt" : "Leer";
-            }
+            SetText(statusText, hasData ? "Belegt" : "Leer");
 
             if (hasDataRoot != null)
             {
@@ -128,6 +135,11 @@ namespace ITAA.UI.Items
             {
                 selectButton.interactable = true;
             }
+
+            if (enableDebugLogs)
+            {
+                Debug.Log($"[{nameof(SaveSlotItemUI)}] Setup Slot {slot.SlotId} | HasData={slot.HasData}", this);
+            }
         }
 
         public SaveSlotEntity GetSlot()
@@ -143,8 +155,13 @@ namespace ITAA.UI.Items
         {
             if (currentSlot == null)
             {
-                Debug.LogWarning($"[{nameof(SaveSlotItemUI)}] Kein SaveSlotEntity gesetzt auf {gameObject.name}.", this);
+                Debug.LogWarning($"[{nameof(SaveSlotItemUI)}] Kein SaveSlotEntity gesetzt auf '{gameObject.name}'.", this);
                 return;
+            }
+
+            if (enableDebugLogs)
+            {
+                Debug.Log($"[{nameof(SaveSlotItemUI)}] Slot gewählt: {currentSlot.SlotId}", this);
             }
 
             onSelected?.Invoke(currentSlot);
@@ -152,25 +169,10 @@ namespace ITAA.UI.Items
 
         private void ApplyNullState()
         {
-            if (slotNameText != null)
-            {
-                slotNameText.text = "Unbekannter Slot";
-            }
-
-            if (sceneNameText != null)
-            {
-                sceneNameText.text = "-";
-            }
-
-            if (savedAtText != null)
-            {
-                savedAtText.text = "-";
-            }
-
-            if (statusText != null)
-            {
-                statusText.text = "Fehler";
-            }
+            SetText(slotNameText, "Unbekannter Slot");
+            SetText(sceneNameText, "-");
+            SetText(savedAtText, "-");
+            SetText(statusText, "Fehler");
 
             if (hasDataRoot != null)
             {
@@ -190,6 +192,97 @@ namespace ITAA.UI.Items
             if (selectButton != null)
             {
                 selectButton.interactable = false;
+            }
+        }
+
+        private void ResolveReferences()
+        {
+            if (!autoResolveReferences)
+            {
+                return;
+            }
+
+            if (selectButton == null)
+            {
+                selectButton = GetComponent<Button>();
+
+                if (selectButton == null)
+                {
+                    selectButton = GetComponentInChildren<Button>(true);
+                }
+            }
+
+            if (backgroundImage == null)
+            {
+                backgroundImage = GetComponent<Image>();
+            }
+
+            TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
+
+            if (slotNameText == null)
+            {
+                slotNameText = FindTextByName(texts, "SlotNameText", "LabelText", "TitleText", "NameText");
+            }
+
+            if (sceneNameText == null)
+            {
+                sceneNameText = FindTextByName(texts, "SceneNameText", "SceneText");
+            }
+
+            if (savedAtText == null)
+            {
+                savedAtText = FindTextByName(texts, "SavedAtText", "DateText", "TimeText");
+            }
+
+            if (statusText == null)
+            {
+                statusText = FindTextByName(texts, "StatusText", "InfoText");
+            }
+
+            if (enableDebugLogs)
+            {
+                Debug.Log(
+                    $"[{nameof(SaveSlotItemUI)}] ResolveReferences | " +
+                    $"Button={(selectButton != null)} | " +
+                    $"SlotName={(slotNameText != null)} | " +
+                    $"SceneName={(sceneNameText != null)} | " +
+                    $"SavedAt={(savedAtText != null)} | " +
+                    $"Status={(statusText != null)}",
+                    this
+                );
+            }
+        }
+
+        private static TMP_Text FindTextByName(TMP_Text[] texts, params string[] candidateNames)
+        {
+            if (texts == null || texts.Length == 0)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < candidateNames.Length; i++)
+            {
+                string candidate = candidateNames[i];
+
+                for (int j = 0; j < texts.Length; j++)
+                {
+                    TMP_Text text = texts[j];
+
+                    if (text != null && text.name.Equals(candidate, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return text;
+                    }
+                }
+            }
+
+            return texts[0];
+        }
+
+        private static void SetText(TMP_Text target, string value)
+        {
+            if (target != null)
+            {
+                target.text = value;
             }
         }
 

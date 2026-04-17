@@ -94685,8 +94685,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ArthurAutoInteraction
   menuManager: {fileID: 749671471}
   movement: {fileID: 0}
+  playerMotor: {fileID: 0}
   requireKeyPress: 0
   interactKey: 19
+  interactDistance: 1.35
+  lockPlayerMovement: 1
+  showDebugLogs: 1
 --- !u!95 &745381517
 Animator:
   serializedVersion: 7
@@ -98439,7 +98443,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1f97d3b69a2fd44e8a720ec1a5c2ed5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LoadGamePanel
-  itemPrefab: {fileID: 0}
+  itemPrefab: {fileID: 9051092408891580415, guid: 6933d7bc336d55b4cab6f7aaa17c1d62, type: 3}
   contentRoot: {fileID: 1949223833}
   slotCount: 3
   titleText: {fileID: 0}
@@ -98670,6 +98674,26 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 9051092408891580415, guid: 6933d7bc336d55b4cab6f7aaa17c1d62, type: 3}
+      propertyPath: statusText
+      value: 
+      objectReference: {fileID: 414458041}
+    - target: {fileID: 9051092408891580415, guid: 6933d7bc336d55b4cab6f7aaa17c1d62, type: 3}
+      propertyPath: savedAtText
+      value: 
+      objectReference: {fileID: 414458041}
+    - target: {fileID: 9051092408891580415, guid: 6933d7bc336d55b4cab6f7aaa17c1d62, type: 3}
+      propertyPath: selectButton
+      value: 
+      objectReference: {fileID: 569128953}
+    - target: {fileID: 9051092408891580415, guid: 6933d7bc336d55b4cab6f7aaa17c1d62, type: 3}
+      propertyPath: slotNameText
+      value: 
+      objectReference: {fileID: 414458041}
+    - target: {fileID: 9051092408891580415, guid: 6933d7bc336d55b4cab6f7aaa17c1d62, type: 3}
+      propertyPath: sceneNameText
+      value: 
+      objectReference: {fileID: 414458041}
     - target: {fileID: 9136875786817421312, guid: 6933d7bc336d55b4cab6f7aaa17c1d62, type: 3}
       propertyPath: labelText
       value: 

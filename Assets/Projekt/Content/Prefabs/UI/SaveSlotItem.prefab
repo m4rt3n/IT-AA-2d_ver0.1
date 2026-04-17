@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 204276671840319251}
   - component: {fileID: 6895222118385704180}
   m_Layer: 5
-  m_Name: ProgressText (TMP)
+  m_Name: Saved At Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -34,7 +34,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 78}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &204276671840319251
@@ -65,7 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: ProgressText
+  m_text: Saved At Text
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -131,7 +131,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 0, y: 0, z: -267.87354, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -148,7 +148,7 @@ GameObject:
   - component: {fileID: 4106180489988434921}
   - component: {fileID: 1820836809539144062}
   - component: {fileID: 181886076460018422}
-  - component: {fileID: 9136875786817421312}
+  - component: {fileID: 9051092408891580415}
   m_Layer: 5
   m_Name: SaveSlotItem
   m_TagString: Untagged
@@ -218,7 +218,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &9136875786817421312
+--- !u!114 &9051092408891580415
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -227,14 +227,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 2682366838257911061}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: be561b5ef1b504b428f8fcad3baecd14, type: 3}
+  m_Script: {fileID: 11500000, guid: c59f8520057120f489e62687b93688e0, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ITAA.UI.SaveSlotListItemUI
-  slotNameText: {fileID: 5498839638632496777}
-  userText: {fileID: 6115087416127431665}
-  progressText: {fileID: 6895222118385704180}
-  statsText: {fileID: 5812420989349116776}
+  m_EditorClassIdentifier: Assembly-CSharp::ITAA.UI.Items.SaveSlotItemUI
   selectButton: {fileID: 6033624884598502898}
+  slotNameText: {fileID: 5498839638632496777}
+  sceneNameText: {fileID: 6115087416127431665}
+  savedAtText: {fileID: 6895222118385704180}
+  statusText: {fileID: 5812420989349116776}
+  hasDataRoot: {fileID: 0}
+  emptyRoot: {fileID: 0}
+  backgroundImage: {fileID: 181886076460018422}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  emptyColor: {r: 0.85, g: 0.85, b: 0.85, a: 1}
+  autoResolveReferences: 1
+  enableDebugLogs: 0
 --- !u!1 &5832681022858413838
 GameObject:
   m_ObjectHideFlags: 0
@@ -248,7 +255,7 @@ GameObject:
   - component: {fileID: 7902966777598304153}
   - component: {fileID: 6033624884598502898}
   m_Layer: 5
-  m_Name: BtnSelect
+  m_Name: Select Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -368,7 +375,7 @@ GameObject:
   - component: {fileID: 2569867334928085052}
   - component: {fileID: 5812420989349116776}
   m_Layer: 5
-  m_Name: StatsText (TMP)
+  m_Name: Status Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -390,7 +397,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 123}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2569867334928085052
@@ -421,7 +428,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: StatsText
+  m_text: Status Text
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -487,7 +494,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 0, y: 0, z: -278.44727, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -527,7 +534,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 370}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7938957354462608198
@@ -624,7 +631,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 0, y: 0, z: -377.13757, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -642,7 +649,7 @@ GameObject:
   - component: {fileID: 7501405269153462931}
   - component: {fileID: 6115087416127431665}
   m_Layer: 5
-  m_Name: UserText (TMP)
+  m_Name: Scene Name Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -664,7 +671,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 187}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7501405269153462931
@@ -695,7 +702,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: UserText
+  m_text: Scene Name Text
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -761,7 +768,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 0, y: 0, z: -331.31702, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
