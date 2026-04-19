@@ -44,7 +44,9 @@ Ziel ist der Aufbau eines **skalierbaren Game-Frameworks**, das als Grundlage f�
 - 🧍 Player Movement System (2D)
 - 🤖 NPC Interaction System
 - 🧩 Modulares UI System
-- 💾 Save/Session Architektur (in Vorbereitung)
+- 💾 Save/Load System mit Slot-Architektur
+- 📂 Dynamisches LoadGamePanel (UI + Datenbindung)
+- 🎮 Horizontales Snap-Scrolling (Netflix-/Konsolen-Style)
 - 🧠 Erweiterbar für Quiz / LLM Systeme
 - 🏗️ Saubere Projektstruktur (Production Ready)
 
@@ -88,14 +90,15 @@ Globale Systeme (Manager, Utilities)
 
 #### UI
 - Menus  
-- Widgets  
+- Panels (z. B. LoadGamePanel)  
+- Widgets (z. B. HorizontalSnapScroll)  
 
 ### Data
 - Models  
 - Storage  
 
 ### Systems
-GameFlow & globale Logik
+GameFlow & globale Logik (SaveSystem, etc.)
 
 ---
 
@@ -103,6 +106,9 @@ GameFlow & globale Logik
 
 StartScene  
 → Menü / Login  
+→ LoadGamePanel (Slots anzeigen)  
+→ Auswahl eines Save-Slots  
+→ Szene wird geladen  
 → Spieler spawnt  
 → Bewegung & Exploration  
 → NPC erkennt Spieler  
@@ -117,7 +123,7 @@ StartScene
 ### 🧱 Phase 1 – Foundation
 - 🟢 Architektur  
 - 🟢 Struktur  
-- 🟡 Core  
+- 🟢 Core  
 
 ### 🧍 Phase 2 – Player
 - 🟢 Movement  
@@ -130,13 +136,15 @@ StartScene
 - 🔴 AI  
 
 ### 🧩 Phase 4 – UI
-- 🟡 Menu Manager  
-- 🔴 Widgets  
+- 🟢 Menu Manager  
+- 🟡 LoadGamePanel  
+- 🟡 Snap-Scroll Navigation  
 - 🔴 HUD  
 
 ### 💾 Phase 5 – Data
-- 🟡 Models  
-- 🔴 Save/Load  
+- 🟢 Models  
+- 🟡 Save/Load System  
+- 🔴 Persistenz-Erweiterung  
 
 ---
 
@@ -153,12 +161,14 @@ Backlog → Ready → In Progress → Review → Done
 - Dialogsystem bauen  
 
 **In Progress**
-- NPC Interaction  
-- UI Fixes  
+- UI Polish  
+- Save-System Erweiterung  
 
 **Done**
 - Player Movement  
 - StartScene Setup  
+- LoadGamePanel  
+- Snap-Scroll UI  
 
 ---
 
@@ -167,6 +177,7 @@ Backlog → Ready → In Progress → Review → Done
 - Unity (2D)  
 - C#  
 - Scriptable Architecture  
+- Unity Input System  
 
 **Geplant:**
 - SQLite  
@@ -199,12 +210,12 @@ Beiträge sind willkommen.
 
 | Bereich        | Fortschritt |
 |----------------|------------|
-| Foundation     | 80%        |
+| Foundation     | 90%        |
 | Player         | 60%        |
 | NPC            | 40%        |
-| UI             | 30%        |
-| Data           | 20%        |
-| Gameplay       | 0%         |
+| UI             | 60%        |
+| Data           | 40%        |
+| Gameplay       | 10%        |
 
 ---
 
