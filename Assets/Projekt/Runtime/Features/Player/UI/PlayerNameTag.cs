@@ -1,11 +1,12 @@
 /*
  * Datei: PlayerNameTag.cs
  * Zweck: Positioniert ein Namensschild über einer Ziel-Figur in der Welt.
- * Verantwortung: Folgt einem Transform-Ziel und aktualisiert optional den sichtbaren Namen.
- * Abhängigkeiten: Transform, TMP_Text, Camera.
- * Verwendet von: Player oder andere Figuren mit World-Space-Namensanzeige.
+ * Verantwortung: Folgt einem Transform-Ziel und zeigt den Spielernamen aus der PlayerSession an.
+ * Abhängigkeiten: PlayerSession, Transform, TMP_Text, Camera.
+ * Verwendet von: Player mit World-Space-Namensanzeige.
  */
 
+using ITAA.Player.Session;
 using TMPro;
 using UnityEngine;
 
@@ -20,7 +21,10 @@ namespace ITAA.Player.UI
         [SerializeField] private TMP_Text nameText;
 
         [Header("Position")]
-        [SerializeField] private Vector3 worldOffset = new(0f, 1.25f, 0f);
+        [SerializeField] private Vector3 worldOffset = new(0f, 1.5f, 0f);
+
+        [Header("Fallback")]
+        [SerializeField] private string fallbackName = "Spieler";
 
         #endregion
 
@@ -32,14 +36,18 @@ namespace ITAA.Player.UI
 
         #region Unity Methods
 
-        private void Start()
+        private void Awake()
         {
-            mainCamera = Camera.main;
-
             if (nameText == null)
             {
                 nameText = GetComponentInChildren<TMP_Text>();
             }
+        }
+
+        private void Start()
+        {
+            mainCamera = Camera.main;
+            UpdateName();
         }
 
         private void LateUpdate()
@@ -50,6 +58,11 @@ namespace ITAA.Player.UI
             }
 
             transform.position = target.position + worldOffset;
+
+            if (mainCamera == null)
+            {
+                mainCamera = Camera.main;
+            }
 
             if (mainCamera != null)
             {
@@ -70,8 +83,26 @@ namespace ITAA.Player.UI
         {
             if (nameText != null)
             {
-                nameText.text = playerName;
+                nameText.text = string.IsNullOrWhiteSpace(playerName) ? fallbackName : playerName;
             }
+        }
+
+        public void UpdateName()
+        {
+            if (nameText == null)
+            {
+                return;
+            }
+
+            string playerName = fallbackName;
+
+            if (PlayerSession.Instance != null &&
+                !string.IsNullOrWhiteSpace(PlayerSession.Instance.Username))
+            {
+                playerName = PlayerSession.Instance.Username;
+            }
+
+            nameText.text = playerName;
         }
 
         #endregion

@@ -6,6 +6,7 @@
  * - Löst Auswahl per Button aus
  * - Unterstützt belegte und leere Slots
  * - Verdrahtet sich bei Bedarf teilweise automatisch
+ * - Unterstützt große Einzelansicht im Load-Panel
  */
 
 using System;
@@ -26,6 +27,9 @@ namespace ITAA.UI.Items
         [SerializeField] private TMP_Text sceneNameText;
         [SerializeField] private TMP_Text savedAtText;
         [SerializeField] private TMP_Text statusText;
+
+        [Header("Optional Extra Text")]
+        [SerializeField] private TMP_Text titleText;
 
         [Header("Optional Visuals")]
         [SerializeField] private GameObject hasDataRoot;
@@ -99,20 +103,30 @@ namespace ITAA.UI.Items
 
             bool hasData = slot.HasData;
 
-            SetText(slotNameText,
-                !string.IsNullOrWhiteSpace(slot.DisplayName)
-                    ? slot.DisplayName
-                    : $"Slot {slot.SlotId}");
+            SetText(slotNameText, $"Slot {slot.SlotId}");
 
-            SetText(sceneNameText,
+            // Oberer Titel im großen Slot.
+            // Kann später durch Tag/PlayerName ersetzt werden.
+            SetText(
+                titleText,
+                hasData
+                    ? GetSafeText(slot.DisplayName, "Spieler")
+                    : "Spieler"
+            );
+
+            SetText(
+                sceneNameText,
                 hasData
                     ? GetSafeText(slot.SceneName, "-")
-                    : "Kein Spielstand");
+                    : "Kein Spielstand"
+            );
 
-            SetText(savedAtText,
+            SetText(
+                savedAtText,
                 hasData
                     ? GetSafeText(slot.SavedAtText, "-")
-                    : "-");
+                    : "-"
+            );
 
             SetText(statusText, hasData ? "Belegt" : "Leer");
 
@@ -169,7 +183,8 @@ namespace ITAA.UI.Items
 
         private void ApplyNullState()
         {
-            SetText(slotNameText, "Unbekannter Slot");
+            SetText(slotNameText, "Slot ?");
+            SetText(titleText, "Spieler");
             SetText(sceneNameText, "-");
             SetText(savedAtText, "-");
             SetText(statusText, "Fehler");
@@ -221,7 +236,12 @@ namespace ITAA.UI.Items
 
             if (slotNameText == null)
             {
-                slotNameText = FindTextByName(texts, "SlotNameText", "LabelText", "TitleText", "NameText");
+                slotNameText = FindTextByName(texts, "SlotNameText", "LabelText", "SlotTitleText");
+            }
+
+            if (titleText == null)
+            {
+                titleText = FindTextByName(texts, "TitleText", "PlayerNameText", "NameText");
             }
 
             if (sceneNameText == null)
@@ -245,6 +265,7 @@ namespace ITAA.UI.Items
                     $"[{nameof(SaveSlotItemUI)}] ResolveReferences | " +
                     $"Button={(selectButton != null)} | " +
                     $"SlotName={(slotNameText != null)} | " +
+                    $"Title={(titleText != null)} | " +
                     $"SceneName={(sceneNameText != null)} | " +
                     $"SavedAt={(savedAtText != null)} | " +
                     $"Status={(statusText != null)}",
@@ -275,7 +296,7 @@ namespace ITAA.UI.Items
                 }
             }
 
-            return texts[0];
+            return null;
         }
 
         private static void SetText(TMP_Text target, string value)

@@ -1,33 +1,23 @@
 /*
- * Datei: Assets/Projekt/Runtime/Features/UI/Panels/LoadGamePanel.cs
- *
- * Zweck:
- * Zeigt die vorhandenen Save-Slots im Load-Game-Panel an und erlaubt das Laden
- * eines ausgewählten Spielstands.
- *
+ * Datei: LoadGamePanel.cs
+ * Zweck: Verwaltet das große Load-Game-Menü mit genau einem sichtbaren Slot.
  * Verantwortung:
- * - erzeugt UI-Slot-Items dynamisch aus einem Prefab
- * - liest Save-Slots aus dem SaveSystem
- * - reagiert auf Klicks auf einzelne Slots
- * - lädt optional direkt die gespeicherte Szene
- * - unterstützt optional HorizontalSnapScroll
+ * - Lädt Save-Slots aus dem SaveSystem
+ * - Zeigt immer genau einen Slot groß an
+ * - Navigation per Pfeil links / rechts
+ * - Startet immer mit Slot 1
+ * - Setzt oberen Titel abhängig vom aktiven Slot
+ * - Lädt Szene bei Auswahl eines belegten Slots
  *
- * Abhängigkeiten:
- * - ITAA.System.Savegame.SaveSystem
- * - ITAA.System.Savegame.SaveSlotEntity
- * - ITAA.UI.Items.SaveSlotItemUI
- * - ITAA.UI.Widgets.HorizontalSnapScroll
- *
- * Hinweise:
- * - itemPrefab muss auf das neue SaveSlotItem-Prefab zeigen
- * - contentRoot muss auf ScrollView/Viewport/Content zeigen
- * - für horizontale Karten Content mit HorizontalLayoutGroup verwenden
+ * Wichtig:
+ * - Dieses Panel verwaltet nur sich selbst und seinen Inhalt.
+ * - CanvasRoot, BackgroundDim und MenuPanel werden vom MenuManager verwaltet.
  */
 
+using System;
 using System.Collections.Generic;
 using ITAA.System.Savegame;
 using ITAA.UI.Items;
-using ITAA.UI.Widgets;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -37,168 +27,252 @@ namespace ITAA.UI.Panels
 {
     public class LoadGamePanel : MonoBehaviour
     {
-        [Header("Save Slot Setup")]
-        [SerializeField] private SaveSlotItemUI itemPrefab;
-        [SerializeField] private RectTransform contentRoot;
+        #region Inspector
+
+        [Header("Config")]
         [SerializeField] private int slotCount = 3;
+        [SerializeField] private string fallbackTitle = "Spieler";
 
-        [Header("Optional UI")]
-        [SerializeField] private TMP_Text titleText;
-        [SerializeField] private TMP_Text infoText;
-        [SerializeField] private Button refreshButton;
+        [Header("UI References")]
+        [SerializeField] private SaveSlotItemUI largeSlotItem;
+        [SerializeField] private Button previousButton;
+        [SerializeField] private Button nextButton;
         [SerializeField] private Button closeButton;
-
-        [Header("Scene Loading")]
-        [SerializeField] private bool loadSceneOnSelection = true;
-        [SerializeField] private string fallbackSceneName = "GameScene";
-
-        [Header("Optional Snap Scroll")]
-        [SerializeField] private HorizontalSnapScroll snapScroll;
+        [SerializeField] private TMP_Text headerTitleText;
+        [SerializeField] private TMP_Text pageIndicatorText;
 
         [Header("Debug")]
-        [SerializeField] private bool autoRefreshOnEnable = true;
-        [SerializeField] private bool enableDebugLogs = true;
+        [SerializeField] private bool enableDebugLogs = false;
+        [SerializeField] private bool logHideStackTrace = false;
 
-        private readonly List<SaveSlotItemUI> spawnedItems = new();
-        private SaveSystem saveSystem;
+        #endregion
+
+        #region Private Fields
+
+        private readonly SaveSystem saveSystem = new SaveSystem();
+        private IReadOnlyList<SaveSlotEntity> slots;
+        private int currentIndex = 0;
+        private bool isInitialized;
+
+        #endregion
+
+        #region Unity Methods
 
         private void Awake()
         {
-            saveSystem = new SaveSystem();
-
-            BindButtons();
-
-            if (titleText != null && string.IsNullOrWhiteSpace(titleText.text))
-            {
-                titleText.text = "Spielstand laden";
-            }
+            WireButtons();
         }
 
-        private void OnEnable()
+        private void Start()
         {
-            if (autoRefreshOnEnable)
+            if (enableDebugLogs)
             {
-                RefreshSlots();
+                Debug.Log($"[{nameof(LoadGamePanel)}] Start()", this);
             }
+
+            isInitialized = true;
+            gameObject.SetActive(false);
         }
 
-        private void OnDestroy()
-        {
-            UnbindButtons();
-        }
+        #endregion
 
-        private void BindButtons()
-        {
-            if (refreshButton != null)
-            {
-                refreshButton.onClick.RemoveListener(RefreshSlots);
-                refreshButton.onClick.AddListener(RefreshSlots);
-            }
-
-            if (closeButton != null)
-            {
-                closeButton.onClick.RemoveListener(Hide);
-                closeButton.onClick.AddListener(Hide);
-            }
-        }
-
-        private void UnbindButtons()
-        {
-            if (refreshButton != null)
-            {
-                refreshButton.onClick.RemoveListener(RefreshSlots);
-            }
-
-            if (closeButton != null)
-            {
-                closeButton.onClick.RemoveListener(Hide);
-            }
-        }
+        #region Public Methods
 
         public void Show()
         {
+            if (enableDebugLogs)
+            {
+                Debug.Log($"[{nameof(LoadGamePanel)}] Show()", this);
+            }
+
             gameObject.SetActive(true);
-            RefreshSlots();
+
+            ReloadSlots();
+            ShowSlot(0);
         }
 
         public void Hide()
         {
+            if (enableDebugLogs)
+            {
+                Debug.Log($"[{nameof(LoadGamePanel)}] Hide()", this);
+            }
+
+            if (logHideStackTrace)
+            {
+                Debug.Log($"[{nameof(LoadGamePanel)}] Hide() StackTrace:\n{Environment.StackTrace}", this);
+            }
+
             gameObject.SetActive(false);
         }
 
-        public void RefreshSlots()
+        public void ReloadSlots()
         {
-            if (itemPrefab == null)
-            {
-                Debug.LogWarning($"[{nameof(LoadGamePanel)}] Item Prefab ist nicht gesetzt.", this);
-                SetInfo("Kein Slot-Prefab zugewiesen.");
-                return;
-            }
-
-            if (contentRoot == null)
-            {
-                Debug.LogWarning($"[{nameof(LoadGamePanel)}] Content Root ist nicht gesetzt.", this);
-                SetInfo("Kein Content Root zugewiesen.");
-                return;
-            }
-
-            ClearSpawnedItems();
-
-            IReadOnlyList<SaveSlotEntity> slots = saveSystem.GetAllSlots(slotCount);
+            slots = saveSystem.GetAllSlots(slotCount);
 
             if (slots == null || slots.Count == 0)
             {
-                SetInfo("Keine Spielstände gefunden.");
-                RefreshSnapScroll();
+                if (enableDebugLogs)
+                {
+                    Debug.LogWarning($"[{nameof(LoadGamePanel)}] Keine Slots geladen.", this);
+                }
+
+                currentIndex = 0;
+                UpdateHeader(null);
+                UpdatePageIndicator();
+                UpdateNavigationState();
                 return;
             }
 
-            for (int i = 0; i < slots.Count; i++)
+            currentIndex = Mathf.Clamp(currentIndex, 0, slots.Count - 1);
+        }
+
+        public void ShowPreviousSlot()
+        {
+            if (!HasSlots())
             {
-                CreateSlotItem(slots[i]);
+                return;
             }
 
-            SetInfo($"Gefundene Slots: {slots.Count}");
-            RefreshSnapScroll();
+            currentIndex--;
 
-            if (enableDebugLogs)
+            if (currentIndex < 0)
             {
-                Debug.Log($"[{nameof(LoadGamePanel)}] RefreshSlots -> {slots.Count} Slot(s) erzeugt.", this);
+                currentIndex = slots.Count - 1;
+            }
+
+            ShowSlot(currentIndex);
+        }
+
+        public void ShowNextSlot()
+        {
+            if (!HasSlots())
+            {
+                return;
+            }
+
+            currentIndex++;
+
+            if (currentIndex >= slots.Count)
+            {
+                currentIndex = 0;
+            }
+
+            ShowSlot(currentIndex);
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void WireButtons()
+        {
+            if (previousButton != null)
+            {
+                previousButton.onClick.RemoveAllListeners();
+                previousButton.onClick.AddListener(ShowPreviousSlot);
+            }
+
+            if (nextButton != null)
+            {
+                nextButton.onClick.RemoveAllListeners();
+                nextButton.onClick.AddListener(ShowNextSlot);
+            }
+
+            if (closeButton != null)
+            {
+                closeButton.onClick.RemoveAllListeners();
+                closeButton.onClick.AddListener(Hide);
             }
         }
 
-        private void CreateSlotItem(SaveSlotEntity slot)
+        private void ShowSlot(int index)
         {
-            SaveSlotItemUI instance = Instantiate(itemPrefab, contentRoot);
-            instance.name = $"SaveSlotItem_{slot.SlotId}";
-            instance.Setup(slot, HandleSlotSelected);
-
-            spawnedItems.Add(instance);
-
-            if (enableDebugLogs)
+            if (!HasSlots())
             {
-                Debug.Log(
-                    $"[{nameof(LoadGamePanel)}] Slot erzeugt -> Id={slot.SlotId}, HasData={slot.HasData}, Scene={slot.SceneName}",
-                    this);
-            }
-        }
-
-        private void ClearSpawnedItems()
-        {
-            for (int i = spawnedItems.Count - 1; i >= 0; i--)
-            {
-                if (spawnedItems[i] != null)
+                if (largeSlotItem != null)
                 {
-                    Destroy(spawnedItems[i].gameObject);
+                    largeSlotItem.Setup(null, HandleSlotSelected);
                 }
+
+                UpdateHeader(null);
+                UpdatePageIndicator();
+                UpdateNavigationState();
+                return;
             }
 
-            spawnedItems.Clear();
+            currentIndex = Mathf.Clamp(index, 0, slots.Count - 1);
 
-            for (int i = contentRoot.childCount - 1; i >= 0; i--)
+            SaveSlotEntity slot = slots[currentIndex];
+
+            if (largeSlotItem != null)
             {
-                Transform child = contentRoot.GetChild(i);
-                Destroy(child.gameObject);
+                largeSlotItem.Setup(slot, HandleSlotSelected);
+            }
+            else
+            {
+                Debug.LogWarning($"[{nameof(LoadGamePanel)}] LargeSlotItem fehlt.", this);
+            }
+
+            UpdateHeader(slot);
+            UpdatePageIndicator();
+            UpdateNavigationState();
+
+            if (enableDebugLogs)
+            {
+                Debug.Log($"[{nameof(LoadGamePanel)}] Zeige Slot-Index {currentIndex} / SlotId {slot.SlotId}", this);
+            }
+        }
+
+        private void UpdateHeader(SaveSlotEntity slot)
+        {
+            if (headerTitleText == null)
+            {
+                return;
+            }
+
+            if (slot != null && slot.HasData && !string.IsNullOrWhiteSpace(slot.DisplayName))
+            {
+                headerTitleText.text = slot.DisplayName;
+            }
+            else
+            {
+                headerTitleText.text = fallbackTitle;
+            }
+        }
+
+        private void UpdatePageIndicator()
+        {
+            if (pageIndicatorText == null)
+            {
+                return;
+            }
+
+            int count = slots != null ? slots.Count : 0;
+
+            if (count <= 0)
+            {
+                pageIndicatorText.text = "0 / 0";
+                return;
+            }
+
+            pageIndicatorText.text = $"{currentIndex + 1} / {count}";
+        }
+
+        private void UpdateNavigationState()
+        {
+            bool canNavigate = HasSlots() && slots.Count > 1;
+
+            if (previousButton != null)
+            {
+                previousButton.gameObject.SetActive(canNavigate);
+                previousButton.interactable = canNavigate;
+            }
+
+            if (nextButton != null)
+            {
+                nextButton.gameObject.SetActive(canNavigate);
+                nextButton.interactable = canNavigate;
             }
         }
 
@@ -206,98 +280,39 @@ namespace ITAA.UI.Panels
         {
             if (slot == null)
             {
-                SetInfo("Ungültiger Slot.");
+                Debug.LogWarning($"[{nameof(LoadGamePanel)}] Slot ist null.", this);
                 return;
-            }
-
-            if (enableDebugLogs)
-            {
-                Debug.Log(
-                    $"[{nameof(LoadGamePanel)}] Slot gewählt -> Id={slot.SlotId}, HasData={slot.HasData}, Scene={slot.SceneName}",
-                    this);
             }
 
             if (!slot.HasData)
             {
-                SetInfo($"Slot {slot.SlotId} ist leer.");
+                if (enableDebugLogs)
+                {
+                    Debug.Log($"[{nameof(LoadGamePanel)}] Slot {slot.SlotId} ist leer.", this);
+                }
+
                 return;
             }
 
-            SetInfo($"Lade Slot {slot.SlotId} ...");
-
-            if (!loadSceneOnSelection)
+            if (string.IsNullOrWhiteSpace(slot.SceneName))
             {
+                Debug.LogWarning($"[{nameof(LoadGamePanel)}] Slot {slot.SlotId} hat keinen SceneName.", this);
                 return;
-            }
-
-            string sceneToLoad = string.IsNullOrWhiteSpace(slot.SceneName)
-                ? fallbackSceneName
-                : slot.SceneName;
-
-            if (!CanLoadScene(sceneToLoad))
-            {
-                Debug.LogWarning(
-                    $"[{nameof(LoadGamePanel)}] Szene '{sceneToLoad}' ist nicht in Build Settings vorhanden. Fallback wird geprüft.",
-                    this);
-
-                if (!string.IsNullOrWhiteSpace(fallbackSceneName) && CanLoadScene(fallbackSceneName))
-                {
-                    sceneToLoad = fallbackSceneName;
-                }
-                else
-                {
-                    SetInfo($"Szene '{sceneToLoad}' nicht ladbar.");
-                    return;
-                }
-            }
-
-            SceneManager.LoadScene(sceneToLoad);
-        }
-
-        private bool CanLoadScene(string sceneName)
-        {
-            if (string.IsNullOrWhiteSpace(sceneName))
-            {
-                return false;
-            }
-
-            for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
-            {
-                string path = SceneUtility.GetScenePathByBuildIndex(i);
-                string name = global::System.IO.Path.GetFileNameWithoutExtension(path);
-
-                if (name == sceneName)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private void RefreshSnapScroll()
-        {
-            if (snapScroll == null)
-            {
-                return;
-            }
-
-            Canvas.ForceUpdateCanvases();
-            LayoutRebuilder.ForceRebuildLayoutImmediate(contentRoot);
-            snapScroll.Refresh();
-        }
-
-        private void SetInfo(string message)
-        {
-            if (infoText != null)
-            {
-                infoText.text = message;
             }
 
             if (enableDebugLogs)
             {
-                Debug.Log($"[{nameof(LoadGamePanel)}] {message}", this);
+                Debug.Log($"[{nameof(LoadGamePanel)}] Lade Szene '{slot.SceneName}' für Slot {slot.SlotId}.", this);
             }
+
+            SceneManager.LoadScene(slot.SceneName);
         }
+
+        private bool HasSlots()
+        {
+            return slots != null && slots.Count > 0;
+        }
+
+        #endregion
     }
 }

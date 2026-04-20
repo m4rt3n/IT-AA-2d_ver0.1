@@ -13,10 +13,11 @@
  *   - GameObject backgroundDim
  *   - GameObject menuPanel
  *   - GameObject startMenuPanel
- *   - GameObject loadGamePanel
+ *   - LoadGamePanel loadGamePanel
  */
 
 using UnityEngine;
+using ITAA.UI.Panels;
 
 namespace ITAA.UI.Managers
 {
@@ -33,7 +34,10 @@ namespace ITAA.UI.Managers
 
         [Header("Panels")]
         [SerializeField] private GameObject startMenuPanel;
-        [SerializeField] private GameObject loadGamePanel;
+        [SerializeField] private LoadGamePanel loadGamePanel;
+
+        [Header("Debug")]
+        [SerializeField] private bool enableDebugLogs = true;
 
         #endregion
 
@@ -63,33 +67,65 @@ namespace ITAA.UI.Managers
 
         public void ShowStartMenu()
         {
-            Debug.Log($"[{nameof(MenuManager)}] ShowStartMenu");
+            Log($"[{nameof(MenuManager)}] ShowStartMenu");
 
             EnsureCanvasRootActive();
 
-            if (backgroundDim != null) backgroundDim.SetActive(true);
-            if (menuPanel != null) menuPanel.SetActive(true);
-            if (startMenuPanel != null) startMenuPanel.SetActive(true);
-            if (loadGamePanel != null) loadGamePanel.SetActive(false);
+            if (backgroundDim != null)
+            {
+                backgroundDim.SetActive(true);
+            }
+
+            if (menuPanel != null)
+            {
+                menuPanel.SetActive(true);
+            }
+
+            if (startMenuPanel != null)
+            {
+                startMenuPanel.SetActive(true);
+            }
+
+            if (loadGamePanel != null)
+            {
+                loadGamePanel.Hide();
+            }
 
             IsOpen = true;
-
             LogState("ShowStartMenu");
         }
 
         public void ShowLoadGamePanel()
         {
-            Debug.Log($"[{nameof(MenuManager)}] ShowLoadGamePanel");
+            Log($"[{nameof(MenuManager)}] ShowLoadGamePanel");
 
             EnsureCanvasRootActive();
 
-            if (backgroundDim != null) backgroundDim.SetActive(true);
-            if (menuPanel != null) menuPanel.SetActive(true);
-            if (startMenuPanel != null) startMenuPanel.SetActive(false);
-            if (loadGamePanel != null) loadGamePanel.SetActive(true);
+            if (backgroundDim != null)
+            {
+                backgroundDim.SetActive(true);
+            }
+
+            if (menuPanel != null)
+            {
+                menuPanel.SetActive(true);
+            }
+
+            if (startMenuPanel != null)
+            {
+                startMenuPanel.SetActive(false);
+            }
+
+            if (loadGamePanel != null)
+            {
+                loadGamePanel.Show();
+            }
+            else
+            {
+                Debug.LogWarning($"[{nameof(MenuManager)}] LoadGamePanel-Referenz fehlt.", this);
+            }
 
             IsOpen = true;
-
             LogState("ShowLoadGamePanel");
         }
 
@@ -108,23 +144,43 @@ namespace ITAA.UI.Managers
             ShowLoadGamePanel();
         }
 
+        public void CloseLoadGameAndReturnToStart()
+        {
+            ShowStartMenu();
+        }
+
         #endregion
 
         #region Private Methods
 
         private void HideAllImmediate()
         {
-            if (startMenuPanel != null) startMenuPanel.SetActive(false);
-            if (loadGamePanel != null) loadGamePanel.SetActive(false);
-            if (menuPanel != null) menuPanel.SetActive(false);
-            if (backgroundDim != null) backgroundDim.SetActive(false);
+            if (startMenuPanel != null)
+            {
+                startMenuPanel.SetActive(false);
+            }
 
-            // CanvasRoot darf aktiv bleiben oder deaktiviert werden.
-            // Hier bewusst AUS, damit beim Spielstart wirklich nichts sichtbar ist.
-            if (canvasRoot != null) canvasRoot.SetActive(false);
+            if (loadGamePanel != null)
+            {
+                loadGamePanel.Hide();
+            }
+
+            if (menuPanel != null)
+            {
+                menuPanel.SetActive(false);
+            }
+
+            if (backgroundDim != null)
+            {
+                backgroundDim.SetActive(false);
+            }
+
+            if (canvasRoot != null)
+            {
+                canvasRoot.SetActive(false);
+            }
 
             IsOpen = false;
-
             LogState("HideAllImmediate");
         }
 
@@ -152,38 +208,64 @@ namespace ITAA.UI.Managers
                 if (backgroundDim == null)
                 {
                     Transform t = canvasRoot.transform.Find("BackgroundDim");
-                    if (t != null) backgroundDim = t.gameObject;
+                    if (t != null)
+                    {
+                        backgroundDim = t.gameObject;
+                    }
                 }
 
                 if (menuPanel == null)
                 {
                     Transform t = canvasRoot.transform.Find("MenuPanel");
-                    if (t != null) menuPanel = t.gameObject;
+                    if (t != null)
+                    {
+                        menuPanel = t.gameObject;
+                    }
                 }
 
                 if (startMenuPanel == null && menuPanel != null)
                 {
                     Transform t = menuPanel.transform.Find("StartMenuPanel");
-                    if (t != null) startMenuPanel = t.gameObject;
+                    if (t != null)
+                    {
+                        startMenuPanel = t.gameObject;
+                    }
                 }
 
                 if (loadGamePanel == null && menuPanel != null)
                 {
                     Transform t = menuPanel.transform.Find("LoadGamePanel");
-                    if (t != null) loadGamePanel = t.gameObject;
+                    if (t != null)
+                    {
+                        loadGamePanel = t.GetComponent<LoadGamePanel>();
+                    }
                 }
+            }
+        }
+
+        private void Log(string message)
+        {
+            if (enableDebugLogs)
+            {
+                Debug.Log(message, this);
             }
         }
 
         private void LogState(string source)
         {
+            if (!enableDebugLogs)
+            {
+                return;
+            }
+
             Debug.Log(
                 $"[{nameof(MenuManager)}::{source}] " +
                 $"canvasRoot={(canvasRoot != null ? canvasRoot.activeSelf.ToString() : "null")}, " +
                 $"backgroundDim={(backgroundDim != null ? backgroundDim.activeSelf.ToString() : "null")}, " +
                 $"menuPanel={(menuPanel != null ? menuPanel.activeSelf.ToString() : "null")}, " +
                 $"startMenuPanel={(startMenuPanel != null ? startMenuPanel.activeSelf.ToString() : "null")}, " +
-                $"loadGamePanel={(loadGamePanel != null ? loadGamePanel.activeSelf.ToString() : "null")}"
+                $"loadGamePanel={(loadGamePanel != null ? loadGamePanel.gameObject.activeSelf.ToString() : "null")}",
+                this
             );
         }
 
