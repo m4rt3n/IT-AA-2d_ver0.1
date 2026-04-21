@@ -1,18 +1,25 @@
 /*
  * Datei: ArthurAnimationController.cs
  * Zweck:
- *   Steuert Arthurs Idle- und Walk-Animationen über Blend Trees
- *   und setzt zusätzlich den Bool-Parameter "IsMoving".
+ *   Steuert Arthurs Idle- und Walk-Animationen über zwei Hauptstates
+ *   ("Arthur_Idle" und "Arthur_Walk") und nutzt dabei Blend-Tree-Parameter
+ *   für die Blick- und Bewegungsrichtung.
  *
  * Voraussetzungen im Animator:
  *   - States:
  *       Arthur_Idle
  *       Arthur_Walk
- *   - Blend Tree Parameter:
+ *   - Float Parameter:
  *       MoveX
  *       MoveY
  *   - Bool Parameter:
  *       IsMoving
+ *
+ * Hinweis:
+ *   Dieses Script ist für Blend Trees gebaut.
+ *   Wenn dein Animator stattdessen einzelne Richtungsstates wie
+ *   Arthur_IdleDown / Arthur_IdleUp / Arthur_WalkLeft usw. nutzt,
+ *   dann muss auch der Animator entsprechend auf Blend Trees umgestellt werden.
  */
 
 using UnityEngine;
@@ -35,11 +42,14 @@ namespace ITAA.NPC.Arthur
         [SerializeField] private string moveYParameter = "MoveY";
         [SerializeField] private string isMovingParameter = "IsMoving";
 
+        [Header("Defaults")]
+        [SerializeField] private Vector2 defaultLookDirection = Vector2.down;
+
         #endregion
 
         #region Fields
 
-        private Vector2 lastLookDirection = Vector2.down;
+        private Vector2 lastLookDirection;
         private string currentState;
 
         #endregion
@@ -48,30 +58,19 @@ namespace ITAA.NPC.Arthur
 
         private void Awake()
         {
-            if (animator == null)
-            {
-                animator = GetComponent<Animator>();
+            CacheAnimator();
 
-                if (animator == null)
-                {
-                    animator = GetComponentInChildren<Animator>();
-                }
-            }
-
-            if (animator == null)
+            if (!HasValidAnimator())
             {
-                Debug.LogWarning($"[{nameof(ArthurAnimationController)}] Kein Animator gefunden auf '{gameObject.name}'.");
                 return;
             }
 
-            if (animator.runtimeAnimatorController == null)
-            {
-                Debug.LogWarning($"[{nameof(ArthurAnimationController)}] Kein Animator Controller zugewiesen.");
-                return;
-            }
+            lastLookDirection = GetSafeDirection(defaultLookDirection);
 
             animator.SetBool(isMovingParameter, false);
             ApplyDirection(lastLookDirection);
+
+            currentState = null;
             PlayIdle();
         }
 
@@ -80,12 +79,7 @@ namespace ITAA.NPC.Arthur
         {
             if (animator == null)
             {
-                animator = GetComponent<Animator>();
-
-                if (animator == null)
-                {
-                    animator = GetComponentInChildren<Animator>();
-                }
+                CacheAnimator();
             }
         }
 #endif
@@ -96,32 +90,34 @@ namespace ITAA.NPC.Arthur
 
         public void SetMovement(Vector2 movement)
         {
-            Debug.Log($"[{nameof(ArthurAnimationController)}] SetMovement input={movement} sqrMagnitude={movement.sqrMagnitude}");
+            if (!HasValidAnimator())
+            {
+                return;
+            }
 
             if (movement.sqrMagnitude > 0.0001f)
             {
-                Vector2 dir = movement.normalized;
-                lastLookDirection = dir;
+                Vector2 direction = movement.normalized;
+                lastLookDirection = direction;
 
                 animator.SetBool(isMovingParameter, true);
-
-                Debug.Log($"[{nameof(ArthurAnimationController)}] WALK dir={dir}");
-
-                ApplyDirection(dir);
+                ApplyDirection(direction);
                 PlayWalk();
                 return;
             }
 
             animator.SetBool(isMovingParameter, false);
-
-            Debug.Log($"[{nameof(ArthurAnimationController)}] IDLE lastLookDirection={lastLookDirection}");
-
             ApplyDirection(lastLookDirection);
             PlayIdle();
         }
 
         public void SetIdleDirection(Vector2 lookDirection)
         {
+            if (!HasValidAnimator())
+            {
+                return;
+            }
+
             if (lookDirection.sqrMagnitude > 0.0001f)
             {
                 lastLookDirection = lookDirection.normalized;
@@ -134,6 +130,11 @@ namespace ITAA.NPC.Arthur
 
         public void ForceIdle()
         {
+            if (!HasValidAnimator())
+            {
+                return;
+            }
+
             currentState = null;
             animator.SetBool(isMovingParameter, false);
             ApplyDirection(lastLookDirection);
@@ -142,6 +143,11 @@ namespace ITAA.NPC.Arthur
 
         public void ForceIdle(Vector2 lookDirection)
         {
+            if (!HasValidAnimator())
+            {
+                return;
+            }
+
             if (lookDirection.sqrMagnitude > 0.0001f)
             {
                 lastLookDirection = lookDirection.normalized;
@@ -153,9 +159,56 @@ namespace ITAA.NPC.Arthur
             PlayIdle();
         }
 
+        public Vector2 GetLastLookDirection()
+        {
+            return lastLookDirection;
+        }
+
         #endregion
 
         #region Private
+
+        private void CacheAnimator()
+        {
+            if (animator != null)
+            {
+                return;
+            }
+
+            animator = GetComponent<Animator>();
+
+            if (animator == null)
+            {
+                animator = GetComponentInChildren<Animator>();
+            }
+        }
+
+        private bool HasValidAnimator()
+        {
+            if (animator == null)
+            {
+                Debug.LogWarning($"[{nameof(ArthurAnimationController)}] Kein Animator gefunden auf '{gameObject.name}'.");
+                return false;
+            }
+
+            if (animator.runtimeAnimatorController == null)
+            {
+                Debug.LogWarning($"[{nameof(ArthurAnimationController)}] Kein Animator Controller auf '{animator.gameObject.name}' zugewiesen.");
+                return false;
+            }
+
+            return true;
+        }
+
+        private Vector2 GetSafeDirection(Vector2 direction)
+        {
+            if (direction.sqrMagnitude <= 0.0001f)
+            {
+                return Vector2.down;
+            }
+
+            return direction.normalized;
+        }
 
         private void PlayWalk()
         {
@@ -167,17 +220,17 @@ namespace ITAA.NPC.Arthur
             PlayState(idleState);
         }
 
-        private void ApplyDirection(Vector2 dir)
+        private void ApplyDirection(Vector2 direction)
         {
             if (animator == null)
             {
                 return;
             }
 
-            animator.SetFloat(moveXParameter, dir.x);
-            animator.SetFloat(moveYParameter, dir.y);
+            Vector2 safeDirection = GetSafeDirection(direction);
 
-            Debug.Log($"[{nameof(ArthurAnimationController)}] SetFloat {moveXParameter}={dir.x}, {moveYParameter}={dir.y}");
+            animator.SetFloat(moveXParameter, safeDirection.x);
+            animator.SetFloat(moveYParameter, safeDirection.y);
         }
 
         private void PlayState(string stateName)
@@ -188,6 +241,12 @@ namespace ITAA.NPC.Arthur
             }
 
             const int layer = 0;
+
+            if (string.IsNullOrWhiteSpace(stateName))
+            {
+                Debug.LogWarning($"[{nameof(ArthurAnimationController)}] State-Name ist leer.");
+                return;
+            }
 
             if (currentState == stateName)
             {
@@ -203,8 +262,6 @@ namespace ITAA.NPC.Arthur
                 );
                 return;
             }
-
-            Debug.Log($"[{nameof(ArthurAnimationController)}] PlayState -> {stateName}");
 
             animator.Play(hash, layer, 0f);
             currentState = stateName;

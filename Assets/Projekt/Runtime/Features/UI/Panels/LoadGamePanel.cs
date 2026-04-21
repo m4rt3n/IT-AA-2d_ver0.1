@@ -1,6 +1,8 @@
 /*
  * Datei: LoadGamePanel.cs
- * Zweck: Verwaltet das große Load-Game-Menü mit genau einem sichtbaren Slot.
+ * Zweck:
+ *   Verwaltet das große Load-Game-Menü mit genau einem sichtbaren Slot.
+ *
  * Verantwortung:
  * - Lädt Save-Slots aus dem SaveSystem
  * - Zeigt immer genau einen Slot groß an
@@ -12,6 +14,8 @@
  * Wichtig:
  * - Dieses Panel verwaltet nur sich selbst und seinen Inhalt.
  * - CanvasRoot, BackgroundDim und MenuPanel werden vom MenuManager verwaltet.
+ * - Der Schließen-Button ruft einen Callback auf.
+ * - In dieser Variante schließt der Callback das komplette Menüsystem.
  */
 
 using System;
@@ -50,9 +54,12 @@ namespace ITAA.UI.Panels
         #region Private Fields
 
         private readonly SaveSystem saveSystem = new SaveSystem();
-        private IReadOnlyList<SaveSlotEntity> slots;
-        private int currentIndex = 0;
+
+        private IReadOnlyList<SaveSlotEntity> slots = Array.Empty<SaveSlotEntity>();
+        private int currentIndex;
         private bool isInitialized;
+
+        private Action onCloseRequested;
 
         #endregion
 
@@ -60,26 +67,27 @@ namespace ITAA.UI.Panels
 
         private void Awake()
         {
-            WireButtons();
+            EnsureInitialized();
         }
 
-        private void Start()
+        private void OnDestroy()
         {
-            if (enableDebugLogs)
-            {
-                Debug.Log($"[{nameof(LoadGamePanel)}] Start()", this);
-            }
-
-            isInitialized = true;
-            gameObject.SetActive(false);
+            UnwireButtons();
         }
 
         #endregion
 
         #region Public Methods
 
+        public void Configure(Action closeCallback)
+        {
+            onCloseRequested = closeCallback;
+        }
+
         public void Show()
         {
+            EnsureInitialized();
+
             if (enableDebugLogs)
             {
                 Debug.Log($"[{nameof(LoadGamePanel)}] Show()", this);
@@ -100,7 +108,10 @@ namespace ITAA.UI.Panels
 
             if (logHideStackTrace)
             {
-                Debug.Log($"[{nameof(LoadGamePanel)}] Hide() StackTrace:\n{Environment.StackTrace}", this);
+                Debug.Log(
+                    $"[{nameof(LoadGamePanel)}] Hide() StackTrace:\n{Environment.StackTrace}",
+                    this
+                );
             }
 
             gameObject.SetActive(false);
@@ -108,16 +119,23 @@ namespace ITAA.UI.Panels
 
         public void ReloadSlots()
         {
-            slots = saveSystem.GetAllSlots(slotCount);
+            slots = saveSystem.GetAllSlots(Mathf.Max(1, slotCount));
 
             if (slots == null || slots.Count == 0)
             {
+                slots = Array.Empty<SaveSlotEntity>();
+                currentIndex = 0;
+
                 if (enableDebugLogs)
                 {
                     Debug.LogWarning($"[{nameof(LoadGamePanel)}] Keine Slots geladen.", this);
                 }
 
-                currentIndex = 0;
+                if (largeSlotItem != null)
+                {
+                    largeSlotItem.Setup(null, HandleSlotSelected);
+                }
+
                 UpdateHeader(null);
                 UpdatePageIndicator();
                 UpdateNavigationState();
@@ -165,25 +183,66 @@ namespace ITAA.UI.Panels
 
         #region Private Methods
 
+        private void EnsureInitialized()
+        {
+            if (isInitialized)
+            {
+                return;
+            }
+
+            WireButtons();
+            ReloadSlots();
+
+            isInitialized = true;
+        }
+
         private void WireButtons()
         {
             if (previousButton != null)
             {
-                previousButton.onClick.RemoveAllListeners();
+                previousButton.onClick.RemoveListener(ShowPreviousSlot);
                 previousButton.onClick.AddListener(ShowPreviousSlot);
             }
 
             if (nextButton != null)
             {
-                nextButton.onClick.RemoveAllListeners();
+                nextButton.onClick.RemoveListener(ShowNextSlot);
                 nextButton.onClick.AddListener(ShowNextSlot);
             }
 
             if (closeButton != null)
             {
-                closeButton.onClick.RemoveAllListeners();
-                closeButton.onClick.AddListener(Hide);
+                closeButton.onClick.RemoveListener(HandleCloseClicked);
+                closeButton.onClick.AddListener(HandleCloseClicked);
             }
+        }
+
+        private void UnwireButtons()
+        {
+            if (previousButton != null)
+            {
+                previousButton.onClick.RemoveListener(ShowPreviousSlot);
+            }
+
+            if (nextButton != null)
+            {
+                nextButton.onClick.RemoveListener(ShowNextSlot);
+            }
+
+            if (closeButton != null)
+            {
+                closeButton.onClick.RemoveListener(HandleCloseClicked);
+            }
+        }
+
+        private void HandleCloseClicked()
+        {
+            if (enableDebugLogs)
+            {
+                Debug.Log($"[{nameof(LoadGamePanel)}] Close button clicked.", this);
+            }
+
+            onCloseRequested?.Invoke();
         }
 
         private void ShowSlot(int index)
@@ -220,7 +279,10 @@ namespace ITAA.UI.Panels
 
             if (enableDebugLogs)
             {
-                Debug.Log($"[{nameof(LoadGamePanel)}] Zeige Slot-Index {currentIndex} / SlotId {slot.SlotId}", this);
+                Debug.Log(
+                    $"[{nameof(LoadGamePanel)}] Zeige Slot-Index {currentIndex} / SlotId {slot.SlotId}",
+                    this
+                );
             }
         }
 
@@ -302,7 +364,10 @@ namespace ITAA.UI.Panels
 
             if (enableDebugLogs)
             {
-                Debug.Log($"[{nameof(LoadGamePanel)}] Lade Szene '{slot.SceneName}' für Slot {slot.SlotId}.", this);
+                Debug.Log(
+                    $"[{nameof(LoadGamePanel)}] Lade Szene '{slot.SceneName}' für Slot {slot.SlotId}.",
+                    this
+                );
             }
 
             SceneManager.LoadScene(slot.SceneName);

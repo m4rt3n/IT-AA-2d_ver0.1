@@ -1,23 +1,24 @@
 /*
  * Datei: MenuManager.cs
- * Zweck: Verwaltet das Öffnen und Schließen der Hauptmenüs.
- * Verantwortung:
- *   - Aktiviert bei Bedarf den kompletten UI-Root
- *   - Schließt alle Menüs beim Start
- *   - Öffnet das Startmenü nur auf Anforderung
- *   - Wechselt zwischen StartMenuPanel und LoadGamePanel
- *   - Blendet BackgroundDim und MenuPanel passend ein/aus
+ * Zweck:
+ *   Zentrale Steuerung für CanvasRoot, BackgroundDim, MenuPanel,
+ *   StartMenuPanel und LoadGamePanel.
  *
- * Abhängigkeiten:
- *   - GameObject canvasRoot
- *   - GameObject backgroundDim
- *   - GameObject menuPanel
- *   - GameObject startMenuPanel
- *   - LoadGamePanel loadGamePanel
+ * Funktionen:
+ * - ShowStartMenu()      -> öffnet Hauptmenü
+ * - ShowLoadGamePanel()  -> öffnet LoadGamePanel
+ * - HideAllImmediate()   -> schließt alles sofort
+ * - HideAll()            -> Kompatibilitäts-Wrapper für alten Code
+ * - IsOpen               -> meldet, ob das Menüsystem aktuell offen ist
+ *
+ * Wichtig:
+ * - Der Close-Button im LoadGamePanel ruft in dieser Variante HideAllImmediate() auf
+ * - Falls die Inspector-Referenz auf LoadGamePanel fehlt, wird sie automatisch gesucht
+ * - HideAllImmediate() wird nur einmal in Awake() aufgerufen
  */
 
-using UnityEngine;
 using ITAA.UI.Panels;
+using UnityEngine;
 
 namespace ITAA.UI.Managers
 {
@@ -25,10 +26,8 @@ namespace ITAA.UI.Managers
     {
         #region Inspector
 
-        [Header("Canvas Root")]
-        [SerializeField] private GameObject canvasRoot;
-
         [Header("Root")]
+        [SerializeField] private GameObject canvasRoot;
         [SerializeField] private GameObject backgroundDim;
         [SerializeField] private GameObject menuPanel;
 
@@ -41,80 +40,62 @@ namespace ITAA.UI.Managers
 
         #endregion
 
-        #region Properties
+        #region Public Properties
 
-        public bool IsOpen { get; private set; }
+        public bool IsOpen
+        {
+            get
+            {
+                bool canvasActive = canvasRoot != null && canvasRoot.activeSelf;
+                bool dimActive = backgroundDim != null && backgroundDim.activeSelf;
+                bool menuActive = menuPanel != null && menuPanel.activeSelf;
+                bool startActive = startMenuPanel != null && startMenuPanel.activeSelf;
+                bool loadActive = loadGamePanel != null && loadGamePanel.gameObject.activeSelf;
+
+                return canvasActive || dimActive || menuActive || startActive || loadActive;
+            }
+        }
 
         #endregion
 
-        #region Unity Methods
+        #region Unity
 
         private void Awake()
         {
             AutoAssignMissingReferences();
-            HideAllImmediate();
-        }
-
-        private void Start()
-        {
-            AutoAssignMissingReferences();
+            ConfigurePanels();
             HideAllImmediate();
         }
 
         #endregion
 
-        #region Public Methods
+        #region Public API
 
         public void ShowStartMenu()
         {
-            Log($"[{nameof(MenuManager)}] ShowStartMenu");
+            Log("ShowStartMenu");
 
-            EnsureCanvasRootActive();
-
-            if (backgroundDim != null)
-            {
-                backgroundDim.SetActive(true);
-            }
-
-            if (menuPanel != null)
-            {
-                menuPanel.SetActive(true);
-            }
-
-            if (startMenuPanel != null)
-            {
-                startMenuPanel.SetActive(true);
-            }
+            SetActive(canvasRoot, true);
+            SetActive(backgroundDim, true);
+            SetActive(menuPanel, true);
+            SetActive(startMenuPanel, true);
 
             if (loadGamePanel != null)
             {
                 loadGamePanel.Hide();
             }
 
-            IsOpen = true;
             LogState("ShowStartMenu");
         }
 
         public void ShowLoadGamePanel()
         {
-            Log($"[{nameof(MenuManager)}] ShowLoadGamePanel");
+            Log("ShowLoadGamePanel");
 
-            EnsureCanvasRootActive();
-
-            if (backgroundDim != null)
-            {
-                backgroundDim.SetActive(true);
-            }
-
-            if (menuPanel != null)
-            {
-                menuPanel.SetActive(true);
-            }
-
-            if (startMenuPanel != null)
-            {
-                startMenuPanel.SetActive(false);
-            }
+            SetActive(canvasRoot, true);
+            SetActive(backgroundDim, true);
+            SetActive(menuPanel, true);
+            SetActive(startMenuPanel, false);
 
             if (loadGamePanel != null)
             {
@@ -122,10 +103,9 @@ namespace ITAA.UI.Managers
             }
             else
             {
-                Debug.LogWarning($"[{nameof(MenuManager)}] LoadGamePanel-Referenz fehlt.", this);
+                Debug.LogWarning($"[{nameof(MenuManager)}] LoadGamePanel ist null und kann nicht geöffnet werden.", this);
             }
 
-            IsOpen = true;
             LogState("ShowLoadGamePanel");
         }
 
@@ -134,137 +114,119 @@ namespace ITAA.UI.Managers
             HideAllImmediate();
         }
 
-        public void OpenStartMenu()
+        public void HideAllImmediate()
         {
-            ShowStartMenu();
-        }
-
-        public void OpenLoadGame()
-        {
-            ShowLoadGamePanel();
-        }
-
-        public void CloseLoadGameAndReturnToStart()
-        {
-            ShowStartMenu();
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        private void HideAllImmediate()
-        {
-            if (startMenuPanel != null)
-            {
-                startMenuPanel.SetActive(false);
-            }
+            Log("HideAllImmediate");
 
             if (loadGamePanel != null)
             {
                 loadGamePanel.Hide();
             }
 
-            if (menuPanel != null)
-            {
-                menuPanel.SetActive(false);
-            }
+            SetActive(startMenuPanel, false);
+            SetActive(menuPanel, false);
+            SetActive(backgroundDim, false);
+            SetActive(canvasRoot, false);
 
-            if (backgroundDim != null)
-            {
-                backgroundDim.SetActive(false);
-            }
-
-            if (canvasRoot != null)
-            {
-                canvasRoot.SetActive(false);
-            }
-
-            IsOpen = false;
             LogState("HideAllImmediate");
         }
 
-        private void EnsureCanvasRootActive()
-        {
-            if (canvasRoot != null && !canvasRoot.activeSelf)
-            {
-                canvasRoot.SetActive(true);
-            }
-        }
+        #endregion
+
+        #region Private
 
         private void AutoAssignMissingReferences()
         {
             if (canvasRoot == null)
             {
-                Transform root = transform.Find("CanvasMainMenu");
-                if (root != null)
+                Canvas canvas = FindFirstObjectByType<Canvas>(FindObjectsInactive.Include);
+                if (canvas != null)
                 {
-                    canvasRoot = root.gameObject;
+                    canvasRoot = canvas.gameObject;
                 }
             }
 
-            if (canvasRoot != null)
+            if (loadGamePanel == null)
             {
-                if (backgroundDim == null)
-                {
-                    Transform t = canvasRoot.transform.Find("BackgroundDim");
-                    if (t != null)
-                    {
-                        backgroundDim = t.gameObject;
-                    }
-                }
+                loadGamePanel = FindFirstObjectByType<LoadGamePanel>(FindObjectsInactive.Include);
+            }
 
-                if (menuPanel == null)
+            if (menuPanel == null && canvasRoot != null)
+            {
+                Transform found = canvasRoot.transform.Find("BackgroundDim/MenuPanel");
+                if (found != null)
                 {
-                    Transform t = canvasRoot.transform.Find("MenuPanel");
-                    if (t != null)
-                    {
-                        menuPanel = t.gameObject;
-                    }
-                }
-
-                if (startMenuPanel == null && menuPanel != null)
-                {
-                    Transform t = menuPanel.transform.Find("StartMenuPanel");
-                    if (t != null)
-                    {
-                        startMenuPanel = t.gameObject;
-                    }
-                }
-
-                if (loadGamePanel == null && menuPanel != null)
-                {
-                    Transform t = menuPanel.transform.Find("LoadGamePanel");
-                    if (t != null)
-                    {
-                        loadGamePanel = t.GetComponent<LoadGamePanel>();
-                    }
+                    menuPanel = found.gameObject;
                 }
             }
+
+            if (backgroundDim == null && canvasRoot != null)
+            {
+                Transform found = canvasRoot.transform.Find("BackgroundDim");
+                if (found != null)
+                {
+                    backgroundDim = found.gameObject;
+                }
+            }
+
+            if (startMenuPanel == null && menuPanel != null)
+            {
+                Transform found = menuPanel.transform.Find("StartMenuPanel");
+                if (found != null)
+                {
+                    startMenuPanel = found.gameObject;
+                }
+            }
+        }
+
+        private void ConfigurePanels()
+        {
+            if (loadGamePanel != null)
+            {
+                loadGamePanel.Configure(HideAllImmediate);
+            }
+        }
+
+        private void SetActive(GameObject target, bool value)
+        {
+            if (target == null)
+            {
+                return;
+            }
+
+            target.SetActive(value);
         }
 
         private void Log(string message)
-        {
-            if (enableDebugLogs)
-            {
-                Debug.Log(message, this);
-            }
-        }
-
-        private void LogState(string source)
         {
             if (!enableDebugLogs)
             {
                 return;
             }
 
+            Debug.Log($"[{nameof(MenuManager)}] {message}", this);
+        }
+
+        private void LogState(string context)
+        {
+            if (!enableDebugLogs)
+            {
+                return;
+            }
+
+            bool canvasState = canvasRoot != null && canvasRoot.activeSelf;
+            bool dimState = backgroundDim != null && backgroundDim.activeSelf;
+            bool menuState = menuPanel != null && menuPanel.activeSelf;
+            bool startState = startMenuPanel != null && startMenuPanel.activeSelf;
+            bool loadState = loadGamePanel != null && loadGamePanel.gameObject.activeSelf;
+
             Debug.Log(
-                $"[{nameof(MenuManager)}::{source}] " +
-                $"canvasRoot={(canvasRoot != null ? canvasRoot.activeSelf.ToString() : "null")}, " +
-                $"backgroundDim={(backgroundDim != null ? backgroundDim.activeSelf.ToString() : "null")}, " +
-                $"menuPanel={(menuPanel != null ? menuPanel.activeSelf.ToString() : "null")}, " +
-                $"startMenuPanel={(startMenuPanel != null ? startMenuPanel.activeSelf.ToString() : "null")}, " +
-                $"loadGamePanel={(loadGamePanel != null ? loadGamePanel.gameObject.activeSelf.ToString() : "null")}",
+                $"[{nameof(MenuManager)}::{context}] " +
+                $"canvasRoot={canvasState}, " +
+                $"backgroundDim={dimState}, " +
+                $"menuPanel={menuState}, " +
+                $"startMenuPanel={startState}, " +
+                $"loadGamePanel={loadState}",
                 this
             );
         }
