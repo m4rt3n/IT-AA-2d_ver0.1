@@ -1,7 +1,11 @@
 /*
  * Datei: PlayerController.cs
  * Zweck: Verarbeitet die Eingabe und bewegt den Spieler in der Spielwelt.
- * Verantwortung: Liest Richtungsinput, bewegt Rigidbody2D und aktualisiert Animator-Parameter.
+ * Verantwortung:
+ *   - Liest Richtungsinput
+ *   - übergibt Bewegungsinput an den PlayerMotor2D
+ *   - aktualisiert Animator-Parameter
+ *   - kann extern gesperrt/freigegeben werden (z. B. für NPC-Interaktionen)
  * Abhängigkeiten: Rigidbody2D, optional Animator.
  * Verwendet von: Player-GameObject in Gameplay-Szenen.
  */
@@ -37,6 +41,8 @@ namespace ITAA.Player.Movement
         private bool hasLastMoveY;
         private bool hasIsMoving;
 
+        private bool movementEnabled = true;
+
         #endregion
 
         #region Unity Methods
@@ -69,6 +75,12 @@ namespace ITAA.Player.Movement
                 return;
             }
 
+            if (!movementEnabled)
+            {
+                UpdateVisuals(Vector2.zero);
+                return;
+            }
+
             Vector2 input = inputReader.MoveInput;
 
             if (input != Vector2.zero)
@@ -91,7 +103,63 @@ namespace ITAA.Player.Movement
                 return;
             }
 
+            if (!movementEnabled)
+            {
+                motor.SetMovementInput(Vector2.zero);
+                return;
+            }
+
             motor.SetMovementInput(inputReader.MoveInput);
+        }
+
+        #endregion
+
+        #region Public Methods
+
+        public void SetMovementEnabled(bool enabled)
+        {
+            movementEnabled = enabled;
+
+            if (motor != null)
+            {
+                motor.SetMovementLocked(!enabled);
+
+                if (!enabled)
+                {
+                    motor.Stop();
+                    UpdateVisuals(Vector2.zero);
+
+                    if (enableDebugLogs)
+                    {
+                        Debug.Log($"[{nameof(PlayerController)}] Movement gesperrt.");
+                    }
+                }
+                else if (enableDebugLogs)
+                {
+                    Debug.Log($"[{nameof(PlayerController)}] Movement freigegeben.");
+                }
+            }
+        }
+
+        public bool IsMovementEnabled()
+        {
+            return movementEnabled;
+        }
+
+        public void StopImmediately()
+        {
+            if (motor == null)
+            {
+                return;
+            }
+
+            motor.Stop();
+            UpdateVisuals(Vector2.zero);
+
+            if (enableDebugLogs)
+            {
+                Debug.Log($"[{nameof(PlayerController)}] StopImmediately ausgeführt.");
+            }
         }
 
         #endregion

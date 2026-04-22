@@ -1,95 +1,288 @@
-/*
- * Datei: ArthurAutoInteraction.cs
- * Zweck:
- *   Steuert Arthurs automatische Interaktion mit dem Spieler.
- *
- * Verantwortung:
- * - Erkennt den Spieler über Trigger oder externe DetectionZone
- * - Lässt Arthur optional zum Spieler laufen
- * - Öffnet bei erreichter Distanz das Startmenü
- * - Sperrt die Spielerbewegung, solange irgendein Menü offen ist
- * - Gibt die Spielerbewegung wieder frei, sobald alle Menüs geschlossen sind
- *
- * Wichtige Abhängigkeiten:
- * - MenuManager
- * - ArthurMovementToPlayer
- * - ArthurAnimationController (optional)
- */
-
-using ITAA.UI.Managers;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using ITAA.Player.Movement;
+using ITAA.UI.Managers;
 
 namespace ITAA.NPC.Arthur
 {
-    public class ArthurAutoInteraction : MonoBehaviour
+    /// <summary>
+    /// Arthur-Interaktion:
+    /// - Beim ersten Betreten der Zone läuft Arthur einmal zum Player
+    /// - Sobald Arthur den Player erreicht, öffnet sich das Menü
+    /// - Wenn das Menü geschlossen wird, kann sich der Player wieder bewegen
+    /// - Arthur folgt danach nicht weiter
+    /// - Solange der Player in der Zone bleibt, kann das Menü danach nur noch per E geöffnet werden
+    /// - Beim Verlassen der Zone wird der Zustand zurückgesetzt
+    /// </summary>
+    [RequireComponent(typeof(Collider2D))]
+    public sealed class ArthurAutoInteraction : MonoBehaviour
     {
-        #region Inspector
-
-        [Header("References")]
-        [SerializeField] private MenuManager menuManager;
+        [Header("Arthur References")]
         [SerializeField] private ArthurMovementToPlayer movementToPlayer;
         [SerializeField] private ArthurAnimationController animationController;
+        [SerializeField] private ArthurNameUI nameUI;
 
-        [Header("Player Control")]
-        [SerializeField] private Behaviour playerMovementController;
+        [Header("UI")]
+        [SerializeField] private MenuManager menuManager;
+        [SerializeField] private bool openMenuWhenArthurReachesPlayer = true;
+
+        [Header("Input")]
+        [SerializeField] private InputActionReference interactAction;
 
         [Header("Detection")]
         [SerializeField] private string playerTag = "Player";
-        [SerializeField] private float openDistance = 1.35f;
-        [SerializeField] private bool requirePlayerInRange = true;
-
-        [Header("Behaviour")]
-        [SerializeField] private bool openMenuAutomatically = true;
-        [SerializeField] private bool moveToPlayerBeforeOpen = true;
-        [SerializeField] private bool openOnlyOncePerApproach = true;
-        [SerializeField] private bool facePlayerWhenMenuOpens = true;
 
         [Header("Debug")]
         [SerializeField] private bool enableDebugLogs = true;
 
-        #endregion
+        private Transform currentTargetPlayer;
+        private PlayerController currentPlayerController;
 
-        #region Private Fields
-
-        private Transform targetPlayer;
         private bool playerInRange;
-        private bool hasOpenedForCurrentApproach;
-        private bool playerMovementLockedByMenu;
+        private bool playerLocked;
+        private bool hasArthurApproachedPlayer;
+        private bool menuOpenedForCurrentInteraction;
 
-        #endregion
-
-        #region Unity
+        private void Reset()
+        {
+            Collider2D collider2D = GetComponent<Collider2D>();
+            if (collider2D != null)
+            {
+                collider2D.isTrigger = true;
+            }
+        }
 
         private void Awake()
         {
+            if (nameUI != null)
+            {
+                nameUI.HideImmediate();
+            }
+
             if (menuManager == null)
             {
-                menuManager = FindFirstObjectByType<MenuManager>(FindObjectsInactive.Include);
+                menuManager = FindAnyObjectByType<MenuManager>(FindObjectsInactive.Include);
             }
+        }
 
-            if (movementToPlayer == null)
+        private void OnEnable()
+        {
+            if (movementToPlayer != null)
             {
-                movementToPlayer = GetComponent<ArthurMovementToPlayer>();
+                movementToPlayer.OnStartedMoving += HandleArthurStartedMoving;
+                movementToPlayer.OnStoppedMoving += HandleArthurStoppedMoving;
+                movementToPlayer.OnReachedTarget += HandleArthurReachedTarget;
             }
 
-            if (animationController == null)
+            if (interactAction != null && interactAction.action != null)
             {
-                animationController = GetComponent<ArthurAnimationController>();
+                interactAction.action.Enable();
+                interactAction.action.performed += HandleInteractPerformed;
+            }
+        }
 
-                if (animationController == null)
-                {
-                    animationController = GetComponentInChildren<ArthurAnimationController>();
-                }
+        private void OnDisable()
+        {
+            if (movementToPlayer != null)
+            {
+                movementToPlayer.OnStartedMoving -= HandleArthurStartedMoving;
+                movementToPlayer.OnStoppedMoving -= HandleArthurStoppedMoving;
+                movementToPlayer.OnReachedTarget -= HandleArthurReachedTarget;
             }
 
-            Log($"Awake. MenuManager gefunden: {menuManager != null}");
+            if (interactAction != null && interactAction.action != null)
+            {
+                interactAction.action.performed -= HandleInteractPerformed;
+                interactAction.action.Disable();
+            }
+
+            ReleasePlayerMovement();
         }
 
         private void Update()
         {
-            UpdatePlayerMovementLock();
+            if (menuManager == null)
+            {
+                return;
+            }
 
-            if (!openMenuAutomatically)
+            if (!menuManager.IsOpen && playerLocked)
+            {
+                ReleasePlayerMovement();
+
+                if (enableDebugLogs)
+                {
+                    Debug.Log($"[{nameof(ArthurAutoInteraction)}] Menu closed -> player released.", this);
+                }
+            }
+        }
+
+        private void OnTriggerEnter2D(Collider2D other)
+        {
+            if (!other.CompareTag(playerTag))
+            {
+                return;
+            }
+
+            SetTargetPlayer(other.transform);
+        }
+
+        private void OnTriggerExit2D(Collider2D other)
+        {
+            if (!other.CompareTag(playerTag))
+            {
+                return;
+            }
+
+            ClearTargetPlayer(other.transform);
+        }
+
+        public void SetTargetPlayer(Transform player)
+        {
+            if (player == null)
+            {
+                return;
+            }
+
+            currentTargetPlayer = player;
+            currentPlayerController = player.GetComponent<PlayerController>();
+            playerInRange = true;
+            menuOpenedForCurrentInteraction = false;
+
+            if (enableDebugLogs)
+            {
+                Debug.Log($"[{nameof(ArthurAutoInteraction)}] Player entered detection zone.", this);
+            }
+
+            if (!hasArthurApproachedPlayer && movementToPlayer != null)
+            {
+                movementToPlayer.EnableMovement(player);
+            }
+        }
+
+        public void ClearTargetPlayer(Transform player)
+        {
+            if (player == null)
+            {
+                return;
+            }
+
+            if (currentTargetPlayer != player)
+            {
+                return;
+            }
+
+            if (enableDebugLogs)
+            {
+                Debug.Log($"[{nameof(ArthurAutoInteraction)}] Player left detection zone.", this);
+            }
+
+            playerInRange = false;
+            menuOpenedForCurrentInteraction = false;
+            hasArthurApproachedPlayer = false;
+
+            if (movementToPlayer != null)
+            {
+                movementToPlayer.DisableMovement();
+            }
+
+            if (animationController != null)
+            {
+                animationController.ForceIdle();
+            }
+
+            if (nameUI != null)
+            {
+                nameUI.Hide();
+            }
+
+            if (menuManager != null && menuManager.IsOpen)
+            {
+                menuManager.HideAllImmediate();
+            }
+
+            ReleasePlayerMovement();
+
+            currentTargetPlayer = null;
+            currentPlayerController = null;
+        }
+
+        private void HandleArthurStartedMoving()
+        {
+            if (!playerInRange)
+            {
+                return;
+            }
+
+            if (enableDebugLogs)
+            {
+                Debug.Log($"[{nameof(ArthurAutoInteraction)}] Arthur started moving.", this);
+            }
+
+            if (nameUI != null)
+            {
+                nameUI.ShowName("Arthur");
+            }
+
+            LockPlayerMovement();
+        }
+
+        private void HandleArthurStoppedMoving()
+        {
+            if (!playerInRange)
+            {
+                return;
+            }
+
+            if (enableDebugLogs)
+            {
+                Debug.Log($"[{nameof(ArthurAutoInteraction)}] Arthur stopped moving.", this);
+            }
+        }
+
+        private void HandleArthurReachedTarget()
+        {
+            if (!playerInRange)
+            {
+                return;
+            }
+
+            if (enableDebugLogs)
+            {
+                Debug.Log($"[{nameof(ArthurAutoInteraction)}] Arthur reached target.", this);
+            }
+
+            hasArthurApproachedPlayer = true;
+
+            if (movementToPlayer != null)
+            {
+                movementToPlayer.DisableMovement();
+            }
+
+            if (animationController != null)
+            {
+                animationController.ForceIdle();
+            }
+
+            if (nameUI != null)
+            {
+                nameUI.ShowName("Arthur");
+            }
+
+            if (openMenuWhenArthurReachesPlayer && !menuOpenedForCurrentInteraction)
+            {
+                OpenDialogueMenu();
+            }
+        }
+
+        private void HandleInteractPerformed(InputAction.CallbackContext context)
+        {
+            if (!playerInRange)
+            {
+                return;
+            }
+
+            if (!hasArthurApproachedPlayer)
             {
                 return;
             }
@@ -104,177 +297,65 @@ namespace ITAA.NPC.Arthur
                 return;
             }
 
-            if (targetPlayer == null)
+            if (enableDebugLogs)
             {
+                Debug.Log($"[{nameof(ArthurAutoInteraction)}] Interact pressed -> open menu.", this);
+            }
+
+            LockPlayerMovement();
+            OpenDialogueMenu();
+        }
+
+        private void OpenDialogueMenu()
+        {
+            if (menuManager == null)
+            {
+                if (enableDebugLogs)
+                {
+                    Debug.LogWarning($"[{nameof(ArthurAutoInteraction)}] MenuManager not found.", this);
+                }
                 return;
-            }
-
-            if (requirePlayerInRange && !playerInRange)
-            {
-                return;
-            }
-
-            if (openOnlyOncePerApproach && hasOpenedForCurrentApproach)
-            {
-                return;
-            }
-
-            float distance = Vector2.Distance(transform.position, targetPlayer.position);
-
-            if (distance > openDistance)
-            {
-                Log($"Arthur noch zu weit weg. Distanz={distance:0.00}, benötigt<={openDistance:0.00}");
-                return;
-            }
-
-            Log("Arthur ist nah genug. Öffne Startmenü.");
-
-            if (moveToPlayerBeforeOpen && movementToPlayer != null)
-            {
-                movementToPlayer.DisableMovement();
-            }
-
-            if (facePlayerWhenMenuOpens)
-            {
-                FacePlayer();
             }
 
             menuManager.ShowStartMenu();
-            hasOpenedForCurrentApproach = true;
+            menuOpenedForCurrentInteraction = true;
+
+            if (enableDebugLogs)
+            {
+                Debug.Log($"[{nameof(ArthurAutoInteraction)}] Start menu opened.", this);
+            }
         }
 
-        private void OnTriggerEnter2D(Collider2D other)
+        private void LockPlayerMovement()
         {
-            if (!IsPlayer(other))
+            if (currentPlayerController == null || playerLocked)
             {
                 return;
             }
 
-            SetTargetPlayer(other.transform);
-            playerInRange = true;
+            currentPlayerController.SetMovementEnabled(false);
+            playerLocked = true;
 
-            Log("Spieler in Reichweite.");
+            if (enableDebugLogs)
+            {
+                Debug.Log($"[{nameof(ArthurAutoInteraction)}] Player locked.", this);
+            }
         }
 
-        private void OnTriggerExit2D(Collider2D other)
+        private void ReleasePlayerMovement()
         {
-            if (!IsPlayer(other))
+            if (currentPlayerController == null || !playerLocked)
             {
                 return;
             }
 
-            ClearTargetPlayer(other.transform);
-            playerInRange = false;
-            hasOpenedForCurrentApproach = false;
+            currentPlayerController.SetMovementEnabled(true);
+            playerLocked = false;
 
-            Log("Spieler hat Reichweite verlassen.");
-        }
-
-        #endregion
-
-        #region Public API
-
-        public void SetTargetPlayer(Transform playerTransform)
-        {
-            if (playerTransform == null)
+            if (enableDebugLogs)
             {
-                return;
-            }
-
-            targetPlayer = playerTransform;
-            playerInRange = true;
-
-            if (moveToPlayerBeforeOpen && movementToPlayer != null)
-            {
-                movementToPlayer.EnableMovement(playerTransform);
-            }
-
-            Log($"SetTargetPlayer -> {playerTransform.name}");
-        }
-
-        public void ClearTargetPlayer(Transform playerTransform = null)
-        {
-            if (playerTransform != null && targetPlayer != null && playerTransform != targetPlayer)
-            {
-                return;
-            }
-
-            if (moveToPlayerBeforeOpen && movementToPlayer != null)
-            {
-                movementToPlayer.DisableMovement();
-            }
-
-            targetPlayer = null;
-            playerInRange = false;
-            hasOpenedForCurrentApproach = false;
-
-            if (animationController != null)
-            {
-                animationController.ForceIdle();
-            }
-
-            Log("ClearTargetPlayer");
-        }
-
-        #endregion
-
-        #region Private Helpers
-
-        private void UpdatePlayerMovementLock()
-        {
-            if (menuManager == null || playerMovementController == null)
-            {
-                return;
-            }
-
-            bool shouldLockPlayer = menuManager.IsOpen;
-
-            if (shouldLockPlayer && !playerMovementLockedByMenu)
-            {
-                playerMovementController.enabled = false;
-                playerMovementLockedByMenu = true;
-                Log("Player-Steuerung deaktiviert, weil ein Menü offen ist.");
-            }
-            else if (!shouldLockPlayer && playerMovementLockedByMenu)
-            {
-                playerMovementController.enabled = true;
-                playerMovementLockedByMenu = false;
-                Log("Player-Steuerung wieder aktiviert, weil alle Menüs geschlossen sind.");
+                Debug.Log($"[{nameof(ArthurAutoInteraction)}] Player released.", this);
             }
         }
-
-        private void FacePlayer()
-        {
-            if (targetPlayer == null || animationController == null)
-            {
-                return;
-            }
-
-            Vector2 direction = targetPlayer.position - transform.position;
-
-            if (direction.sqrMagnitude <= 0.0001f)
-            {
-                return;
-            }
-
-            animationController.ForceIdle(direction.normalized);
-        }
-
-        private bool IsPlayer(Collider2D other)
-        {
-            return other != null && other.CompareTag(playerTag);
-        }
-
-        private void Log(string message)
-        {
-            if (!enableDebugLogs)
-            {
-                return;
-            }
-
-            Debug.Log($"[{nameof(ArthurAutoInteraction)}] {message}");
-        }
-
-        #endregion
     }
 }

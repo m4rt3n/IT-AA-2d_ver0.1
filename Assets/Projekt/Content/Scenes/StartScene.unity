@@ -31071,16 +31071,6 @@ Tilemap:
       m_TileObjectToInstantiateIndex: 65535
       dummyAlignment: 0
       m_AllTileFlags: 1073741825
-  - first: {x: -15, y: 2, z: 0}
-    second:
-      serializedVersion: 2
-      m_TileIndex: 0
-      m_TileSpriteIndex: 0
-      m_TileMatrixIndex: 0
-      m_TileColorIndex: 0
-      m_TileObjectToInstantiateIndex: 65535
-      dummyAlignment: 0
-      m_AllTileFlags: 1073741825
   - first: {x: -14, y: 2, z: 0}
     second:
       serializedVersion: 2
@@ -34992,16 +34982,6 @@ Tilemap:
       dummyAlignment: 0
       m_AllTileFlags: 1073741825
   - first: {x: -11, y: 6, z: 0}
-    second:
-      serializedVersion: 2
-      m_TileIndex: 0
-      m_TileSpriteIndex: 0
-      m_TileMatrixIndex: 0
-      m_TileColorIndex: 0
-      m_TileObjectToInstantiateIndex: 65535
-      dummyAlignment: 0
-      m_AllTileFlags: 1073741825
-  - first: {x: -10, y: 6, z: 0}
     second:
       serializedVersion: 2
       m_TileIndex: 0
@@ -76254,21 +76234,21 @@ Tilemap:
   m_AnimatedTiles: {}
   m_TileAssetArray:
   - serializedVersion: 2
-    m_RefCount: 7565
+    m_RefCount: 7563
     m_Data: {fileID: 11400000, guid: 194cc348477a71e4186139e10bcf3c46, type: 2}
   - serializedVersion: 2
     m_RefCount: 1
     m_Data: {fileID: 11400000, guid: b2da23d3e4f0fbb4d99ddfde2cf784bc, type: 2}
   m_TileSpriteArray:
   - serializedVersion: 2
-    m_RefCount: 7565
+    m_RefCount: 7563
     m_Data: {fileID: -532556091, guid: 85866616fde399d4f838b9fe51388586, type: 3}
   - serializedVersion: 2
     m_RefCount: 1
     m_Data: {fileID: 1733678710, guid: 85866616fde399d4f838b9fe51388586, type: 3}
   m_TileMatrixArray:
   - serializedVersion: 2
-    m_RefCount: 7566
+    m_RefCount: 7564
     m_Data:
       e00: 1
       e01: 0
@@ -76288,7 +76268,7 @@ Tilemap:
       e33: 1
   m_TileColorArray:
   - serializedVersion: 2
-    m_RefCount: 7566
+    m_RefCount: 7564
     m_Data: {r: 1, g: 1, b: 1, a: 1}
   m_TileObjectToInstantiateArray: []
   m_AnimationFrameRate: 1
@@ -94655,6 +94635,7 @@ GameObject:
   - component: {fileID: 745381520}
   - component: {fileID: 745381519}
   - component: {fileID: 745381518}
+  - component: {fileID: 745381521}
   m_Layer: 9
   m_Name: Arthur
   m_TagString: Untagged
@@ -94822,17 +94803,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d162b5cd9dcf1ab4d8ad0ca77612b48b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ArthurAutoInteraction
-  menuManager: {fileID: 749671471}
   movementToPlayer: {fileID: 745381518}
   animationController: {fileID: 745381520}
-  playerMovementController: {fileID: 1672437183}
+  nameUI: {fileID: 745381521}
+  menuManager: {fileID: 0}
+  openMenuWhenArthurReachesPlayer: 1
+  interactAction: {fileID: 0}
   playerTag: Player
-  openDistance: 1.35
-  requirePlayerInRange: 1
-  openMenuAutomatically: 1
-  moveToPlayerBeforeOpen: 1
-  openOnlyOncePerApproach: 1
-  facePlayerWhenMenuOpens: 1
   enableDebugLogs: 1
 --- !u!95 &745381517
 Animator:
@@ -94873,7 +94850,7 @@ MonoBehaviour:
   moveSpeed: 2.5
   stopDistance: 1.25
   moveOnlyWhenPlayerInRange: 1
-  showDebugLogs: 1
+  showDebugLogs: 0
 --- !u!114 &745381519
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -94907,6 +94884,22 @@ MonoBehaviour:
   moveYParameter: MoveY
   isMovingParameter: IsMoving
   defaultLookDirection: {x: 0, y: -1}
+--- !u!114 &745381521
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 745381509}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 371fee97f28f36b4d8d5653d5c23d834, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ITAA.NPC.Arthur.ArthurNameUI
+  root: {fileID: 736147240}
+  nameText: {fileID: 1070104211}
+  defaultName: Arthur
+  enableDebugLogs: 0
 --- !u!1 &749671468
 GameObject:
   m_ObjectHideFlags: 0
@@ -94955,7 +94948,8 @@ MonoBehaviour:
   backgroundDim: {fileID: 1695271960}
   menuPanel: {fileID: 2102773475}
   startMenuPanel: {fileID: 1419130777}
-  loadGamePanel: {fileID: 2098674751}
+  loadGamePanel: {fileID: 2098674755}
+  openStartMenuOnStart: 0
   enableDebugLogs: 1
 --- !u!1 &932743355
 GameObject:
@@ -96498,7 +96492,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: -1394.15}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1419130779
 MonoBehaviour:
@@ -96922,7 +96916,7 @@ Transform:
   m_GameObject: {fileID: 1672437180}
   serializedVersion: 2
   m_LocalRotation: {x: -0.000016790813, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.95, y: 0.23, z: 0}
+  m_LocalPosition: {x: -10.48, y: 0.23, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -96942,8 +96936,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2b0d33a1374aa94e8badb710b113f9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerControler
-  inputReader: {fileID: 0}
-  motor: {fileID: 0}
+  inputReader: {fileID: 1672437190}
+  motor: {fileID: 1672437189}
   animator: {fileID: 1672437184}
   enableDebugLogs: 0
 --- !u!95 &1672437184
@@ -97070,7 +97064,7 @@ MonoBehaviour:
   m_DefaultControlScheme: Keyboard&Mouse
   m_DefaultActionMap: 
   m_SplitScreenIndex: -1
-  m_Camera: {fileID: 0}
+  m_Camera: {fileID: 519420031}
 --- !u!70 &1672437188
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -99045,7 +99039,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2082348159
 RectTransform:
   m_ObjectHideFlags: 0

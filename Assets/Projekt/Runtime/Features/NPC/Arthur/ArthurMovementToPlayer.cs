@@ -3,14 +3,27 @@
  * Zweck:
  *   Bewegt Arthur nur dann zum Spieler, wenn dieser in Reichweite ist.
  *   Ansonsten bleibt Arthur idle.
+ *
+ * Erweiterung:
+ *   - Liefert Events für Bewegungsstart, Bewegungsstopp und Ziel erreicht
+ *   - Damit ArthurAutoInteraction sauber darauf reagieren kann
  */
 
+using System;
 using UnityEngine;
 
 namespace ITAA.NPC.Arthur
 {
     public class ArthurMovementToPlayer : MonoBehaviour
     {
+        #region Events
+
+        public event Action OnStartedMoving;
+        public event Action OnStoppedMoving;
+        public event Action OnReachedTarget;
+
+        #endregion
+
         #region Inspector
 
         [Header("References")]
@@ -32,6 +45,7 @@ namespace ITAA.NPC.Arthur
         #region Fields
 
         private bool canMove;
+        private bool isMoving;
 
         #endregion
 
@@ -52,22 +66,16 @@ namespace ITAA.NPC.Arthur
 
         private void FixedUpdate()
         {
-            // ❌ Movement blockiert
+            // Bewegung blockiert
             if (moveOnlyWhenPlayerInRange && !canMove)
             {
-                if (animationController != null)
-                {
-                    animationController.ForceIdle();
-                }
+                StopMovementInternal(false);
                 return;
             }
 
             if (playerTarget == null)
             {
-                if (animationController != null)
-                {
-                    animationController.ForceIdle();
-                }
+                StopMovementInternal(false);
                 return;
             }
 
@@ -79,10 +87,7 @@ namespace ITAA.NPC.Arthur
 
             if (distance <= stopDistance)
             {
-                if (animationController != null)
-                {
-                    animationController.ForceIdle();
-                }
+                StopMovementInternal(true);
                 return;
             }
 
@@ -105,6 +110,18 @@ namespace ITAA.NPC.Arthur
 
                 animationController.SetMovement(movement);
             }
+
+            if (!isMoving)
+            {
+                isMoving = true;
+
+                if (showDebugLogs)
+                {
+                    Debug.Log("[ArthurMovement] OnStartedMoving");
+                }
+
+                OnStartedMoving?.Invoke();
+            }
         }
 
         #endregion
@@ -125,15 +142,45 @@ namespace ITAA.NPC.Arthur
         public void DisableMovement()
         {
             canMove = false;
+            StopMovementInternal(false);
 
+            if (showDebugLogs)
+            {
+                Debug.Log("[ArthurMovement] Movement DISABLED");
+            }
+        }
+
+        #endregion
+
+        #region Internal
+
+        private void StopMovementInternal(bool reachedTarget)
+        {
             if (animationController != null)
             {
                 animationController.ForceIdle();
             }
 
-            if (showDebugLogs)
+            if (isMoving)
             {
-                Debug.Log("[ArthurMovement] Movement DISABLED");
+                isMoving = false;
+
+                if (showDebugLogs)
+                {
+                    Debug.Log("[ArthurMovement] OnStoppedMoving");
+                }
+
+                OnStoppedMoving?.Invoke();
+            }
+
+            if (reachedTarget)
+            {
+                if (showDebugLogs)
+                {
+                    Debug.Log("[ArthurMovement] OnReachedTarget");
+                }
+
+                OnReachedTarget?.Invoke();
             }
         }
 

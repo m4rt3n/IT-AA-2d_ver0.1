@@ -13,8 +13,9 @@
  *
  * Wichtig:
  * - Der Close-Button im LoadGamePanel ruft in dieser Variante HideAllImmediate() auf
- * - Falls die Inspector-Referenz auf LoadGamePanel fehlt, wird sie automatisch gesucht
- * - HideAllImmediate() wird nur einmal in Awake() aufgerufen
+ * - Falls Inspector-Referenzen fehlen, werden sie automatisch gesucht
+ * - canvasRoot wird NICHT deaktiviert, damit der MenuManager aktiv bleibt
+ * - Beim Start wird das Startmenü einmal geöffnet
  */
 
 using ITAA.UI.Panels;
@@ -35,6 +36,9 @@ namespace ITAA.UI.Managers
         [SerializeField] private GameObject startMenuPanel;
         [SerializeField] private LoadGamePanel loadGamePanel;
 
+        [Header("Startup")]
+        [SerializeField] private bool openStartMenuOnStart = true;
+
         [Header("Debug")]
         [SerializeField] private bool enableDebugLogs = true;
 
@@ -46,13 +50,12 @@ namespace ITAA.UI.Managers
         {
             get
             {
-                bool canvasActive = canvasRoot != null && canvasRoot.activeSelf;
                 bool dimActive = backgroundDim != null && backgroundDim.activeSelf;
                 bool menuActive = menuPanel != null && menuPanel.activeSelf;
                 bool startActive = startMenuPanel != null && startMenuPanel.activeSelf;
                 bool loadActive = loadGamePanel != null && loadGamePanel.gameObject.activeSelf;
 
-                return canvasActive || dimActive || menuActive || startActive || loadActive;
+                return dimActive || menuActive || startActive || loadActive;
             }
         }
 
@@ -65,6 +68,14 @@ namespace ITAA.UI.Managers
             AutoAssignMissingReferences();
             ConfigurePanels();
             HideAllImmediate();
+        }
+
+        private void Start()
+        {
+            if (openStartMenuOnStart)
+            {
+                ShowStartMenu();
+            }
         }
 
         #endregion
@@ -118,6 +129,8 @@ namespace ITAA.UI.Managers
         {
             Log("HideAllImmediate");
 
+            SetActive(canvasRoot, true);
+
             if (loadGamePanel != null)
             {
                 loadGamePanel.Hide();
@@ -126,7 +139,6 @@ namespace ITAA.UI.Managers
             SetActive(startMenuPanel, false);
             SetActive(menuPanel, false);
             SetActive(backgroundDim, false);
-            SetActive(canvasRoot, false);
 
             LogState("HideAllImmediate");
         }
@@ -137,26 +149,17 @@ namespace ITAA.UI.Managers
 
         private void AutoAssignMissingReferences()
         {
-            if (canvasRoot == null)
-            {
-                Canvas canvas = FindFirstObjectByType<Canvas>(FindObjectsInactive.Include);
-                if (canvas != null)
-                {
-                    canvasRoot = canvas.gameObject;
-                }
-            }
-
             if (loadGamePanel == null)
             {
-                loadGamePanel = FindFirstObjectByType<LoadGamePanel>(FindObjectsInactive.Include);
+                loadGamePanel = FindAnyObjectByType<LoadGamePanel>(FindObjectsInactive.Include);
             }
 
-            if (menuPanel == null && canvasRoot != null)
+            if (canvasRoot == null && loadGamePanel != null)
             {
-                Transform found = canvasRoot.transform.Find("BackgroundDim/MenuPanel");
-                if (found != null)
+                Canvas parentCanvas = loadGamePanel.GetComponentInParent<Canvas>(true);
+                if (parentCanvas != null)
                 {
-                    menuPanel = found.gameObject;
+                    canvasRoot = parentCanvas.gameObject;
                 }
             }
 
@@ -166,6 +169,15 @@ namespace ITAA.UI.Managers
                 if (found != null)
                 {
                     backgroundDim = found.gameObject;
+                }
+            }
+
+            if (menuPanel == null && backgroundDim != null)
+            {
+                Transform found = backgroundDim.transform.Find("MenuPanel");
+                if (found != null)
+                {
+                    menuPanel = found.gameObject;
                 }
             }
 
