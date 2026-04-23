@@ -36,6 +36,7 @@ namespace ITAA.UI.Panels
         [Header("Config")]
         [SerializeField] private int slotCount = 3;
         [SerializeField] private string fallbackTitle = "Spieler";
+        [SerializeField] private bool ensureDummySaveOnShow = true;
 
         [Header("UI References")]
         [SerializeField] private SaveSlotItemUI largeSlotItem;
@@ -87,6 +88,11 @@ namespace ITAA.UI.Panels
         public void Show()
         {
             EnsureInitialized();
+
+            if (ensureDummySaveOnShow)
+            {
+                saveSystem.EnsureDummySaveExists();
+            }
 
             if (enableDebugLogs)
             {
@@ -360,6 +366,31 @@ namespace ITAA.UI.Panels
             {
                 Debug.LogWarning($"[{nameof(LoadGamePanel)}] Slot {slot.SlotId} hat keinen SceneName.", this);
                 return;
+            }
+
+            SaveGameData loadedSave = saveSystem.Load(slot.SlotId);
+
+            if (loadedSave == null)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(LoadGamePanel)}] SaveGameData für Slot {slot.SlotId} konnte nicht geladen werden.",
+                    this
+                );
+                return;
+            }
+
+            SavegameRuntimeSession runtimeSession = SavegameRuntimeSession.Instance;
+
+            if (runtimeSession != null)
+            {
+                runtimeSession.CurrentSave = loadedSave;
+            }
+            else
+            {
+                Debug.LogWarning(
+                    $"[{nameof(LoadGamePanel)}] Keine {nameof(SavegameRuntimeSession)} in der Szene gefunden.",
+                    this
+                );
             }
 
             if (enableDebugLogs)

@@ -1,15 +1,9 @@
 /*
  * Datei: SaveSlotEntity.cs
- * Pfad: Assets/Projekt/Runtime/System/Savegame/SaveSlotEntity.cs
- * Zweck: Beschreibt einen Save-Slot in UI-freundlicher Form.
- * Verantwortung:
- * - Hält die Anzeige-Daten eines Speicherstands
- * - Wandelt SaveGameData in ein UI-Modell um
- * - Formatiert den Speicherzeitpunkt für die Darstellung
+ * Zweck: Leichtgewichtiges UI-Modell für Save-Slots im LoadGamePanel.
  */
 
 using System;
-using System.Globalization;
 
 namespace ITAA.System.Savegame
 {
@@ -18,60 +12,46 @@ namespace ITAA.System.Savegame
     {
         public int SlotId;
         public string DisplayName;
+        public string PlayerName;
         public string SceneName;
         public string SavedAtText;
+        public int Level;
+        public int Score;
         public bool HasData;
+
+        public static SaveSlotEntity CreateEmpty(int slotId)
+        {
+            return new SaveSlotEntity
+            {
+                SlotId = slotId,
+                DisplayName = $"Slot {slotId}",
+                PlayerName = "-",
+                SceneName = "-",
+                SavedAtText = "Leer",
+                Level = 0,
+                Score = 0,
+                HasData = false
+            };
+        }
 
         public static SaveSlotEntity FromSaveData(SaveGameData data)
         {
             if (data == null)
             {
-                return new SaveSlotEntity
-                {
-                    SlotId = 0,
-                    DisplayName = "Leerer Slot",
-                    SceneName = "-",
-                    SavedAtText = "-",
-                    HasData = false
-                };
+                return null;
             }
 
             return new SaveSlotEntity
             {
                 SlotId = data.SlotId,
-                DisplayName = string.IsNullOrWhiteSpace(data.PlayerName)
-                    ? $"Slot {data.SlotId}"
-                    : data.PlayerName,
-                SceneName = string.IsNullOrWhiteSpace(data.SceneName)
-                    ? "-"
-                    : data.SceneName,
-                SavedAtText = FormatSavedAt(data.SavedAtUtc),
-                HasData = true
+                DisplayName = string.IsNullOrWhiteSpace(data.DisplayName) ? $"Slot {data.SlotId}" : data.DisplayName,
+                PlayerName = string.IsNullOrWhiteSpace(data.PlayerName) ? "-" : data.PlayerName,
+                SceneName = string.IsNullOrWhiteSpace(data.SceneName) ? "-" : data.SceneName,
+                SavedAtText = string.IsNullOrWhiteSpace(data.SavedAtText) ? "-" : data.SavedAtText,
+                Level = data.Level,
+                Score = data.Score,
+                HasData = data.HasData
             };
-        }
-
-        private static string FormatSavedAt(string savedAtUtc)
-        {
-            if (string.IsNullOrWhiteSpace(savedAtUtc))
-            {
-                return "-";
-            }
-
-            if (DateTime.TryParse(
-                savedAtUtc,
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.RoundtripKind,
-                out DateTime parsedDate))
-            {
-                return parsedDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm");
-            }
-
-            if (DateTime.TryParse(savedAtUtc, out parsedDate))
-            {
-                return parsedDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm");
-            }
-
-            return savedAtUtc;
         }
     }
 }

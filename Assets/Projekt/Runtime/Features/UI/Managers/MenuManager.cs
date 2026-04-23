@@ -5,11 +5,12 @@
  *   StartMenuPanel und LoadGamePanel.
  *
  * Funktionen:
- * - ShowStartMenu()      -> öffnet Hauptmenü
- * - ShowLoadGamePanel()  -> öffnet LoadGamePanel
- * - HideAllImmediate()   -> schließt alles sofort
- * - HideAll()            -> Kompatibilitäts-Wrapper für alten Code
- * - IsOpen               -> meldet, ob das Menüsystem aktuell offen ist
+ * - ShowStartMenu()           -> öffnet Hauptmenü
+ * - ShowLoadGamePanel()       -> öffnet LoadGamePanel
+ * - OpenLoadGameFromArthur()  -> öffnet StartMenu und danach LoadGamePanel
+ * - HideAllImmediate()        -> schließt alles sofort
+ * - HideAll()                 -> Kompatibilitäts-Wrapper für alten Code
+ * - IsOpen                    -> meldet, ob das Menüsystem aktuell offen ist
  *
  * Wichtig:
  * - Der Close-Button im LoadGamePanel ruft in dieser Variante HideAllImmediate() auf
@@ -118,6 +119,16 @@ namespace ITAA.UI.Managers
             }
 
             LogState("ShowLoadGamePanel");
+        }
+
+        public void OpenLoadGameFromArthur()
+        {
+            Log("OpenLoadGameFromArthur");
+
+            ShowStartMenu();
+            ShowLoadGamePanel();
+
+            LogState("OpenLoadGameFromArthur");
         }
 
         public void HideAll()

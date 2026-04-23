@@ -15,7 +15,7 @@ namespace ITAA.NPC.Arthur
 
         [Header("UI")]
         [SerializeField] private MenuManager menuManager;
-        [SerializeField] private bool openMenuWhenArthurReachesPlayer = true;
+        [SerializeField] private bool openLoadMenuWhenArthurReachesPlayer = true;
 
         [Header("Input")]
         [SerializeField] private InputActionReference interactAction;
@@ -264,10 +264,10 @@ namespace ITAA.NPC.Arthur
                 nameUI.ShowName("Arthur");
             }
 
-            if (openMenuWhenArthurReachesPlayer && !menuOpenedForCurrentInteraction)
+            if (openLoadMenuWhenArthurReachesPlayer && !menuOpenedForCurrentInteraction)
             {
                 LockPlayerMovement();
-                OpenDialogueMenu();
+                OpenLoadMenu();
             }
         }
 
@@ -295,14 +295,14 @@ namespace ITAA.NPC.Arthur
 
             if (enableDebugLogs)
             {
-                Debug.Log($"[{nameof(ArthurAutoInteraction)}] Interact pressed -> open menu.", this);
+                Debug.Log($"[{nameof(ArthurAutoInteraction)}] Interact pressed -> open load menu.", this);
             }
 
             LockPlayerMovement();
-            OpenDialogueMenu();
+            OpenLoadMenu();
         }
 
-        private void OpenDialogueMenu()
+        private void OpenLoadMenu()
         {
             if (menuManager == null)
             {
@@ -313,12 +313,12 @@ namespace ITAA.NPC.Arthur
                 return;
             }
 
-            menuManager.ShowStartMenu();
+            menuManager.OpenLoadGameFromArthur();
             menuOpenedForCurrentInteraction = true;
 
             if (enableDebugLogs)
             {
-                Debug.Log($"[{nameof(ArthurAutoInteraction)}] Start menu opened.", this);
+                Debug.Log($"[{nameof(ArthurAutoInteraction)}] Arthur opened StartMenu + LoadGamePanel.", this);
             }
         }
 
