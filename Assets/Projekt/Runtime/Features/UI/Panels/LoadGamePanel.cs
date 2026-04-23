@@ -54,8 +54,7 @@ namespace ITAA.UI.Panels
 
         #region Private Fields
 
-        private readonly SaveSystem saveSystem = new SaveSystem();
-
+        private SaveSystem saveSystem;
         private IReadOnlyList<SaveSlotEntity> slots = Array.Empty<SaveSlotEntity>();
         private int currentIndex;
         private bool isInitialized;
@@ -68,6 +67,7 @@ namespace ITAA.UI.Panels
 
         private void Awake()
         {
+            saveSystem = new SaveSystem();
             EnsureInitialized();
         }
 
@@ -125,6 +125,11 @@ namespace ITAA.UI.Panels
 
         public void ReloadSlots()
         {
+            if (saveSystem == null)
+            {
+                saveSystem = new SaveSystem();
+            }
+
             slots = saveSystem.GetAllSlots(Mathf.Max(1, slotCount));
 
             if (slots == null || slots.Count == 0)
@@ -383,7 +388,7 @@ namespace ITAA.UI.Panels
 
             if (runtimeSession != null)
             {
-                runtimeSession.CurrentSave = loadedSave;
+                runtimeSession.SetCurrentSave(loadedSave);
             }
             else
             {

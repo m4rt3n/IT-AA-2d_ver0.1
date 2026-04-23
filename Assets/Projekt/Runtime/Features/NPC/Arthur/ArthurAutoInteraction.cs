@@ -15,7 +15,7 @@ namespace ITAA.NPC.Arthur
 
         [Header("UI")]
         [SerializeField] private MenuManager menuManager;
-        [SerializeField] private bool openLoadMenuWhenArthurReachesPlayer = true;
+        [SerializeField] private bool openMenuWhenArthurReachesPlayer = true;
 
         [Header("Input")]
         [SerializeField] private InputActionReference interactAction;
@@ -264,10 +264,10 @@ namespace ITAA.NPC.Arthur
                 nameUI.ShowName("Arthur");
             }
 
-            if (openLoadMenuWhenArthurReachesPlayer && !menuOpenedForCurrentInteraction)
+            if (openMenuWhenArthurReachesPlayer && !menuOpenedForCurrentInteraction)
             {
                 LockPlayerMovement();
-                OpenLoadMenu();
+                OpenStartMenu();
             }
         }
 
@@ -295,14 +295,14 @@ namespace ITAA.NPC.Arthur
 
             if (enableDebugLogs)
             {
-                Debug.Log($"[{nameof(ArthurAutoInteraction)}] Interact pressed -> open load menu.", this);
+                Debug.Log($"[{nameof(ArthurAutoInteraction)}] Interact pressed -> open start menu.", this);
             }
 
             LockPlayerMovement();
-            OpenLoadMenu();
+            OpenStartMenu();
         }
 
-        private void OpenLoadMenu()
+        private void OpenStartMenu()
         {
             if (menuManager == null)
             {
@@ -310,15 +310,16 @@ namespace ITAA.NPC.Arthur
                 {
                     Debug.LogWarning($"[{nameof(ArthurAutoInteraction)}] MenuManager not found.", this);
                 }
+
                 return;
             }
 
-            menuManager.OpenLoadGameFromArthur();
+            menuManager.ShowStartMenu();
             menuOpenedForCurrentInteraction = true;
 
             if (enableDebugLogs)
             {
-                Debug.Log($"[{nameof(ArthurAutoInteraction)}] Arthur opened StartMenu + LoadGamePanel.", this);
+                Debug.Log($"[{nameof(ArthurAutoInteraction)}] Arthur opened StartMenu.", this);
             }
         }
 
@@ -330,6 +331,7 @@ namespace ITAA.NPC.Arthur
                 {
                     Debug.LogWarning($"[{nameof(ArthurAutoInteraction)}] PlayerController not found -> lock skipped.", this);
                 }
+
                 return;
             }
 
