@@ -18,49 +18,54 @@
 > ⚠️ Platzhalter – hier später echte Screens einfügen
 
 <p align="center">
- 
  <img width="45%" alt="image" src="https://github.com/user-attachments/assets/f9c9c1ed-5d41-4121-8219-51f510543883" />
-
 </p>
 
 ---
 
 ## 📖 Overview
 
-**IT-AA 2D** ist ein modular aufgebautes Unity-2D-Projekt mit Fokus auf **saubere Architektur**, **Erweiterbarkeit** und **klare Systemtrennung**.
+**IT-AA 2D** ist ein modular aufgebautes Unity-2D-Projekt mit Fokus auf:
 
-Ziel ist der Aufbau eines **skalierbaren Game-Frameworks**, das als Grundlage für komplexe Spielsysteme dient.
+- **saubere Architektur**
+- **klare Systemtrennung**
+- **skalierbare Erweiterbarkeit**
 
-**Fokus:**
-- Feature-basierte Architektur  
-- Wartbarer & erweiterbarer Code  
-- Klare Trennung von Systemen  
-- Vorbereitung für KI- & Datenintegration  
+Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturierte Game-Entwicklung und IT-nahe Szenarien.
 
 ---
 
-## ✨ Features
+## ✨ Features (aktueller Stand)
 
-- 🧍 Player Movement System (2D)
-- 🤖 NPC Interaction System
-- 🧩 Modulares UI System
-- 💾 Save/Load System mit Slot-Architektur
-- 📂 Dynamisches LoadGamePanel (UI + Datenbindung)
-- 🎮 Horizontales Snap-Scrolling (Netflix-/Konsolen-Style)
-- 🧠 Erweiterbar für Quiz / LLM Systeme
-- 🏗️ Saubere Projektstruktur (Production Ready)
+- 🧍 **Player Movement System**
+  - Input → Controller → Motor (sauber getrennt)
+- 🤖 **NPC System (Arthur)**
+  - Auto-Approach zum Player
+  - Trigger-basierte Interaktion
+- 🧩 **UI System**
+  - MenuManager (zentrale Steuerung)
+  - StartMenu + LoadGamePanel
+- 💾 **Save/Load System**
+  - JSON-basiert
+  - Slot-System
+  - Dummy Save für Tests
+- 🔁 **Runtime Session**
+  - Übergabe von Save-Daten zwischen Szenen
+- 🎮 **Menü-Flow**
+  - Arthur → StartMenu → LoadGamePanel → Scene Load
 
 ---
 
 ## 🧠 Architektur
 
-Das Projekt basiert auf einer **Feature-driven Architecture**:
+Feature-driven Architecture:
 
-- Jedes Feature ist **isoliert & erweiterbar**
-- Minimale Abhängigkeiten zwischen Systemen
-- Klare Verantwortlichkeiten pro Script
+- Systeme sind **isoliert**
+- klare Verantwortlichkeiten
+- minimale Abhängigkeiten
 
 **Prinzipien:**
+
 - Separation of Concerns  
 - Single Responsibility  
 - Lose Kopplung  
@@ -70,118 +75,161 @@ Das Projekt basiert auf einer **Feature-driven Architecture**:
 ---
 
 ## 📂 Projektstruktur
+Assets/
+├── Projekt/
+│ ├── Content/
+│ │ ├── Art/
+│ │ ├── Audio/
+│ │ ├── Materials/
+│ │ ├── Prefabs/
+│ │ └── Scenes/
+│ │
+│ └── Runtime/
+│ ├── Core/
+│ ├── Features/
+│ │ ├── Player/
+│ │ │ └── Movement/
+│ │ │ ├── PlayerController
+│ │ │ ├── PlayerMotor2D
+│ │ │ └── PlayerInputReader
+│ │ │
+│ │ ├── NPC/
+│ │ │ └── Arthur/
+│ │ │ ├── ArthurAutoInteraction
+│ │ │ ├── ArthurMovementToPlayer
+│ │ │ ├── ArthurAnimationController
+│ │ │ └── ArthurNameUI
+│ │ │
+│ │ └── UI/
+│ │ ├── Managers/
+│ │ │ └── MenuManager
+│ │ └── Panels/
+│ │ └── LoadGamePanel
+│ │
+│ └── System/
+│ └── Savegame/
+│ ├── SaveSystem
+│ ├── SaveGameData
+│ ├── SaveSlotEntity
+│ ├── SavegameRuntimeSession
+│ └── DummySaveBootstrap
+│
+├── Settings/
+├── ScriptableObjects/
+└── PlayerControls.inputactions
 
-Assets/Projekt/Runtime
-
-### Core
-Globale Systeme (Manager, Utilities)
-
-### Features
-
-#### Player
-- Movement  
-- Session  
-- UI  
-
-#### NPC
-- Behaviour  
-- Detection  
-- Interaction  
-
-#### UI
-- Menus  
-- Panels (z. B. LoadGamePanel)  
-- Widgets (z. B. HorizontalSnapScroll)  
-
-### Data
-- Models  
-- Storage  
-
-### Systems
-GameFlow & globale Logik (SaveSystem, etc.)
 
 ---
 
-## 🎮 Game Flow
+## 🎮 Game Flow (aktuell implementiert)
+
+### Einstieg
 
 StartScene  
-→ Menü / Login  
-→ LoadGamePanel (Slots anzeigen)  
-→ Auswahl eines Save-Slots  
-→ Szene wird geladen  
-→ Spieler spawnt  
-→ Bewegung & Exploration  
-→ NPC erkennt Spieler  
-→ Interaktion  
-→ UI reagiert  
-→ Fortschritt wird gespeichert  
+→ StartMenu wird automatisch geöffnet  
 
 ---
 
-## 🚀 Roadmap
+### Arthur Interaktion
+
+1. Player betritt Trigger  
+2. Arthur läuft zum Player  
+3. Player wird **gelockt**  
+4. **StartMenu öffnet sich**
+
+---
+
+### Menü-Flow
+
+StartMenu  
+→ Spieler wählt **„Laden“**  
+→ LoadGamePanel öffnet sich  
+
+---
+
+### Load Flow
+
+1. Slots werden geladen (JSON)
+2. Dummy Save wird automatisch erstellt (falls leer)
+3. Spieler wählt Slot
+4. SaveGameData wird geladen
+5. Daten werden in `SavegameRuntimeSession` gespeichert
+6. Szene wird geladen
+
+---
+
+## 💾 Save System
+
+- Speicherort:
+Application.persistentDataPath/Savegames/
+
+
+- Format:
+
+save_slot_1.json
+save_slot_2.json
+
+
+- Inhalt:
+- PlayerName
+- SceneName
+- Position
+- Level
+- Score
+
+---
+
+## 🚀 Roadmap (aktualisiert)
 
 ### 🧱 Phase 1 – Foundation
-- 🟢 Architektur  
-- 🟢 Struktur  
-- 🟢 Core  
+- 🟢 Architektur
+- 🟢 Struktur
+- 🟢 Core
 
 ### 🧍 Phase 2 – Player
-- 🟢 Movement  
-- 🟡 Animation  
-- 🟡 States  
+- 🟢 Movement
+- 🟡 Animation Finetuning
+- 🔴 State Machine
 
 ### 🤖 Phase 3 – NPC
-- 🟡 Detection  
-- 🟡 Interaction  
-- 🔴 AI  
+- 🟢 Arthur Movement + Interaction
+- 🟡 Erweiterte Interaktion (Dialogsystem)
+- 🔴 AI / Verhalten
 
 ### 🧩 Phase 4 – UI
-- 🟢 Menu Manager  
-- 🟡 LoadGamePanel  
-- 🟡 Snap-Scroll Navigation  
-- 🔴 HUD  
+- 🟢 MenuManager
+- 🟢 LoadGamePanel (funktional)
+- 🟡 UX / Navigation verbessern
+- 🔴 HUD
 
 ### 💾 Phase 5 – Data
-- 🟢 Models  
-- 🟡 Save/Load System  
-- 🔴 Persistenz-Erweiterung  
+- 🟢 Save/Load Basis
+- 🟡 Runtime Session
+- 🔴 Persistenz erweitern (AutoSave etc.)
+
+### 🎯 Phase 6 – Gameplay
+- 🔴 Player Spawn aus Save
+- 🔴 Weltzustand laden
+- 🔴 Fortschritt speichern
 
 ---
 
-## 📋 GitHub Project Board
-
-### Workflow
+## 📋 GitHub Workflow
 
 Backlog → Ready → In Progress → Review → Done  
-
-### Beispiel Tasks
-
-**Backlog**
-- NPC AI entwickeln  
-- Dialogsystem bauen  
-
-**In Progress**
-- UI Polish  
-- Save-System Erweiterung  
-
-**Done**
-- Player Movement  
-- StartScene Setup  
-- LoadGamePanel  
-- Snap-Scroll UI  
 
 ---
 
 ## 🛠️ Tech Stack
 
-- Unity (2D)  
-- C#  
-- Scriptable Architecture  
-- Unity Input System  
+- Unity (2D)
+- C#
+- Unity Input System
+- JSON (Save System)
 
 **Geplant:**
-- SQLite  
-- LLM Integration  
+- SQLite
+- LLM Integration
 
 ---
 
@@ -200,9 +248,9 @@ Beiträge sind willkommen.
 
 **Guidelines:**
 - Feature-basiert entwickeln  
-- Klare Namensgebung  
 - Ein Script = eine Verantwortung  
-- Dokumentation pro Feature  
+- Klare Namensgebung  
+- Saubere Trennung von Logik  
 
 ---
 
@@ -210,12 +258,12 @@ Beiträge sind willkommen.
 
 | Bereich        | Fortschritt |
 |----------------|------------|
-| Foundation     | 90%        |
-| Player         | 60%        |
-| NPC            | 40%        |
-| UI             | 60%        |
-| Data           | 40%        |
-| Gameplay       | 10%        |
+| Foundation     | 95%        |
+| Player         | 70%        |
+| NPC            | 60%        |
+| UI             | 75%        |
+| Data           | 60%        |
+| Gameplay       | 20%        |
 
 ---
 
@@ -228,9 +276,9 @@ Lizenzdetails folgen.
 
 ## ⭐ Vision
 
-Ein **sauberes, skalierbares Unity-Framework**, das als Grundlage für:
+Ein **sauberes, skalierbares Unity-Framework**, das als Grundlage dient für:
+
 - Lernprojekte  
 - Game Prototypen  
+- IT-/Support-Simulationen  
 - KI-gestützte Spielsysteme  
-
-dient.
