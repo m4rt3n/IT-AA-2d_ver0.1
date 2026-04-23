@@ -1,12 +1,18 @@
 /*
  * Datei: ArthurMovementToPlayer.cs
  * Zweck:
- *   Bewegt Arthur nur dann zum Spieler, wenn dieser in Reichweite ist.
- *   Ansonsten bleibt Arthur idle.
+ * Bewegt Arthur kontrolliert in Richtung Spieler und meldet Start/Stop/Ankunft
+ * an andere Systeme (z. B. ArthurAutoInteraction).
  *
- * Erweiterung:
- *   - Liefert Events für Bewegungsstart, Bewegungsstopp und Ziel erreicht
- *   - Damit ArthurAutoInteraction sauber darauf reagieren kann
+ * Verantwortung:
+ * - Zielspieler setzen/entfernen
+ * - Arthur bis zur Stop-Distanz bewegen
+ * - Bewegungsstatus über Events melden
+ * - Idle/Walk-Animation sauber ansteuern
+ *
+ * Voraussetzungen:
+ * - ArthurAnimationController auf demselben GameObject oder Kindobjekt
+ * - ArthurAutoInteraction kann diese Klasse über Events abonnieren
  */
 
 using System;
@@ -14,18 +20,15 @@ using UnityEngine;
 
 namespace ITAA.NPC.Arthur
 {
-    public class ArthurMovementToPlayer : MonoBehaviour
+    public sealed class ArthurMovementToPlayer : MonoBehaviour
     {
         #region Events
-
         public event Action OnStartedMoving;
         public event Action OnStoppedMoving;
         public event Action OnReachedTarget;
-
         #endregion
 
         #region Inspector
-
         [Header("References")]
         [SerializeField] private Transform playerTarget;
         [SerializeField] private ArthurAnimationController animationController;
@@ -34,23 +37,21 @@ namespace ITAA.NPC.Arthur
         [SerializeField] private float moveSpeed = 2.5f;
         [SerializeField] private float stopDistance = 1.25f;
 
-        [Header("Control")]
-        [SerializeField] private bool moveOnlyWhenPlayerInRange = true;
+        [Header("Auto Find")]
+        [SerializeField] private bool autoFindPlayerByTag = true;
+        [SerializeField] private string playerTag = "Player";
 
         [Header("Debug")]
         [SerializeField] private bool showDebugLogs = false;
-
         #endregion
 
         #region Fields
-
-        private bool canMove;
+        private bool movementEnabled;
         private bool isMoving;
-
+        private bool reachedTarget;
         #endregion
 
-        #region Unity
-
+        #region Unity Methods
         private void Awake()
         {
             if (animationController == null)
@@ -62,128 +63,210 @@ namespace ITAA.NPC.Arthur
                     animationController = GetComponentInChildren<ArthurAnimationController>();
                 }
             }
+
+            if (playerTarget == null && autoFindPlayerByTag)
+            {
+                GameObject playerObject = GameObject.FindGameObjectWithTag(playerTag);
+                if (playerObject != null)
+                {
+                    playerTarget = playerObject.transform;
+                }
+            }
+        }
+
+        private void Start()
+        {
+            if (animationController == null)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(ArthurMovementToPlayer)}] Kein {nameof(ArthurAnimationController)} gefunden auf '{gameObject.name}'.",
+                    this);
+            }
+
+            if (playerTarget == null && showDebugLogs)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(ArthurMovementToPlayer)}] Beim Start kein Spieler-Ziel gefunden auf '{gameObject.name}'.",
+                    this);
+            }
         }
 
         private void FixedUpdate()
         {
-            // Bewegung blockiert
-            if (moveOnlyWhenPlayerInRange && !canMove)
+            if (!movementEnabled)
             {
-                StopMovementInternal(false);
+                ForceIdleIfNeeded();
                 return;
             }
 
             if (playerTarget == null)
             {
-                StopMovementInternal(false);
+                ForceIdleIfNeeded();
                 return;
             }
 
             Vector2 currentPosition = transform.position;
             Vector2 targetPosition = playerTarget.position;
-
             Vector2 toTarget = targetPosition - currentPosition;
-            float distance = toTarget.magnitude;
+            float distanceToTarget = toTarget.magnitude;
 
-            if (distance <= stopDistance)
+            if (distanceToTarget <= stopDistance)
             {
-                StopMovementInternal(true);
+                HandleReachedTarget();
                 return;
             }
+
+            reachedTarget = false;
 
             Vector2 nextPosition = Vector2.MoveTowards(
                 currentPosition,
                 targetPosition,
-                moveSpeed * Time.fixedDeltaTime
-            );
+                moveSpeed * Time.fixedDeltaTime);
 
-            Vector2 movement = nextPosition - currentPosition;
+            Vector2 actualMovement = nextPosition - currentPosition;
+
+            if (!isMoving)
+            {
+                isMoving = true;
+                OnStartedMoving?.Invoke();
+
+                if (showDebugLogs)
+                {
+                    Debug.Log($"[{nameof(ArthurMovementToPlayer)}] Bewegung gestartet.", this);
+                }
+            }
 
             transform.position = new Vector3(nextPosition.x, nextPosition.y, transform.position.z);
 
             if (animationController != null)
             {
-                if (showDebugLogs)
-                {
-                    Debug.Log($"[ArthurMovement] Move={movement}");
-                }
-
-                animationController.SetMovement(movement);
+                animationController.SetMovement(actualMovement);
             }
-
-            if (!isMoving)
-            {
-                isMoving = true;
-
-                if (showDebugLogs)
-                {
-                    Debug.Log("[ArthurMovement] OnStartedMoving");
-                }
-
-                OnStartedMoving?.Invoke();
-            }
-        }
-
-        #endregion
-
-        #region Public API
-
-        public void EnableMovement(Transform target)
-        {
-            playerTarget = target;
-            canMove = true;
 
             if (showDebugLogs)
             {
-                Debug.Log("[ArthurMovement] Movement ENABLED");
+                Debug.Log(
+                    $"[{nameof(ArthurMovementToPlayer)}] Move={actualMovement}, Distanz={distanceToTarget:0.00}",
+                    this);
+            }
+        }
+        #endregion
+
+        #region Public API
+        public void EnableMovement(Transform target)
+        {
+            if (target == null)
+            {
+                if (showDebugLogs)
+                {
+                    Debug.LogWarning($"[{nameof(ArthurMovementToPlayer)}] EnableMovement ohne Ziel aufgerufen.", this);
+                }
+
+                return;
+            }
+
+            playerTarget = target;
+            movementEnabled = true;
+            reachedTarget = false;
+
+            if (showDebugLogs)
+            {
+                Debug.Log($"[{nameof(ArthurMovementToPlayer)}] Movement aktiviert.", this);
             }
         }
 
         public void DisableMovement()
         {
-            canMove = false;
-            StopMovementInternal(false);
+            movementEnabled = false;
+            ForceIdleIfNeeded();
 
             if (showDebugLogs)
             {
-                Debug.Log("[ArthurMovement] Movement DISABLED");
+                Debug.Log($"[{nameof(ArthurMovementToPlayer)}] Movement deaktiviert.", this);
             }
         }
 
+        public void SetTarget(Transform newTarget)
+        {
+            playerTarget = newTarget;
+            reachedTarget = false;
+        }
+
+        public void ClearTarget()
+        {
+            playerTarget = null;
+            movementEnabled = false;
+            ForceIdleIfNeeded();
+        }
+
+        public void StopMoving()
+        {
+            movementEnabled = false;
+            ForceIdleIfNeeded();
+        }
+
+        public bool IsMovementEnabled()
+        {
+            return movementEnabled;
+        }
+
+        public bool HasReachedTarget()
+        {
+            return reachedTarget;
+        }
         #endregion
 
-        #region Internal
-
-        private void StopMovementInternal(bool reachedTarget)
+        #region Private Methods
+        private void HandleReachedTarget()
         {
-            if (animationController != null)
-            {
-                animationController.ForceIdle();
-            }
+            movementEnabled = false;
 
             if (isMoving)
             {
                 isMoving = false;
+                OnStoppedMoving?.Invoke();
 
                 if (showDebugLogs)
                 {
-                    Debug.Log("[ArthurMovement] OnStoppedMoving");
+                    Debug.Log($"[{nameof(ArthurMovementToPlayer)}] Bewegung gestoppt.", this);
                 }
-
-                OnStoppedMoving?.Invoke();
             }
 
-            if (reachedTarget)
+            if (!reachedTarget)
             {
+                reachedTarget = true;
+                OnReachedTarget?.Invoke();
+
                 if (showDebugLogs)
                 {
-                    Debug.Log("[ArthurMovement] OnReachedTarget");
+                    Debug.Log($"[{nameof(ArthurMovementToPlayer)}] Ziel erreicht.", this);
                 }
+            }
 
-                OnReachedTarget?.Invoke();
+            if (animationController != null)
+            {
+                animationController.ForceIdle();
             }
         }
 
+        private void ForceIdleIfNeeded()
+        {
+            if (isMoving)
+            {
+                isMoving = false;
+                OnStoppedMoving?.Invoke();
+
+                if (showDebugLogs)
+                {
+                    Debug.Log($"[{nameof(ArthurMovementToPlayer)}] ForceIdle -> Stop-Event gesendet.", this);
+                }
+            }
+
+            if (animationController != null)
+            {
+                animationController.ForceIdle();
+            }
+        }
         #endregion
     }
 }

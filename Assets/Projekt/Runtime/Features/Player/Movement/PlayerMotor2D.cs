@@ -1,21 +1,3 @@
-/*
- * Datei: PlayerMotor2D.cs
- * Zweck: Bewegt den Spieler physisch über Rigidbody2D.
- * Verantwortung:
- *   - Anwenden von Bewegung auf den Rigidbody2D
- *   - Trennung von Input und physischer Bewegung
- *   - Sperren/Freigeben der Bewegung z. B. für NPC-Interaktionen
- *
- * Abhängigkeiten:
- *   - Rigidbody2D
- *
- * Verwendet von:
- *   - PlayerController
- *   - ArthurAutoInteraction
- */
-
-// Datei: Assets/Projekt/Runtime/Features/Player/Movement/PlayerMotor2D.cs
-
 using UnityEngine;
 
 namespace ITAA.Player.Movement
@@ -23,8 +5,6 @@ namespace ITAA.Player.Movement
     [RequireComponent(typeof(Rigidbody2D))]
     public class PlayerMotor2D : MonoBehaviour
     {
-        #region Inspector
-
         [Header("Movement")]
         [SerializeField] private float moveSpeed = 4f;
         [SerializeField] private bool useBlockingCheck = true;
@@ -36,25 +16,13 @@ namespace ITAA.Player.Movement
         [Header("Debug")]
         [SerializeField] private bool enableDebugLogs;
 
-        #endregion
-
-        #region Private Fields
-
         private readonly RaycastHit2D[] castResults = new RaycastHit2D[8];
         private Rigidbody2D rb;
         private Vector2 movementInput;
         private bool movementLocked;
 
-        #endregion
-
-        #region Public Properties
-
         public Vector2 CurrentVelocity => rb != null ? rb.linearVelocity : Vector2.zero;
         public bool IsMovementLocked => movementLocked;
-
-        #endregion
-
-        #region Unity Methods
 
         private void Awake()
         {
@@ -70,6 +38,7 @@ namespace ITAA.Player.Movement
 
             if (movementLocked)
             {
+                movementInput = Vector2.zero;
                 rb.linearVelocity = Vector2.zero;
                 return;
             }
@@ -84,7 +53,7 @@ namespace ITAA.Player.Movement
             {
                 if (enableDebugLogs)
                 {
-                    Debug.Log($"[{nameof(PlayerMotor2D)}] Bewegung blockiert: {movementInput}");
+                    Debug.Log($"[{nameof(PlayerMotor2D)}] Bewegung blockiert: {movementInput}", this);
                 }
 
                 rb.linearVelocity = Vector2.zero;
@@ -93,10 +62,6 @@ namespace ITAA.Player.Movement
 
             rb.linearVelocity = movementInput * moveSpeed;
         }
-
-        #endregion
-
-        #region Public Methods
 
         public void SetMovementInput(Vector2 input)
         {
@@ -130,7 +95,7 @@ namespace ITAA.Player.Movement
 
             if (enableDebugLogs)
             {
-                Debug.Log($"[{nameof(PlayerMotor2D)}] MovementLocked = {movementLocked}");
+                Debug.Log($"[{nameof(PlayerMotor2D)}] MovementLocked = {movementLocked}", this);
             }
         }
 
@@ -142,11 +107,12 @@ namespace ITAA.Player.Movement
             {
                 rb.linearVelocity = Vector2.zero;
             }
+
+            if (enableDebugLogs)
+            {
+                Debug.Log($"[{nameof(PlayerMotor2D)}] Stop ausgeführt.", this);
+            }
         }
-
-        #endregion
-
-        #region Private Methods
 
         private bool IsBlocked(Vector2 direction)
         {
@@ -176,7 +142,7 @@ namespace ITAA.Player.Movement
 
                 if (enableDebugLogs)
                 {
-                    Debug.Log($"[{nameof(PlayerMotor2D)}] Blockiert durch: {hit.collider.name}");
+                    Debug.Log($"[{nameof(PlayerMotor2D)}] Blockiert durch: {hit.collider.name}", this);
                 }
 
                 return true;
@@ -184,7 +150,5 @@ namespace ITAA.Player.Movement
 
             return false;
         }
-
-        #endregion
     }
 }

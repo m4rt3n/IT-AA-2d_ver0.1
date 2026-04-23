@@ -5,15 +5,6 @@ using ITAA.UI.Managers;
 
 namespace ITAA.NPC.Arthur
 {
-    /// <summary>
-    /// Arthur-Interaktion:
-    /// - Beim ersten Betreten der Zone läuft Arthur einmal zum Player
-    /// - Sobald Arthur den Player erreicht, öffnet sich das Menü
-    /// - Wenn das Menü geschlossen wird, kann sich der Player wieder bewegen
-    /// - Arthur folgt danach nicht weiter
-    /// - Solange der Player in der Zone bleibt, kann das Menü danach nur noch per E geöffnet werden
-    /// - Beim Verlassen der Zone wird der Zustand zurückgesetzt
-    /// </summary>
     [RequireComponent(typeof(Collider2D))]
     public sealed class ArthurAutoInteraction : MonoBehaviour
     {
@@ -124,7 +115,8 @@ namespace ITAA.NPC.Arthur
                 return;
             }
 
-            SetTargetPlayer(other.transform);
+            Transform playerRoot = GetPlayerRootTransform(other);
+            SetTargetPlayer(playerRoot);
         }
 
         private void OnTriggerExit2D(Collider2D other)
@@ -134,7 +126,8 @@ namespace ITAA.NPC.Arthur
                 return;
             }
 
-            ClearTargetPlayer(other.transform);
+            Transform playerRoot = GetPlayerRootTransform(other);
+            ClearTargetPlayer(playerRoot);
         }
 
         public void SetTargetPlayer(Transform player)
@@ -145,13 +138,15 @@ namespace ITAA.NPC.Arthur
             }
 
             currentTargetPlayer = player;
-            currentPlayerController = player.GetComponent<PlayerController>();
+            currentPlayerController = player.GetComponentInParent<PlayerController>();
             playerInRange = true;
             menuOpenedForCurrentInteraction = false;
 
             if (enableDebugLogs)
             {
-                Debug.Log($"[{nameof(ArthurAutoInteraction)}] Player entered detection zone.", this);
+                Debug.Log(
+                    $"[{nameof(ArthurAutoInteraction)}] Player entered detection zone. Controller found: {currentPlayerController != null}",
+                    this);
             }
 
             if (!hasArthurApproachedPlayer && movementToPlayer != null)
@@ -271,6 +266,7 @@ namespace ITAA.NPC.Arthur
 
             if (openMenuWhenArthurReachesPlayer && !menuOpenedForCurrentInteraction)
             {
+                LockPlayerMovement();
                 OpenDialogueMenu();
             }
         }
@@ -328,12 +324,22 @@ namespace ITAA.NPC.Arthur
 
         private void LockPlayerMovement()
         {
-            if (currentPlayerController == null || playerLocked)
+            if (currentPlayerController == null)
+            {
+                if (enableDebugLogs)
+                {
+                    Debug.LogWarning($"[{nameof(ArthurAutoInteraction)}] PlayerController not found -> lock skipped.", this);
+                }
+                return;
+            }
+
+            if (playerLocked)
             {
                 return;
             }
 
             currentPlayerController.SetMovementEnabled(false);
+            currentPlayerController.StopImmediately();
             playerLocked = true;
 
             if (enableDebugLogs)
@@ -356,6 +362,12 @@ namespace ITAA.NPC.Arthur
             {
                 Debug.Log($"[{nameof(ArthurAutoInteraction)}] Player released.", this);
             }
+        }
+
+        private static Transform GetPlayerRootTransform(Collider2D other)
+        {
+            PlayerController controller = other.GetComponentInParent<PlayerController>();
+            return controller != null ? controller.transform : other.transform;
         }
     }
 }

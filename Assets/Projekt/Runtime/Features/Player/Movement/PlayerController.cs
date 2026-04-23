@@ -1,17 +1,3 @@
-/*
- * Datei: PlayerController.cs
- * Zweck: Verarbeitet die Eingabe und bewegt den Spieler in der Spielwelt.
- * Verantwortung:
- *   - Liest Richtungsinput
- *   - übergibt Bewegungsinput an den PlayerMotor2D
- *   - aktualisiert Animator-Parameter
- *   - kann extern gesperrt/freigegeben werden (z. B. für NPC-Interaktionen)
- * Abhängigkeiten: Rigidbody2D, optional Animator.
- * Verwendet von: Player-GameObject in Gameplay-Szenen.
- */
-
-// Datei: Assets/Projekt/Runtime/Features/Player/Movement/PlayerController.cs
-
 using UnityEngine;
 
 namespace ITAA.Player.Movement
@@ -20,8 +6,6 @@ namespace ITAA.Player.Movement
     [RequireComponent(typeof(PlayerMotor2D))]
     public class PlayerController : MonoBehaviour
     {
-        #region Inspector
-
         [Header("References")]
         [SerializeField] private PlayerInputReader inputReader;
         [SerializeField] private PlayerMotor2D motor;
@@ -29,10 +13,6 @@ namespace ITAA.Player.Movement
 
         [Header("Debug")]
         [SerializeField] private bool enableDebugLogs;
-
-        #endregion
-
-        #region Private Fields
 
         private Vector2 lastMoveDirection = Vector2.down;
         private bool hasMoveX;
@@ -42,10 +22,6 @@ namespace ITAA.Player.Movement
         private bool hasIsMoving;
 
         private bool movementEnabled = true;
-
-        #endregion
-
-        #region Unity Methods
 
         private void Awake()
         {
@@ -71,7 +47,7 @@ namespace ITAA.Player.Movement
         {
             if (inputReader == null)
             {
-                Debug.LogError($"[{nameof(PlayerController)}] {nameof(PlayerInputReader)} fehlt.");
+                Debug.LogError($"[{nameof(PlayerController)}] {nameof(PlayerInputReader)} fehlt.", this);
                 return;
             }
 
@@ -92,7 +68,7 @@ namespace ITAA.Player.Movement
 
             if (enableDebugLogs && input != Vector2.zero)
             {
-                Debug.Log($"[{nameof(PlayerController)}] Input erkannt: {input}");
+                Debug.Log($"[{nameof(PlayerController)}] Input erkannt: {input}", this);
             }
         }
 
@@ -112,31 +88,33 @@ namespace ITAA.Player.Movement
             motor.SetMovementInput(inputReader.MoveInput);
         }
 
-        #endregion
-
-        #region Public Methods
-
         public void SetMovementEnabled(bool enabled)
         {
             movementEnabled = enabled;
 
-            if (motor != null)
+            if (motor == null)
             {
-                motor.SetMovementLocked(!enabled);
+                return;
+            }
 
-                if (!enabled)
+            motor.SetMovementLocked(!enabled);
+
+            if (!enabled)
+            {
+                motor.SetMovementInput(Vector2.zero);
+                motor.Stop();
+                UpdateVisuals(Vector2.zero);
+
+                if (enableDebugLogs)
                 {
-                    motor.Stop();
-                    UpdateVisuals(Vector2.zero);
-
-                    if (enableDebugLogs)
-                    {
-                        Debug.Log($"[{nameof(PlayerController)}] Movement gesperrt.");
-                    }
+                    Debug.Log($"[{nameof(PlayerController)}] Movement gesperrt.", this);
                 }
-                else if (enableDebugLogs)
+            }
+            else
+            {
+                if (enableDebugLogs)
                 {
-                    Debug.Log($"[{nameof(PlayerController)}] Movement freigegeben.");
+                    Debug.Log($"[{nameof(PlayerController)}] Movement freigegeben.", this);
                 }
             }
         }
@@ -153,18 +131,15 @@ namespace ITAA.Player.Movement
                 return;
             }
 
+            motor.SetMovementInput(Vector2.zero);
             motor.Stop();
             UpdateVisuals(Vector2.zero);
 
             if (enableDebugLogs)
             {
-                Debug.Log($"[{nameof(PlayerController)}] StopImmediately ausgeführt.");
+                Debug.Log($"[{nameof(PlayerController)}] StopImmediately ausgeführt.", this);
             }
         }
-
-        #endregion
-
-        #region Private Methods
 
         private void UpdateVisuals(Vector2 direction)
         {
@@ -206,7 +181,5 @@ namespace ITAA.Player.Movement
 
             return false;
         }
-
-        #endregion
     }
 }
