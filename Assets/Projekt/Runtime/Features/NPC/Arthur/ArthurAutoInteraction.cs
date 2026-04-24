@@ -1,3 +1,11 @@
+/*
+ * Datei: ArthurAutoInteraction.cs
+ * Zweck: Koordiniert Arthurs automatische Spielerinteraktion und den UI-Startfluss.
+ * Verantwortung: Erkennt den Spieler, startet Arthurs Annäherung, sperrt den Player bei Bedarf
+ * und öffnet nach Arthurs Ankunft das Startmenü.
+ * Abhängigkeiten: ArthurMovementToPlayer, ArthurAnimationController, ArthurNameUI, MenuManager, Input System.
+ * Verwendet von: Arthur-Triggerzone in der Szene als Einstieg in den Menü- und Interaktionsfluss.
+ */
 using UnityEngine;
 using UnityEngine.InputSystem;
 using ITAA.Player.Movement;
@@ -181,10 +189,7 @@ namespace ITAA.NPC.Arthur
                 movementToPlayer.DisableMovement();
             }
 
-            if (animationController != null)
-            {
-                animationController.ForceIdle();
-            }
+            FacePlayerIfPossible();
 
             if (nameUI != null)
             {
@@ -254,10 +259,7 @@ namespace ITAA.NPC.Arthur
                 movementToPlayer.DisableMovement();
             }
 
-            if (animationController != null)
-            {
-                animationController.ForceIdle();
-            }
+            FacePlayerIfPossible();
 
             if (nameUI != null)
             {
@@ -364,6 +366,29 @@ namespace ITAA.NPC.Arthur
             {
                 Debug.Log($"[{nameof(ArthurAutoInteraction)}] Player released.", this);
             }
+        }
+
+        private void FacePlayerIfPossible()
+        {
+            if (animationController == null)
+            {
+                return;
+            }
+
+            if (currentTargetPlayer == null)
+            {
+                animationController.ForceIdle();
+                return;
+            }
+
+            Vector2 lookDirection = currentTargetPlayer.position - transform.position;
+            if (lookDirection.sqrMagnitude <= 0.0001f)
+            {
+                animationController.ForceIdle();
+                return;
+            }
+
+            animationController.ForceIdle(lookDirection);
         }
 
         private static Transform GetPlayerRootTransform(Collider2D other)

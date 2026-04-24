@@ -1,7 +1,7 @@
 /*
  * Datei: PlayerNameTag.cs
  * Zweck: Positioniert ein Namensschild über einer Ziel-Figur in der Welt.
- * Verantwortung: Folgt einem Transform-Ziel und zeigt den Spielernamen aus der PlayerSession an.
+ * Verantwortung: Folgt einem Transform-Ziel und zeigt den Spielernamen aus der PlayerSession oder dem Runtime-Save an.
  * Abhängigkeiten: PlayerSession, Transform, TMP_Text, Camera.
  * Verwendet von: Player mit World-Space-Namensanzeige.
  */
@@ -94,13 +94,9 @@ namespace ITAA.Player.UI
                 return;
             }
 
-            string playerName = fallbackName;
-
-            if (PlayerSession.Instance != null &&
-                !string.IsNullOrWhiteSpace(PlayerSession.Instance.Username))
-            {
-                playerName = PlayerSession.Instance.Username;
-            }
+            string playerName = PlayerSession.Instance != null
+                ? PlayerSession.Instance.GetResolvedPlayerName(fallbackName)
+                : fallbackName;
 
             nameText.text = playerName;
         }

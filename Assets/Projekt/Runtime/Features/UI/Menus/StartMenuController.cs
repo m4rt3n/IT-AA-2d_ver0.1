@@ -31,10 +31,7 @@ namespace ITAA.UI.Menus
 
         private void Awake()
         {
-            if (menuManager == null)
-            {
-                menuManager = FindAnyObjectByType<MenuManager>();
-            }
+            ResolveMenuManager();
         }
 
         #endregion
@@ -43,7 +40,7 @@ namespace ITAA.UI.Menus
 
         public void OpenLoadGame()
         {
-            if (menuManager == null)
+            if (!ResolveMenuManager())
             {
                 Debug.LogWarning($"[{nameof(StartMenuController)}] Kein {nameof(MenuManager)} gefunden.");
                 return;
@@ -54,7 +51,7 @@ namespace ITAA.UI.Menus
 
         public void CloseLoadGame()
         {
-            if (menuManager == null)
+            if (!ResolveMenuManager())
             {
                 Debug.LogWarning($"[{nameof(StartMenuController)}] Kein {nameof(MenuManager)} gefunden.");
                 return;
@@ -65,13 +62,24 @@ namespace ITAA.UI.Menus
 
         public void CloseAllMenus()
         {
-            if (menuManager == null)
+            if (!ResolveMenuManager())
             {
                 Debug.LogWarning($"[{nameof(StartMenuController)}] Kein {nameof(MenuManager)} gefunden.");
                 return;
             }
 
             menuManager.HideAll();
+        }
+
+        private bool ResolveMenuManager()
+        {
+            if (menuManager != null)
+            {
+                return true;
+            }
+
+            menuManager = FindAnyObjectByType<MenuManager>(FindObjectsInactive.Include);
+            return menuManager != null;
         }
 
         #endregion

@@ -15,7 +15,7 @@
  * - Dieses Panel verwaltet nur sich selbst und seinen Inhalt.
  * - CanvasRoot, BackgroundDim und MenuPanel werden vom MenuManager verwaltet.
  * - Der Schließen-Button ruft einen Callback auf.
- * - In dieser Variante schließt der Callback das komplette Menüsystem.
+ * - Falls kein Callback gesetzt ist, schließt sich das Panel selbst.
  */
 
 using System;
@@ -31,6 +31,8 @@ namespace ITAA.UI.Panels
 {
     public class LoadGamePanel : MonoBehaviour
     {
+        private const int FirstSlotIndex = 0;
+
         #region Inspector
 
         [Header("Config")]
@@ -101,8 +103,9 @@ namespace ITAA.UI.Panels
 
             gameObject.SetActive(true);
 
+            ResetSelectionToFirstSlot();
             ReloadSlots();
-            ShowSlot(0);
+            ShowFirstSlot();
         }
 
         public void Hide()
@@ -253,7 +256,23 @@ namespace ITAA.UI.Panels
                 Debug.Log($"[{nameof(LoadGamePanel)}] Close button clicked.", this);
             }
 
-            onCloseRequested?.Invoke();
+            if (onCloseRequested != null)
+            {
+                onCloseRequested.Invoke();
+                return;
+            }
+
+            Hide();
+        }
+
+        private void ResetSelectionToFirstSlot()
+        {
+            currentIndex = FirstSlotIndex;
+        }
+
+        private void ShowFirstSlot()
+        {
+            ShowSlot(FirstSlotIndex);
         }
 
         private void ShowSlot(int index)

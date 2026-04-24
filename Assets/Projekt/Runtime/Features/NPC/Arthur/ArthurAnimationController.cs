@@ -1,25 +1,27 @@
 /*
  * Datei: ArthurAnimationController.cs
  * Zweck:
- *   Steuert Arthurs Idle- und Walk-Animationen über zwei Hauptstates
- *   ("Arthur_Idle" und "Arthur_Walk") und nutzt dabei Blend-Tree-Parameter
- *   für die Blick- und Bewegungsrichtung.
+ *   Steuert Arthurs Idle- und Walk-Animationen über vorhandene
+ *   richtungsbasierte States wie Arthur_IdleDown und Arthur_WalkLeft.
  *
  * Voraussetzungen im Animator:
  *   - States:
- *       Arthur_Idle
- *       Arthur_Walk
- *   - Float Parameter:
+ *       Arthur_IdleDown
+ *       Arthur_IdleUp
+ *       Arthur_IdleLeft
+ *       Arthur_IdleRight
+ *       Arthur_WalkDown
+ *       Arthur_WalkUp
+ *       Arthur_WalkLeft
+ *       Arthur_WalkRight
+ *   - Optionale Parameter:
  *       MoveX
  *       MoveY
- *   - Bool Parameter:
  *       IsMoving
  *
  * Hinweis:
- *   Dieses Script ist für Blend Trees gebaut.
- *   Wenn dein Animator stattdessen einzelne Richtungsstates wie
- *   Arthur_IdleDown / Arthur_IdleUp / Arthur_WalkLeft usw. nutzt,
- *   dann muss auch der Animator entsprechend auf Blend Trees umgestellt werden.
+ *   Arthur merkt sich seine letzte Blickrichtung und nutzt diese wieder,
+ *   sobald er in einen Idle-State wechselt.
  */
 
 using UnityEngine;
@@ -34,8 +36,14 @@ namespace ITAA.NPC.Arthur
         [SerializeField] private Animator animator;
 
         [Header("States")]
-        [SerializeField] private string idleState = "Arthur_Idle";
-        [SerializeField] private string walkState = "Arthur_Walk";
+        [SerializeField] private string idleDownState = "Arthur_IdleDown";
+        [SerializeField] private string idleUpState = "Arthur_IdleUp";
+        [SerializeField] private string idleLeftState = "Arthur_IdleLeft";
+        [SerializeField] private string idleRightState = "Arthur_IdleRight";
+        [SerializeField] private string walkDownState = "Arthur_WalkDown";
+        [SerializeField] private string walkUpState = "Arthur_WalkUp";
+        [SerializeField] private string walkLeftState = "Arthur_WalkLeft";
+        [SerializeField] private string walkRightState = "Arthur_WalkRight";
 
         [Header("Parameters")]
         [SerializeField] private string moveXParameter = "MoveX";
@@ -212,12 +220,12 @@ namespace ITAA.NPC.Arthur
 
         private void PlayWalk()
         {
-            PlayState(walkState);
+            PlayState(GetDirectionalStateName(lastLookDirection, true));
         }
 
         private void PlayIdle()
         {
-            PlayState(idleState);
+            PlayState(GetDirectionalStateName(lastLookDirection, false));
         }
 
         private void ApplyDirection(Vector2 direction)
@@ -265,6 +273,28 @@ namespace ITAA.NPC.Arthur
 
             animator.Play(hash, layer, 0f);
             currentState = stateName;
+        }
+
+        private string GetDirectionalStateName(Vector2 direction, bool isMoving)
+        {
+            Vector2 safeDirection = GetSafeDirection(direction);
+
+            if (Mathf.Abs(safeDirection.x) > Mathf.Abs(safeDirection.y))
+            {
+                if (safeDirection.x >= 0f)
+                {
+                    return isMoving ? walkRightState : idleRightState;
+                }
+
+                return isMoving ? walkLeftState : idleLeftState;
+            }
+
+            if (safeDirection.y >= 0f)
+            {
+                return isMoving ? walkUpState : idleUpState;
+            }
+
+            return isMoving ? walkDownState : idleDownState;
         }
 
         #endregion

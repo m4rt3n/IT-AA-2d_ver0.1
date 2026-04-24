@@ -1,7 +1,7 @@
 /*
  * Datei: PlayerNameDisplay.cs
  * Zweck: Zeigt den Namen des aktuell geladenen Spielers in einem UI-Textfeld an.
- * Verantwortung: Liest den Namen aus der PlayerSession und setzt ihn in ein TMP_Text-Element.
+ * Verantwortung: Liest den Namen aus der PlayerSession oder dem Runtime-Save und setzt ihn in ein TMP_Text-Element.
  * Abhängigkeiten: PlayerSession, TMP_Text.
  * Verwendet von: UI-Elemente wie HUD oder Menüanzeigen mit Spielername.
  */
@@ -50,13 +50,9 @@ namespace ITAA.Player.UI
                 return;
             }
 
-            string playerName = fallbackName;
-
-            if (PlayerSession.Instance != null &&
-                !string.IsNullOrWhiteSpace(PlayerSession.Instance.Username))
-            {
-                playerName = PlayerSession.Instance.Username;
-            }
+            string playerName = PlayerSession.Instance != null
+                ? PlayerSession.Instance.GetResolvedPlayerName(fallbackName)
+                : fallbackName;
 
             targetText.text = playerName;
         }

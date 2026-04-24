@@ -42,15 +42,20 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
 - 🤖 **NPC System (Arthur)**
   - Auto-Approach zum Player
   - Trigger-basierte Interaktion
+  - Richtungsbasierte Idle-/Walk-Animationen mit gemerkter Blickrichtung
 - 🧩 **UI System**
   - MenuManager (zentrale Steuerung)
   - StartMenu + LoadGamePanel
+  - Close im LoadGamePanel führt sauber zurück ins Startmenü
 - 💾 **Save/Load System**
   - JSON-basiert
   - Slot-System
   - Dummy Save für Tests
 - 🔁 **Runtime Session**
   - Übergabe von Save-Daten zwischen Szenen
+- 🏷️ **Player Name Tag**
+  - Spielername wird aus dem geladenen SaveSlot übernommen
+  - Anzeige direkt über dem Player
 - 🎮 **Menü-Flow**
   - Arthur → StartMenu → LoadGamePanel → Scene Load
 
@@ -144,7 +149,9 @@ StartScene
 
 StartMenu  
 → Spieler wählt **„Laden“**  
-→ LoadGamePanel öffnet sich  
+→ LoadGamePanel öffnet sich mit **Slot 1** als Standardauswahl  
+→ Pfeile wechseln sauber zwischen **Slot 1 / 2 / 3**  
+→ Close führt zurück ins **StartMenu**  
 
 ---
 

@@ -13,7 +13,8 @@
  * - IsOpen                    -> meldet, ob das Menüsystem aktuell offen ist
  *
  * Wichtig:
- * - Der Close-Button im LoadGamePanel ruft in dieser Variante HideAllImmediate() auf
+ * - Der Close-Button im LoadGamePanel führt bevorzugt zurück ins Startmenü
+ *   und schließt nur dann komplett, wenn kein Startmenü verfügbar ist
  * - Falls Inspector-Referenzen fehlen, werden sie automatisch gesucht
  * - canvasRoot wird NICHT deaktiviert, damit der MenuManager aktiv bleibt
  * - Beim Start wird das Startmenü einmal geöffnet
@@ -85,6 +86,8 @@ namespace ITAA.UI.Managers
 
         public void ShowStartMenu()
         {
+            AutoAssignMissingReferences();
+            ConfigurePanels();
             Log("ShowStartMenu");
 
             SetActive(canvasRoot, true);
@@ -102,6 +105,8 @@ namespace ITAA.UI.Managers
 
         public void ShowLoadGamePanel()
         {
+            AutoAssignMissingReferences();
+            ConfigurePanels();
             Log("ShowLoadGamePanel");
 
             SetActive(canvasRoot, true);
@@ -138,6 +143,7 @@ namespace ITAA.UI.Managers
 
         public void HideAllImmediate()
         {
+            AutoAssignMissingReferences();
             Log("HideAllImmediate");
 
             SetActive(canvasRoot, true);
@@ -206,8 +212,19 @@ namespace ITAA.UI.Managers
         {
             if (loadGamePanel != null)
             {
-                loadGamePanel.Configure(HideAllImmediate);
+                loadGamePanel.Configure(HandleLoadGameCloseRequested);
             }
+        }
+
+        private void HandleLoadGameCloseRequested()
+        {
+            if (startMenuPanel != null)
+            {
+                ShowStartMenu();
+                return;
+            }
+
+            HideAllImmediate();
         }
 
         private void SetActive(GameObject target, bool value)
