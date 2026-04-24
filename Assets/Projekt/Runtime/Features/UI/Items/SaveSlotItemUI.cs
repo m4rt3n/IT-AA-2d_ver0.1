@@ -1,23 +1,31 @@
 /*
  * Datei: SaveSlotItemUI.cs
- * Zweck: Stellt einen einzelnen Save-Slot in der UI dar.
+ * Zweck: Stellt einen einzelnen Save-Slot in der UI dar und bereitet dessen Daten für kleine sowie große Slot-Ansichten auf.
  * Verantwortung:
- * - Zeigt Slot-Daten an
- * - Löst Auswahl per Button aus
- * - Unterstützt belegte und leere Slots
- * - Verdrahtet sich bei Bedarf teilweise automatisch
- * - Unterstützt große Einzelansicht im Load-Panel
+ * - Zeigt Save-Slot-Daten strukturiert und lesbar an
+ * - Unterstützt getrennte Textfelder und einen kombinierten Info-Block
+ * - Löst Auswahl/Laden per Button oder Klick auf die gesamte Slot-Karte aus
+ * - Hebt den aktuell sichtbaren großen Slot visuell als aktive Auswahl hervor
+ * - Unterscheidet sauber zwischen belegten und leeren Slots
+ * Abhängigkeiten:
+ * - ITAA.System.Savegame.SaveSlotEntity
+ * - TMPro
+ * - Unity UI / EventSystem
+ * Verwendung:
+ * - Wird vom LoadGamePanel für den großen aktuell ausgewählten Slot verwendet
+ * - Kann auch für kleinere Listen-/Kartenansichten wiederverwendet werden
  */
 
 using System;
 using ITAA.System.Savegame;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace ITAA.UI.Items
 {
-    public class SaveSlotItemUI : MonoBehaviour
+    public class SaveSlotItemUI : MonoBehaviour, IPointerClickHandler
     {
         #region Inspector
 
@@ -30,13 +38,23 @@ namespace ITAA.UI.Items
 
         [Header("Optional Extra Text")]
         [SerializeField] private TMP_Text titleText;
+        [SerializeField] private TMP_Text actionButtonLabelText;
 
         [Header("Optional Visuals")]
         [SerializeField] private GameObject hasDataRoot;
         [SerializeField] private GameObject emptyRoot;
         [SerializeField] private Image backgroundImage;
+        [SerializeField] private Outline selectionOutline;
         [SerializeField] private Color normalColor = Color.white;
         [SerializeField] private Color emptyColor = new Color(0.85f, 0.85f, 0.85f, 1f);
+        [SerializeField] private Color selectedColor = new Color(0.96f, 0.97f, 1f, 1f);
+        [SerializeField] private Color selectedOutlineColor = new Color(0.96f, 0.72f, 0.2f, 1f);
+
+        [Header("Text Colors")]
+        [SerializeField] private Color titleColor = new Color(0.11f, 0.15f, 0.24f, 1f);
+        [SerializeField] private Color infoColor = new Color(0.19f, 0.24f, 0.32f, 1f);
+        [SerializeField] private Color accentColor = new Color(0.1f, 0.56f, 0.27f, 1f);
+        [SerializeField] private Color emptyInfoColor = new Color(0.43f, 0.47f, 0.53f, 1f);
 
         [Header("Debug")]
         [SerializeField] private bool autoResolveReferences = true;
@@ -102,33 +120,47 @@ namespace ITAA.UI.Items
             }
 
             bool hasData = slot.HasData;
+            bool useCombinedInfoLayout = UsesCombinedInfoLayout();
 
-            SetText(slotNameText, $"Slot {slot.SlotId}");
+            string slotLabel = $"Slot {slot.SlotId}";
+            string playerName = hasData
+                ? GetSafeText(slot.PlayerName, GetSafeText(slot.DisplayName, "Spieler"))
+                : "Kein Spieler";
+            string sceneName = hasData
+                ? GetSafeText(slot.SceneName, "-")
+                : "Kein Spielstand";
+            string savedAt = hasData
+                ? GetSafeText(slot.SavedAtText, "-")
+                : "-";
+            string status = hasData ? "Belegt" : "Leer";
 
-            // Oberer Titel im großen Slot.
-            // Kann später durch Tag/PlayerName ersetzt werden.
-            SetText(
-                titleText,
-                hasData
-                    ? GetSafeText(slot.DisplayName, "Spieler")
-                    : "Spieler"
-            );
+            if (useCombinedInfoLayout)
+            {
+                TMP_Text combinedInfoText = GetCombinedInfoTextTarget();
 
-            SetText(
-                sceneNameText,
-                hasData
-                    ? GetSafeText(slot.SceneName, "-")
-                    : "Kein Spielstand"
-            );
+                SetText(titleText, hasData ? playerName : "Spielstand waehlen");
+                SetText(
+                    combinedInfoText,
+                    BuildCombinedInfoText(
+                        slotLabel,
+                        playerName,
+                        sceneName,
+                        savedAt,
+                        status,
+                        slot.Level,
+                        slot.Score,
+                        hasData));
+            }
+            else
+            {
+                SetText(slotNameText, slotLabel);
+                SetText(titleText, playerName);
+                SetText(sceneNameText, $"Szene: {sceneName}");
+                SetText(savedAtText, $"Gespeichert: {savedAt}");
+                SetText(statusText, $"Status: {status}");
+            }
 
-            SetText(
-                savedAtText,
-                hasData
-                    ? GetSafeText(slot.SavedAtText, "-")
-                    : "-"
-            );
-
-            SetText(statusText, hasData ? "Belegt" : "Leer");
+            ApplyTextColors(hasData, useCombinedInfoLayout);
 
             if (hasDataRoot != null)
             {
@@ -142,23 +174,51 @@ namespace ITAA.UI.Items
 
             if (backgroundImage != null)
             {
-                backgroundImage.color = hasData ? normalColor : emptyColor;
+                backgroundImage.color = hasData ? selectedColor : emptyColor;
+            }
+
+            EnsureSelectionOutline();
+
+            if (selectionOutline != null)
+            {
+                selectionOutline.enabled = true;
+                selectionOutline.effectColor = hasData ? selectedOutlineColor : emptyInfoColor;
+                selectionOutline.effectDistance = hasData ? new Vector2(3f, -3f) : new Vector2(2f, -2f);
+            }
+
+            SetText(actionButtonLabelText, hasData ? "Laden" : "Leer");
+
+            if (actionButtonLabelText != null)
+            {
+                actionButtonLabelText.color = hasData ? titleColor : emptyInfoColor;
             }
 
             if (selectButton != null)
             {
-                selectButton.interactable = true;
+                selectButton.interactable = hasData;
             }
 
             if (enableDebugLogs)
             {
-                Debug.Log($"[{nameof(SaveSlotItemUI)}] Setup Slot {slot.SlotId} | HasData={slot.HasData}", this);
+                Debug.Log(
+                    $"[{nameof(SaveSlotItemUI)}] Setup Slot {slot.SlotId} | HasData={slot.HasData} | CombinedLayout={useCombinedInfoLayout}",
+                    this);
             }
         }
 
         public SaveSlotEntity GetSlot()
         {
             return currentSlot;
+        }
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            if (eventData == null)
+            {
+                return;
+            }
+
+            HandleClick();
         }
 
         #endregion
@@ -170,6 +230,16 @@ namespace ITAA.UI.Items
             if (currentSlot == null)
             {
                 Debug.LogWarning($"[{nameof(SaveSlotItemUI)}] Kein SaveSlotEntity gesetzt auf '{gameObject.name}'.", this);
+                return;
+            }
+
+            if (!currentSlot.HasData)
+            {
+                if (enableDebugLogs)
+                {
+                    Debug.Log($"[{nameof(SaveSlotItemUI)}] Slot {currentSlot.SlotId} ist leer und wird nicht geladen.", this);
+                }
+
                 return;
             }
 
@@ -185,9 +255,19 @@ namespace ITAA.UI.Items
         {
             SetText(slotNameText, "Slot ?");
             SetText(titleText, "Spieler");
-            SetText(sceneNameText, "-");
-            SetText(savedAtText, "-");
-            SetText(statusText, "Fehler");
+
+            if (UsesCombinedInfoLayout())
+            {
+                SetText(GetCombinedInfoTextTarget(), "Slotdaten konnten nicht geladen werden.");
+            }
+            else
+            {
+                SetText(sceneNameText, "Szene: -");
+                SetText(savedAtText, "Gespeichert: -");
+                SetText(statusText, "Status: Fehler");
+            }
+
+            ApplyTextColors(false, UsesCombinedInfoLayout());
 
             if (hasDataRoot != null)
             {
@@ -204,9 +284,25 @@ namespace ITAA.UI.Items
                 backgroundImage.color = emptyColor;
             }
 
+            EnsureSelectionOutline();
+
+            if (selectionOutline != null)
+            {
+                selectionOutline.enabled = true;
+                selectionOutline.effectColor = emptyInfoColor;
+                selectionOutline.effectDistance = new Vector2(2f, -2f);
+            }
+
             if (selectButton != null)
             {
                 selectButton.interactable = false;
+            }
+
+            SetText(actionButtonLabelText, "Fehler");
+
+            if (actionButtonLabelText != null)
+            {
+                actionButtonLabelText.color = emptyInfoColor;
             }
         }
 
@@ -230,6 +326,11 @@ namespace ITAA.UI.Items
             if (backgroundImage == null)
             {
                 backgroundImage = GetComponent<Image>();
+            }
+
+            if (selectionOutline == null)
+            {
+                selectionOutline = GetComponent<Outline>();
             }
 
             TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
@@ -259,6 +360,11 @@ namespace ITAA.UI.Items
                 statusText = FindTextByName(texts, "StatusText", "InfoText");
             }
 
+            if (actionButtonLabelText == null && selectButton != null)
+            {
+                actionButtonLabelText = selectButton.GetComponentInChildren<TMP_Text>(true);
+            }
+
             if (enableDebugLogs)
             {
                 Debug.Log(
@@ -268,7 +374,9 @@ namespace ITAA.UI.Items
                     $"Title={(titleText != null)} | " +
                     $"SceneName={(sceneNameText != null)} | " +
                     $"SavedAt={(savedAtText != null)} | " +
-                    $"Status={(statusText != null)}",
+                    $"Status={(statusText != null)} | " +
+                    $"ActionLabel={(actionButtonLabelText != null)} | " +
+                    $"Outline={(selectionOutline != null)}",
                     this
                 );
             }
@@ -310,6 +418,143 @@ namespace ITAA.UI.Items
         private static string GetSafeText(string value, string fallback)
         {
             return string.IsNullOrWhiteSpace(value) ? fallback : value;
+        }
+
+        private bool UsesCombinedInfoLayout()
+        {
+            int uniqueCount = 0;
+            TMP_Text[] candidates = { slotNameText, sceneNameText, savedAtText, statusText };
+
+            for (int i = 0; i < candidates.Length; i++)
+            {
+                TMP_Text candidate = candidates[i];
+
+                if (candidate == null || ReferenceEquals(candidate, titleText))
+                {
+                    continue;
+                }
+
+                bool alreadyCounted = false;
+
+                for (int j = 0; j < i; j++)
+                {
+                    if (ReferenceEquals(candidates[j], candidate))
+                    {
+                        alreadyCounted = true;
+                        break;
+                    }
+                }
+
+                if (!alreadyCounted)
+                {
+                    uniqueCount++;
+                }
+            }
+
+            return uniqueCount > 0 && uniqueCount < 4;
+        }
+
+        private TMP_Text GetCombinedInfoTextTarget()
+        {
+            if (IsUsableInfoTarget(statusText))
+            {
+                return statusText;
+            }
+
+            if (IsUsableInfoTarget(sceneNameText))
+            {
+                return sceneNameText;
+            }
+
+            if (IsUsableInfoTarget(savedAtText))
+            {
+                return savedAtText;
+            }
+
+            if (IsUsableInfoTarget(slotNameText))
+            {
+                return slotNameText;
+            }
+
+            return null;
+        }
+
+        private bool IsUsableInfoTarget(TMP_Text candidate)
+        {
+            return candidate != null && !ReferenceEquals(candidate, titleText);
+        }
+
+        private static string BuildCombinedInfoText(
+            string slotLabel,
+            string playerName,
+            string sceneName,
+            string savedAt,
+            string status,
+            int level,
+            int score,
+            bool hasData)
+        {
+            if (!hasData)
+            {
+                return
+                    "<b><color=#9CA3AF>Auswahl sichtbar</color></b>\n" +
+                    $"{slotLabel}\n" +
+                    $"Spieler: {playerName}\n" +
+                    $"Szene: {sceneName}\n" +
+                    $"Gespeichert: {savedAt}\n" +
+                    $"Status: {status}";
+            }
+
+            return
+                "<b><color=#D97706>Ausgewahlt</color></b>\n" +
+                $"{slotLabel}\n" +
+                $"Spieler: {playerName}\n" +
+                $"Szene: {sceneName}\n" +
+                $"Gespeichert: {savedAt}\n" +
+                $"<color=#198F45>Status: {status}</color>\n" +
+                $"Level: {level}   Score: {score}";
+        }
+
+        private void ApplyTextColors(bool hasData, bool useCombinedInfoLayout)
+        {
+            Color resolvedTitleColor = hasData ? titleColor : emptyInfoColor;
+            Color resolvedInfoColor = hasData ? infoColor : emptyInfoColor;
+
+            SetTextColor(titleText, resolvedTitleColor);
+
+            if (!useCombinedInfoLayout)
+            {
+                SetTextColor(slotNameText, resolvedTitleColor);
+                SetTextColor(sceneNameText, resolvedInfoColor);
+                SetTextColor(savedAtText, resolvedInfoColor);
+                SetTextColor(statusText, hasData ? accentColor : emptyInfoColor);
+                return;
+            }
+
+            SetTextColor(GetCombinedInfoTextTarget(), resolvedInfoColor);
+        }
+
+        private void EnsureSelectionOutline()
+        {
+            if (selectionOutline != null)
+            {
+                return;
+            }
+
+            selectionOutline = GetComponent<Outline>();
+
+            if (selectionOutline == null)
+            {
+                selectionOutline = gameObject.AddComponent<Outline>();
+            }
+        }
+
+        private static void SetTextColor(TMP_Text target, Color color)
+        {
+            if (target != null)
+            {
+                target.color = color;
+            }
         }
 
         #endregion

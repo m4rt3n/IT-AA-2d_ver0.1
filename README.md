@@ -47,6 +47,10 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
   - MenuManager (zentrale Steuerung)
   - StartMenu + LoadGamePanel
   - Close im LoadGamePanel führt sauber zurück ins Startmenü
+  - Großer Save-Slot zeigt Dummy-/Save-Daten jetzt strukturiert an
+  - Klick auf die große Slot-Karte oder den Button lädt belegte Slots direkt
+  - Aktiver großer Slot ist farblich hervorgehoben und besser lesbar
+  - SaveSlotItem verwendet getrennte TMP-Felder: `SlotNameText`, `TitleText`, `SceneNameText`, `SavedAtText`, `StatusText`
 - 💾 **Save/Load System**
   - JSON-basiert
   - Slot-System
@@ -153,6 +157,9 @@ StartMenu
 → Spieler wählt **„Laden“**  
 → LoadGamePanel öffnet sich mit **Slot 1** als Standardauswahl  
 → Pfeile wechseln sauber zwischen **Slot 1 / 2 / 3**  
+→ Großer Slot zeigt **Slot, Spielername, Szene, Datum, Status, Level und Score**  
+→ Aktiver Slot ist mit **Highlight/Outline** sichtbar ausgewählt  
+→ Klick auf den großen Slot oder **„Laden“** startet den belegten Spielstand  
 → Close führt zurück ins **StartMenu**  
 
 ---
