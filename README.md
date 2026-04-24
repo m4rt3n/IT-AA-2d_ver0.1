@@ -74,6 +74,7 @@ Feature-driven Architecture:
 
 ---
 
+
 ## 📂 Projektstruktur
 Assets/
 ├── Projekt/
