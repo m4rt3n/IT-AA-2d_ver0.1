@@ -2,10 +2,10 @@
  * Datei: ArthurAnimationController.cs
  * Zweck:
  *   Steuert Arthurs Idle- und Walk-Animationen über vorhandene
- *   richtungsbasierte States wie Arthur_IdleDown und Arthur_WalkLeft.
+ *   richtungsbasierte States oder über Fallback-Blend-Tree-States.
  *
  * Voraussetzungen im Animator:
- *   - States:
+ *   - Entweder States:
  *       Arthur_IdleDown
  *       Arthur_IdleUp
  *       Arthur_IdleLeft
@@ -14,6 +14,9 @@
  *       Arthur_WalkUp
  *       Arthur_WalkLeft
  *       Arthur_WalkRight
+ *   - Oder Fallback-States:
+ *       Arthur_Idle
+ *       Arthur_Walk
  *   - Optionale Parameter:
  *       MoveX
  *       MoveY
@@ -44,6 +47,8 @@ namespace ITAA.NPC.Arthur
         [SerializeField] private string walkUpState = "Arthur_WalkUp";
         [SerializeField] private string walkLeftState = "Arthur_WalkLeft";
         [SerializeField] private string walkRightState = "Arthur_WalkRight";
+        [SerializeField] private string idleFallbackState = "Arthur_Idle";
+        [SerializeField] private string walkFallbackState = "Arthur_Walk";
 
         [Header("Parameters")]
         [SerializeField] private string moveXParameter = "MoveX";
@@ -220,12 +225,12 @@ namespace ITAA.NPC.Arthur
 
         private void PlayWalk()
         {
-            PlayState(GetDirectionalStateName(lastLookDirection, true));
+            PlayState(GetResolvedStateName(lastLookDirection, true));
         }
 
         private void PlayIdle()
         {
-            PlayState(GetDirectionalStateName(lastLookDirection, false));
+            PlayState(GetResolvedStateName(lastLookDirection, false));
         }
 
         private void ApplyDirection(Vector2 direction)
@@ -275,6 +280,23 @@ namespace ITAA.NPC.Arthur
             currentState = stateName;
         }
 
+        private string GetResolvedStateName(Vector2 direction, bool isMoving)
+        {
+            string directionalStateName = GetDirectionalStateName(direction, isMoving);
+            if (HasState(directionalStateName))
+            {
+                return directionalStateName;
+            }
+
+            string fallbackStateName = isMoving ? walkFallbackState : idleFallbackState;
+            if (HasState(fallbackStateName))
+            {
+                return fallbackStateName;
+            }
+
+            return directionalStateName;
+        }
+
         private string GetDirectionalStateName(Vector2 direction, bool isMoving)
         {
             Vector2 safeDirection = GetSafeDirection(direction);
@@ -295,6 +317,16 @@ namespace ITAA.NPC.Arthur
             }
 
             return isMoving ? walkDownState : idleDownState;
+        }
+
+        private bool HasState(string stateName)
+        {
+            if (animator == null || string.IsNullOrWhiteSpace(stateName))
+            {
+                return false;
+            }
+
+            return animator.HasState(0, Animator.StringToHash(stateName));
         }
 
         #endregion

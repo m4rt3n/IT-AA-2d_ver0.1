@@ -1,7 +1,8 @@
 /*
  * Datei: DatabaseManager.cs
  * Zweck: Lädt, speichert und verwaltet Benutzer- und Spielstandsdaten.
- * Verantwortung: Kapselt die JSON-basierte Datenhaltung und stellt SaveSlots zentral bereit.
+ * Verantwortung: Kapselt die JSON-basierte Datenhaltung, initialisiert fehlende Datendateien
+ * und stellt SaveSlots zentral bereit.
  * Abhängigkeiten: PersistentSingleton, SaveSlotData, UserData, Datei- und JSON-Zugriffe.
  * Verwendet von: LoadGamePanel, GameStartProgressSync, AuthManager und PlayerSession.
  */
@@ -42,6 +43,27 @@ namespace ITAA.Data
             userFilePath = Path.Combine(Application.persistentDataPath, userDatabaseFileName);
 
             LoadAll();
+            EnsureStorageInitialized();
+        }
+
+        public void EnsureStorageInitialized()
+        {
+            EnsurePathsInitialized();
+            EnsureParentDirectoryExists(saveFilePath);
+            EnsureParentDirectoryExists(userFilePath);
+
+            saveDatabase ??= new SaveDatabaseFile();
+            userDatabase ??= new UserDatabaseFile();
+
+            if (!File.Exists(saveFilePath))
+            {
+                SaveSaveDatabase();
+            }
+
+            if (!File.Exists(userFilePath))
+            {
+                SaveUserDatabase();
+            }
 
             if (createDemoSaveSlotsIfEmpty)
             {
@@ -100,6 +122,7 @@ namespace ITAA.Data
 
         private void LoadAll()
         {
+            EnsurePathsInitialized();
             saveDatabase = LoadJson<SaveDatabaseFile>(saveFilePath) ?? new SaveDatabaseFile();
             userDatabase = LoadJson<UserDatabaseFile>(userFilePath) ?? new UserDatabaseFile();
         }
@@ -117,8 +140,16 @@ namespace ITAA.Data
 
         private void SaveSaveDatabase()
         {
+            EnsurePathsInitialized();
             string json = JsonUtility.ToJson(saveDatabase, true);
             File.WriteAllText(saveFilePath, json);
+        }
+
+        private void SaveUserDatabase()
+        {
+            EnsurePathsInitialized();
+            string json = JsonUtility.ToJson(userDatabase, true);
+            File.WriteAllText(userFilePath, json);
         }
 
         private void EnsureDemoSaveSlots()
@@ -151,6 +182,38 @@ namespace ITAA.Data
             });
 
             SaveSaveDatabase();
+        }
+
+        private void EnsurePathsInitialized()
+        {
+            if (string.IsNullOrWhiteSpace(saveFilePath))
+            {
+                saveFilePath = Path.Combine(Application.persistentDataPath, saveDatabaseFileName);
+            }
+
+            if (string.IsNullOrWhiteSpace(userFilePath))
+            {
+                userFilePath = Path.Combine(Application.persistentDataPath, userDatabaseFileName);
+            }
+        }
+
+        private static void EnsureParentDirectoryExists(string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                return;
+            }
+
+            string directoryPath = Path.GetDirectoryName(filePath);
+            if (string.IsNullOrWhiteSpace(directoryPath))
+            {
+                return;
+            }
+
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
         }
     }
 }

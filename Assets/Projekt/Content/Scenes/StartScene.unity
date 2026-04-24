@@ -77006,7 +77006,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0ed6760ae3eba83419e5b737ffc7a6b1, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DatabaseManager
+  m_EditorClassIdentifier: Assembly-CSharp::ITAA.Data.DatabaseManager
   saveDatabaseFileName: saveSlots.json
   userDatabaseFileName: users.json
   createDemoSaveSlotsIfEmpty: 1
@@ -94802,7 +94802,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d162b5cd9dcf1ab4d8ad0ca77612b48b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ArthurAutoInteraction
+  m_EditorClassIdentifier: Assembly-CSharp::ITAA.NPC.Arthur.ArthurAutoInteraction
   movementToPlayer: {fileID: 745381518}
   animationController: {fileID: 745381520}
   nameUI: {fileID: 745381521}
@@ -94943,7 +94943,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 24ceb812ef9e1b84795fe9e074e327ab, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MenuManager
+  m_EditorClassIdentifier: Assembly-CSharp::ITAA.UI.Managers.MenuManager
   canvasRoot: {fileID: 2082348158}
   backgroundDim: {fileID: 1695271960}
   menuPanel: {fileID: 2102773475}
@@ -96150,7 +96150,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a9b96a9e39b8aad4bbba7949f414cf36, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AuthManager
+  m_EditorClassIdentifier: Assembly-CSharp::ITAA.Authentication.AuthManager
   gameSceneName: StartScene
 --- !u!4 &1377716541
 Transform:
@@ -96531,7 +96531,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bd14a07d807ca6045a0f2a5484752fe7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::StartMenuController
+  m_EditorClassIdentifier: Assembly-CSharp::ITAA.UI.Menus.StartMenuController
   menuManager: {fileID: 749671471}
 --- !u!1 &1424022357
 GameObject:
@@ -96935,7 +96935,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d2b0d33a1374aa94e8badb710b113f9d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerControler
+  m_EditorClassIdentifier: Assembly-CSharp::ITAA.Player.Movement.PlayerController
   inputReader: {fileID: 1672437190}
   motor: {fileID: 1672437189}
   animator: {fileID: 1672437184}
@@ -98867,7 +98867,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2cf9a278f8cd7194e9da96dccbaaf4eb, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerSession
+  m_EditorClassIdentifier: Assembly-CSharp::ITAA.Player.Session.PlayerSession
 --- !u!1 &1981642623
 GameObject:
   m_ObjectHideFlags: 0
@@ -99182,7 +99182,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1f97d3b69a2fd44e8a720ec1a5c2ed5, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LoadGamePanel
+  m_EditorClassIdentifier: Assembly-CSharp::ITAA.UI.Panels.LoadGamePanel
   slotCount: 3
   fallbackTitle: Spieler
   largeSlotItem: {fileID: 1133933423}
@@ -99607,14 +99607,6 @@ PrefabInstance:
       propertyPath: sceneNameText
       value: 
       objectReference: {fileID: 414458041}
-    - target: {fileID: 9136875786817421312, guid: 6933d7bc336d55b4cab6f7aaa17c1d62, type: 3}
-      propertyPath: labelText
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 9136875786817421312, guid: 6933d7bc336d55b4cab6f7aaa17c1d62, type: 3}
-      propertyPath: loadButton
-      value: 
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 6712783469676307254, guid: 6933d7bc336d55b4cab6f7aaa17c1d62, type: 3}

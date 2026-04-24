@@ -10,6 +10,7 @@
  * - Startet immer mit Slot 1
  * - Setzt oberen Titel abhängig vom aktiven Slot
  * - Lädt Szene bei Auswahl eines belegten Slots
+ * - Prüft vor dem Szenenstart die benötigten Dateien und zeigt einen Ladebalken in Prozent
  *
  * Wichtig:
  * - Dieses Panel verwaltet nur sich selbst und seinen Inhalt.
@@ -20,6 +21,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections;
+using System.IO;
+using ITAA.Data;
+using ITAA.Player.Session;
 using ITAA.System.Savegame;
 using ITAA.UI.Items;
 using TMPro;
@@ -32,6 +37,7 @@ namespace ITAA.UI.Panels
     public class LoadGamePanel : MonoBehaviour
     {
         private const int FirstSlotIndex = 0;
+        private const float InitializationProgressShare = 0.55f;
 
         #region Inspector
 
@@ -48,6 +54,12 @@ namespace ITAA.UI.Panels
         [SerializeField] private TMP_Text headerTitleText;
         [SerializeField] private TMP_Text pageIndicatorText;
 
+        [Header("Loading UI")]
+        [SerializeField] private RectTransform loadingOverlayRoot;
+        [SerializeField] private TMP_Text loadingStatusText;
+        [SerializeField] private TMP_Text loadingPercentText;
+        [SerializeField] private Image loadingProgressFillImage;
+
         [Header("Debug")]
         [SerializeField] private bool enableDebugLogs = false;
         [SerializeField] private bool logHideStackTrace = false;
@@ -60,6 +72,7 @@ namespace ITAA.UI.Panels
         private IReadOnlyList<SaveSlotEntity> slots = Array.Empty<SaveSlotEntity>();
         private int currentIndex;
         private bool isInitialized;
+        private bool isLoading;
 
         private Action onCloseRequested;
 
@@ -71,6 +84,8 @@ namespace ITAA.UI.Panels
         {
             saveSystem = new SaveSystem();
             EnsureInitialized();
+            EnsureLoadingOverlay();
+            SetLoadingOverlayVisible(false);
         }
 
         private void OnDestroy()
@@ -90,6 +105,9 @@ namespace ITAA.UI.Panels
         public void Show()
         {
             EnsureInitialized();
+            EnsureLoadingOverlay();
+            SetLoadingOverlayVisible(false);
+            isLoading = false;
 
             if (ensureDummySaveOnShow)
             {
@@ -110,6 +128,8 @@ namespace ITAA.UI.Panels
 
         public void Hide()
         {
+            isLoading = false;
+
             if (enableDebugLogs)
             {
                 Debug.Log($"[{nameof(LoadGamePanel)}] Hide()", this);
@@ -161,7 +181,7 @@ namespace ITAA.UI.Panels
 
         public void ShowPreviousSlot()
         {
-            if (!HasSlots())
+            if (isLoading || !HasSlots())
             {
                 return;
             }
@@ -178,7 +198,7 @@ namespace ITAA.UI.Panels
 
         public void ShowNextSlot()
         {
-            if (!HasSlots())
+            if (isLoading || !HasSlots())
             {
                 return;
             }
@@ -208,6 +228,95 @@ namespace ITAA.UI.Panels
             ReloadSlots();
 
             isInitialized = true;
+        }
+
+        private void EnsureLoadingOverlay()
+        {
+            if (loadingOverlayRoot != null &&
+                loadingStatusText != null &&
+                loadingPercentText != null &&
+                loadingProgressFillImage != null)
+            {
+                return;
+            }
+
+            RectTransform parent = transform as RectTransform;
+            if (parent == null)
+            {
+                return;
+            }
+
+            GameObject overlayObject = loadingOverlayRoot != null
+                ? loadingOverlayRoot.gameObject
+                : CreateUiObject("LoadingOverlay", parent);
+
+            loadingOverlayRoot = overlayObject.GetComponent<RectTransform>();
+            StretchToParent(loadingOverlayRoot);
+
+            Image overlayImage = overlayObject.GetComponent<Image>();
+            if (overlayImage == null)
+            {
+                overlayImage = overlayObject.AddComponent<Image>();
+            }
+
+            overlayImage.color = new Color(0.05f, 0.07f, 0.12f, 0.92f);
+            overlayImage.raycastTarget = true;
+
+            RectTransform cardRoot = CreateUiObject("LoadingCard", loadingOverlayRoot).GetComponent<RectTransform>();
+            cardRoot.anchorMin = new Vector2(0.5f, 0.5f);
+            cardRoot.anchorMax = new Vector2(0.5f, 0.5f);
+            cardRoot.pivot = new Vector2(0.5f, 0.5f);
+            cardRoot.anchoredPosition = Vector2.zero;
+            cardRoot.sizeDelta = new Vector2(620f, 180f);
+
+            Image cardImage = cardRoot.gameObject.AddComponent<Image>();
+            cardImage.color = new Color(0.12f, 0.14f, 0.2f, 0.98f);
+
+            loadingStatusText = CreateText("LoadingStatusText", cardRoot, 28, FontStyles.Bold);
+            RectTransform statusRect = loadingStatusText.rectTransform;
+            statusRect.anchorMin = new Vector2(0f, 1f);
+            statusRect.anchorMax = new Vector2(1f, 1f);
+            statusRect.pivot = new Vector2(0.5f, 1f);
+            statusRect.anchoredPosition = new Vector2(0f, -24f);
+            statusRect.sizeDelta = new Vector2(-48f, 40f);
+            loadingStatusText.alignment = TextAlignmentOptions.Center;
+            loadingStatusText.text = "Initialisiere Dateien...";
+
+            RectTransform progressBarBackground = CreateUiObject("LoadingProgressBarBackground", cardRoot).GetComponent<RectTransform>();
+            progressBarBackground.anchorMin = new Vector2(0.5f, 0.5f);
+            progressBarBackground.anchorMax = new Vector2(0.5f, 0.5f);
+            progressBarBackground.pivot = new Vector2(0.5f, 0.5f);
+            progressBarBackground.anchoredPosition = new Vector2(0f, -6f);
+            progressBarBackground.sizeDelta = new Vector2(520f, 28f);
+
+            Image progressBarBackgroundImage = progressBarBackground.gameObject.AddComponent<Image>();
+            progressBarBackgroundImage.color = new Color(0.22f, 0.26f, 0.34f, 1f);
+            progressBarBackgroundImage.raycastTarget = false;
+
+            RectTransform fillRect = CreateUiObject("LoadingProgressBarFill", progressBarBackground).GetComponent<RectTransform>();
+            StretchToParent(fillRect);
+            fillRect.offsetMin = Vector2.zero;
+            fillRect.offsetMax = Vector2.zero;
+
+            loadingProgressFillImage = fillRect.gameObject.AddComponent<Image>();
+            loadingProgressFillImage.color = new Color(0.35f, 0.78f, 0.62f, 1f);
+            loadingProgressFillImage.type = Image.Type.Filled;
+            loadingProgressFillImage.fillMethod = Image.FillMethod.Horizontal;
+            loadingProgressFillImage.fillOrigin = (int)Image.OriginHorizontal.Left;
+            loadingProgressFillImage.fillAmount = 0f;
+            loadingProgressFillImage.raycastTarget = false;
+
+            loadingPercentText = CreateText("LoadingPercentText", cardRoot, 30, FontStyles.Bold);
+            RectTransform percentRect = loadingPercentText.rectTransform;
+            percentRect.anchorMin = new Vector2(0f, 0f);
+            percentRect.anchorMax = new Vector2(1f, 0f);
+            percentRect.pivot = new Vector2(0.5f, 0f);
+            percentRect.anchoredPosition = new Vector2(0f, 20f);
+            percentRect.sizeDelta = new Vector2(-48f, 40f);
+            loadingPercentText.alignment = TextAlignmentOptions.Center;
+            loadingPercentText.text = "0%";
+
+            SetLoadingOverlayVisible(false);
         }
 
         private void WireButtons()
@@ -251,6 +360,11 @@ namespace ITAA.UI.Panels
 
         private void HandleCloseClicked()
         {
+            if (isLoading)
+            {
+                return;
+            }
+
             if (enableDebugLogs)
             {
                 Debug.Log($"[{nameof(LoadGamePanel)}] Close button clicked.", this);
@@ -393,7 +507,6 @@ namespace ITAA.UI.Panels
             }
 
             SaveGameData loadedSave = saveSystem.Load(slot.SlotId);
-
             if (loadedSave == null)
             {
                 Debug.LogWarning(
@@ -403,34 +516,195 @@ namespace ITAA.UI.Panels
                 return;
             }
 
-            SavegameRuntimeSession runtimeSession = SavegameRuntimeSession.Instance;
-
-            if (runtimeSession != null)
+            if (isLoading)
             {
-                runtimeSession.SetCurrentSave(loadedSave);
-            }
-            else
-            {
-                Debug.LogWarning(
-                    $"[{nameof(LoadGamePanel)}] Keine {nameof(SavegameRuntimeSession)} in der Szene gefunden.",
-                    this
-                );
+                return;
             }
 
-            if (enableDebugLogs)
-            {
-                Debug.Log(
-                    $"[{nameof(LoadGamePanel)}] Lade Szene '{slot.SceneName}' für Slot {slot.SlotId}.",
-                    this
-                );
-            }
-
-            SceneManager.LoadScene(slot.SceneName);
+            StartCoroutine(LoadSelectedSlotAsync(slot, loadedSave));
         }
 
         private bool HasSlots()
         {
             return slots != null && slots.Count > 0;
+        }
+
+        private IEnumerator LoadSelectedSlotAsync(SaveSlotEntity slot, SaveGameData loadedSave)
+        {
+            isLoading = true;
+            SetLoadingOverlayVisible(true);
+            SetNavigationInteractable(false);
+            UpdateLoadingUi(0f, "Initialisiere Dateien...");
+
+            yield return null;
+
+            if (!TryInitializeRequiredFiles(slot, loadedSave, out string errorMessage))
+            {
+                Debug.LogWarning($"[{nameof(LoadGamePanel)}] {errorMessage}", this);
+                UpdateLoadingUi(0f, errorMessage);
+                yield return new WaitForSecondsRealtime(1.2f);
+                SetLoadingOverlayVisible(false);
+                SetNavigationInteractable(true);
+                isLoading = false;
+                yield break;
+            }
+
+            UpdateLoadingUi(InitializationProgressShare, "Dateien initialisiert.");
+            yield return null;
+
+            if (enableDebugLogs)
+            {
+                Debug.Log(
+                    $"[{nameof(LoadGamePanel)}] Lade Szene '{slot.SceneName}' für Slot {slot.SlotId} asynchron.",
+                    this
+                );
+            }
+
+            AsyncOperation loadOperation = SceneManager.LoadSceneAsync(slot.SceneName);
+            if (loadOperation == null)
+            {
+                Debug.LogWarning($"[{nameof(LoadGamePanel)}] Async Scene Load konnte nicht gestartet werden.", this);
+                UpdateLoadingUi(0f, "Szenenstart fehlgeschlagen.");
+                yield return new WaitForSecondsRealtime(1.2f);
+                SetLoadingOverlayVisible(false);
+                SetNavigationInteractable(true);
+                isLoading = false;
+                yield break;
+            }
+
+            while (!loadOperation.isDone)
+            {
+                float sceneProgress = Mathf.Clamp01(loadOperation.progress / 0.9f);
+                float totalProgress = Mathf.Lerp(InitializationProgressShare, 1f, sceneProgress);
+                UpdateLoadingUi(totalProgress, "Starte Spiel...");
+                yield return null;
+            }
+        }
+
+        private bool TryInitializeRequiredFiles(SaveSlotEntity slot, SaveGameData loadedSave, out string errorMessage)
+        {
+            try
+            {
+                string savegamesDirectory = Path.Combine(Application.persistentDataPath, "Savegames");
+
+                UpdateLoadingUi(0.08f, "Prüfe Speicherpfade...");
+                Directory.CreateDirectory(Application.persistentDataPath);
+                Directory.CreateDirectory(savegamesDirectory);
+
+                UpdateLoadingUi(0.18f, "Prüfe Save-Datei...");
+                string saveFilePath = Path.Combine(savegamesDirectory, $"save_slot_{slot.SlotId}.json");
+                if (!File.Exists(saveFilePath))
+                {
+                    saveSystem.Save(slot.SlotId, loadedSave);
+                }
+
+                UpdateLoadingUi(0.3f, "Prüfe Datenbanken...");
+                if (DatabaseManager.Instance != null)
+                {
+                    DatabaseManager.Instance.EnsureStorageInitialized();
+                }
+
+                UpdateLoadingUi(0.42f, "Prüfe Runtime-Session...");
+                SavegameRuntimeSession runtimeSession = SavegameRuntimeSession.Instance;
+                if (runtimeSession == null)
+                {
+                    GameObject runtimeSessionObject = new GameObject(nameof(SavegameRuntimeSession));
+                    runtimeSession = runtimeSessionObject.AddComponent<SavegameRuntimeSession>();
+                }
+
+                runtimeSession.SetCurrentSave(loadedSave);
+
+                UpdateLoadingUi(0.5f, "Übernehme Spielerstatus...");
+                if (PlayerSession.Instance != null)
+                {
+                    PlayerSession.Instance.ApplySaveGameData(loadedSave);
+                }
+
+                errorMessage = string.Empty;
+                return true;
+            }
+            catch (Exception exception)
+            {
+                errorMessage = $"Initialisierung fehlgeschlagen: {exception.Message}";
+                return false;
+            }
+        }
+
+        private void SetNavigationInteractable(bool interactable)
+        {
+            if (previousButton != null)
+            {
+                previousButton.interactable = interactable && HasSlots() && slots.Count > 1;
+            }
+
+            if (nextButton != null)
+            {
+                nextButton.interactable = interactable && HasSlots() && slots.Count > 1;
+            }
+
+            if (closeButton != null)
+            {
+                closeButton.interactable = interactable;
+            }
+        }
+
+        private void SetLoadingOverlayVisible(bool visible)
+        {
+            if (loadingOverlayRoot == null)
+            {
+                return;
+            }
+
+            loadingOverlayRoot.gameObject.SetActive(visible);
+        }
+
+        private void UpdateLoadingUi(float progress, string status)
+        {
+            EnsureLoadingOverlay();
+
+            float clampedProgress = Mathf.Clamp01(progress);
+
+            if (loadingStatusText != null)
+            {
+                loadingStatusText.text = status;
+            }
+
+            if (loadingPercentText != null)
+            {
+                loadingPercentText.text = $"{Mathf.RoundToInt(clampedProgress * 100f)}%";
+            }
+
+            if (loadingProgressFillImage != null)
+            {
+                loadingProgressFillImage.fillAmount = clampedProgress;
+            }
+        }
+
+        private static GameObject CreateUiObject(string objectName, Transform parent)
+        {
+            GameObject gameObject = new GameObject(objectName, typeof(RectTransform));
+            gameObject.transform.SetParent(parent, false);
+            return gameObject;
+        }
+
+        private static void StretchToParent(RectTransform rectTransform)
+        {
+            rectTransform.anchorMin = Vector2.zero;
+            rectTransform.anchorMax = Vector2.one;
+            rectTransform.offsetMin = Vector2.zero;
+            rectTransform.offsetMax = Vector2.zero;
+            rectTransform.pivot = new Vector2(0.5f, 0.5f);
+        }
+
+        private static TextMeshProUGUI CreateText(string objectName, Transform parent, float fontSize, FontStyles fontStyle)
+        {
+            GameObject textObject = CreateUiObject(objectName, parent);
+            TextMeshProUGUI textComponent = textObject.AddComponent<TextMeshProUGUI>();
+            textComponent.fontSize = fontSize;
+            textComponent.fontStyle = fontStyle;
+            textComponent.color = Color.white;
+            textComponent.enableWordWrapping = false;
+            return textComponent;
         }
 
         #endregion

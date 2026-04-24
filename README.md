@@ -51,6 +51,8 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
   - JSON-basiert
   - Slot-System
   - Dummy Save für Tests
+  - Vor Spielstart Prüfung und Initialisierung benötigter Dateien
+  - Ladebalken mit Prozentanzeige vor Szenenstart
 - 🔁 **Runtime Session**
   - Übergabe von Save-Daten zwischen Szenen
 - 🏷️ **Player Name Tag**

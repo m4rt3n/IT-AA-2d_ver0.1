@@ -5,9 +5,16 @@
  * Abhängigkeiten: UserData.
  * Verwendet von: DatabaseManager für das Speichern und Laden der User-Datei.
  */
-using UnityEngine;
+using System;
+using System.Collections.Generic;
+using ITAA.Data.Models;
 
-public class UserDatabaseFile
+namespace ITAA.Data.Storage
 {
-    
+    [Serializable]
+    public class UserDatabaseFile
+    {
+        public List<UserData> Users = new();
+        public int NextUserId = 1;
+    }
 }
