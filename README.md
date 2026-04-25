@@ -15,8 +15,6 @@
 
 ## 📸 Screenshots
 
-> ⚠️ Platzhalter – hier später echte Screens einfügen
-
 <p align="center">
  <img width="45%" alt="image" src="https://github.com/user-attachments/assets/f9c9c1ed-5d41-4121-8219-51f510543883" />
 </p>
@@ -55,6 +53,7 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
   - JSON-basiert
   - Slot-System
   - Dummy Save für Tests
+  - Dummy-Saves verweisen aktuell auf `StartScene`, da derzeit nur diese Laufzeit-Szene in den Build Settings aktiv ist
   - Vor Spielstart Prüfung und Initialisierung benötigter Dateien
   - Ladebalken mit Prozentanzeige vor Szenenstart
 - 🔁 **Runtime Session**
@@ -98,6 +97,8 @@ Assets/
 │ │
 │ └── Runtime/
 │ ├── Core/
+│ │ └── SceneManagement/
+│ │ └── SceneNames
 │ ├── Features/
 │ │ ├── Player/
 │ │ │ └── Movement/
@@ -140,6 +141,8 @@ Assets/
 StartScene  
 → StartMenu wird automatisch geöffnet  
 
+Hinweis: Kurzfristig ist `StartScene` die zentrale Laufzeit-Szene für Menü und geladenen Dummy-Spielstand. Eine separate `GameScene` ist als späterer Portfolio-Ausbau vorgesehen.
+
 ---
 
 ### Arthur Interaktion
@@ -171,7 +174,7 @@ StartMenu
 3. Spieler wählt Slot
 4. SaveGameData wird geladen
 5. Daten werden in `SavegameRuntimeSession` gespeichert
-6. Szene wird geladen
+6. Die im Save hinterlegte Szene wird geladen
 
 ---
 
@@ -193,6 +196,11 @@ save_slot_2.json
 - Position
 - Level
 - Score
+
+Aktueller Dummy-Stand:
+- `SceneName` wird zentral über `SceneNames.StartScene` gesetzt
+- Bereits vorhandene Dummy-Saves mit altem `GameScene`-Wert werden auf `StartScene` migriert
+- Dadurch bleiben Dummy-Save, Auth-Startszene und Build Settings kurzfristig synchron
 
 ---
 

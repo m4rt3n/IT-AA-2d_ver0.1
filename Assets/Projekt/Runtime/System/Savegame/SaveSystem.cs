@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using ITAA.Core.SceneManagement;
 using UnityEngine;
 
 namespace ITAA.System.Savegame
@@ -130,6 +131,7 @@ namespace ITAA.System.Savegame
 
             if (existing != null && existing.HasData)
             {
+                EnsureExistingDummySceneIsValid(existing);
                 return;
             }
 
@@ -138,7 +140,7 @@ namespace ITAA.System.Savegame
                 SlotId = 1,
                 DisplayName = "Testslot Arthur",
                 PlayerName = "Martin",
-                SceneName = "GameScene",
+                SceneName = SceneNames.StartScene,
                 SavedAtText = DateTime.Now.ToString("dd.MM.yyyy HH:mm"),
                 Level = 3,
                 Score = 1200,
@@ -152,6 +154,27 @@ namespace ITAA.System.Savegame
             Debug.Log(
                 $"[{nameof(SaveSystem)}] Dummy-Spielstand in Slot 1 erstellt: {GetSlotPath(1)}"
             );
+        }
+
+        private void EnsureExistingDummySceneIsValid(SaveGameData existing)
+        {
+            if (existing == null)
+            {
+                return;
+            }
+
+            if (existing.SceneName == SceneNames.StartScene)
+            {
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(existing.SceneName) && existing.SceneName != SceneNames.LegacyGameScene)
+            {
+                return;
+            }
+
+            existing.SceneName = SceneNames.StartScene;
+            Save(existing.SlotId > 0 ? existing.SlotId : 1, existing);
         }
 
         private static string GetSlotPath(int slotId)

@@ -6,6 +6,7 @@
  * Verwendet von: LoadGamePanel und späteren Login-/Start-Workflows.
  */
 using ITAA.Core.Runtime;
+using ITAA.Core.SceneManagement;
 using ITAA.Data.Models;
 using ITAA.Player.Session;
 using UnityEngine;
@@ -16,7 +17,7 @@ namespace ITAA.Authentication
     public class AuthManager : PersistentSingleton<AuthManager>
     {
         [Header("Scenes")]
-        [SerializeField] private string gameSceneName = "StartScene";
+        [SerializeField] private string gameSceneName = SceneNames.StartScene;
 
         // --- LOGIN / REGISTER (aktuell deaktiviert) ---
 

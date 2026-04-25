@@ -7,6 +7,7 @@
  */
 
 using System;
+using ITAA.Core.SceneManagement;
 using UnityEngine;
 
 namespace ITAA.System.Savegame
@@ -65,7 +66,7 @@ namespace ITAA.System.Savegame
                 SlotId = 1,
                 DisplayName = "Testslot Arthur",
                 PlayerName = "Martin",
-                SceneName = "GameScene",
+                SceneName = SceneNames.StartScene,
                 SavedAtText = DateTime.Now.ToString("dd.MM.yyyy HH:mm"),
                 Level = 3,
                 Score = 1200,
