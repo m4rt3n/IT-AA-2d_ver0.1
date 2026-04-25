@@ -10,6 +10,7 @@ using ITAA.Quiz;
 using ITAA.UI.Panels;
 using UnityEngine;
 
+
 namespace ITAA.NPC.Bernd
 {
     [DisallowMultipleComponent]
@@ -30,7 +31,7 @@ namespace ITAA.NPC.Bernd
             StartQuiz(null);
         }
 
-        public void StartQuiz(System.Action closedCallback)
+        public void StartQuiz(global::System.Action closedCallback)
         {
             ResolvePanel();
 

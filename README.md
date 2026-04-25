@@ -43,6 +43,9 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
   - Richtungsbasierte Idle-/Walk-Animationen mit gemerkter Blickrichtung
 - 🧑‍🏫 **NPC Bernd + Quiz**
   - Bernd ist in `StartScene` als NPC mit Sprite, Animator, Trigger und Namensanzeige angelegt
+  - Namensanzeige nutzt wie Arthur ein World-Space-`NameTagCanvas` und wird nur bei Player-Naehe eingeblendet
+  - Sprite-Import ist auf Player-/Arthur-Basis angepasst (`16 PPU`, `16x32` Slices, Bottom-Center Pivot, Point Filter)
+  - Idle- und Walk-Basisclips sind im Bernd Animator Controller eingebunden
   - Interaktion per **E** startet ein lokales, erweiterbares Quiz
   - Quiz-Fragen liegen als `QuizSet`-Datenmodell unter `Assets/Projekt/Content/Quiz/`
   - Quiz-UI wird ueber `QuizPanel` geoeffnet und enthaelt keine hart codierten Fragen

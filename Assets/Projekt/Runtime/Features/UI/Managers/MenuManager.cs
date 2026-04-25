@@ -42,7 +42,7 @@ namespace ITAA.UI.Managers
         [SerializeField] private bool openStartMenuOnStart = true;
 
         [Header("Debug")]
-        [SerializeField] private bool enableDebugLogs = true;
+        [SerializeField] private bool enableDebugLogs = false;
 
         #endregion
 

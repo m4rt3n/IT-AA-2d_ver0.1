@@ -30,7 +30,7 @@ Bernd/
 * **BerndDetectionZone** → Erkennt Spieler via Trigger
 * **BerndAutoInteraction** → Startet Interaktion (automatisch oder per Input)
 * **BerndQuizStarter** → Startet Bernds zugewiesenes `QuizSet`
-* **BerndNameTag** → Erzeugt Bernds Namensanzeige ueber dem Kopf
+* **BerndNameTag** → Zeigt Bernds Namensanzeige bei Player-Naehe wie Arthurs NameTag
 
 ---
 
@@ -69,6 +69,33 @@ Bernd/
 
 ---
 
+## 🖼️ Sprite- und Animationsbasis
+
+Bernd nutzt `Assets/Projekt/Content/Art/Player/character green.png`.
+Die Import-Basis ist auf die Player-/Arthur-Groesse abgestimmt:
+
+* Pixels Per Unit: `16`
+* Sprite Mode: `Multiple`
+* Slice-Groesse: `16 x 32`
+* Pivot je Slice: Bottom Center (`0.5, 0`)
+* Filter Mode: Point
+* Texture Compression: None
+
+Vorhandene Clips:
+
+* `Bernd_IdleDown`
+* `Bernd_IdleUp`
+* `Bernd_IdleLeft`
+* `Bernd_IdleRight`
+* `Bernd_WalkDown`
+* `Bernd_WalkUp`
+* `Bernd_WalkLeft`
+* `Bernd_WalkRight`
+
+Der Animator nutzt `MoveX`, `MoveY` und `IsMoving`, um zwischen Idle- und Walk-BlendTree zu wechseln.
+
+---
+
 ## 🎬 Animation Setup
 
 Animator erwartet folgende States:
@@ -104,6 +131,8 @@ Base Layer
 
 Aktuell ist Bernd bereits in `Assets/Projekt/Content/Scenes/StartScene.unity` angelegt und mit
 `Assets/Projekt/Content/Quiz/BerndIntroQuiz.asset` sowie dem `QuizPanel` verbunden.
+Das `NameTagCanvas` ist als Child von Bernd angelegt und wird ueber `BerndNameTag` automatisch
+bei Naehe zum Player sichtbar.
 
 ---
 

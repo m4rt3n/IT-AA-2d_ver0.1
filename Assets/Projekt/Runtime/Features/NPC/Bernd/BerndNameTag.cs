@@ -1,9 +1,9 @@
 /*
  * Datei: BerndNameTag.cs
- * Zweck: Zeigt Bernds Namen als Welt-UI ueber seinem Kopf an.
- * Verantwortung: Erstellt bei Bedarf ein einfaches NameTag und richtet es zur Kamera aus.
- * Abhaengigkeiten: TextMeshPro, Unity UI Canvas.
- * Verwendung: Wird auf Bernds GameObject gesetzt und benoetigt keine manuelle UI-Zuweisung.
+ * Zweck: Zeigt Bernds Nametag nur bei Naehe zum Player an.
+ * Verantwortung: Folgt Bernd, richtet sich zur Kamera aus und blendet den Namen bei Distanz ein/aus.
+ * Abhaengigkeiten: TMP_Text, Transform, Camera, Canvas.
+ * Verwendung: Wird wie ArthurNameTag auf Bernds NameTagCanvas verwendet.
  */
 
 using TMPro;
@@ -11,41 +11,32 @@ using UnityEngine;
 
 namespace ITAA.NPC.Bernd
 {
-    [DisallowMultipleComponent]
     public class BerndNameTag : MonoBehaviour
     {
+        [Header("References")]
+        [SerializeField] private Transform target;
+        [SerializeField] private Transform player;
         [SerializeField] private TMP_Text nameText;
-        [SerializeField] private string displayName = "Bernd";
-        [SerializeField] private Vector3 worldOffset = new(0f, 1.6f, 0f);
+        [SerializeField] private Canvas canvas;
 
-        private Transform labelRoot;
+        [Header("Display")]
+        [SerializeField] private string displayName = "Bernd";
+        [SerializeField] private Vector3 worldOffset = new(0f, 1.5f, 0f);
+        [SerializeField] private float visibleDistance = 2.5f;
+
         private Camera mainCamera;
 
         private void Awake()
         {
-            mainCamera = Camera.main;
-            EnsureNameTag();
-            SetName(displayName);
-        }
-
-        private void LateUpdate()
-        {
-            if (labelRoot == null)
+            if (nameText == null)
             {
-                return;
+                nameText = GetComponentInChildren<TMP_Text>();
             }
 
-            labelRoot.position = transform.position + worldOffset;
-
-            if (mainCamera != null)
+            if (canvas == null)
             {
-                labelRoot.rotation = mainCamera.transform.rotation;
+                canvas = GetComponent<Canvas>();
             }
-        }
-
-        public void SetName(string newName)
-        {
-            displayName = string.IsNullOrWhiteSpace(newName) ? "Bernd" : newName;
 
             if (nameText != null)
             {
@@ -53,43 +44,71 @@ namespace ITAA.NPC.Bernd
             }
         }
 
-        private void EnsureNameTag()
+        private void Start()
         {
-            if (nameText != null)
+            mainCamera = Camera.main;
+
+            if (target == null)
             {
-                labelRoot = nameText.transform;
+                Debug.LogWarning($"[{nameof(BerndNameTag)}] Target ist nicht gesetzt.", this);
+            }
+
+            if (player == null)
+            {
+                GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+                if (playerObject != null)
+                {
+                    player = playerObject.transform;
+                }
+            }
+
+            SetVisible(false);
+        }
+
+        private void LateUpdate()
+        {
+            if (target == null)
+            {
                 return;
             }
 
-            GameObject canvasObject = new GameObject("BerndNameTagCanvas", typeof(RectTransform));
-            canvasObject.transform.SetParent(transform, false);
-            canvasObject.transform.localScale = Vector3.one * 0.01f;
+            transform.position = target.position + worldOffset;
 
-            Canvas canvas = canvasObject.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.WorldSpace;
-            canvas.sortingOrder = 120;
+            if (mainCamera == null)
+            {
+                mainCamera = Camera.main;
+            }
 
-            RectTransform canvasRect = canvasObject.GetComponent<RectTransform>();
-            canvasRect.sizeDelta = new Vector2(180f, 48f);
+            if (mainCamera != null)
+            {
+                transform.forward = mainCamera.transform.forward;
+            }
 
-            GameObject textObject = new GameObject("NameText", typeof(RectTransform));
-            textObject.transform.SetParent(canvasObject.transform, false);
+            UpdateVisibility();
+        }
 
-            RectTransform textRect = textObject.GetComponent<RectTransform>();
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.offsetMin = Vector2.zero;
-            textRect.offsetMax = Vector2.zero;
+        private void UpdateVisibility()
+        {
+            if (player == null)
+            {
+                SetVisible(false);
+                return;
+            }
 
-            TextMeshProUGUI generatedText = textObject.AddComponent<TextMeshProUGUI>();
-            generatedText.alignment = TextAlignmentOptions.Center;
-            generatedText.fontSize = 32f;
-            generatedText.fontStyle = FontStyles.Bold;
-            generatedText.color = Color.white;
-            generatedText.raycastTarget = false;
+            float distance = Vector3.Distance(player.position, target.position);
+            SetVisible(distance <= visibleDistance);
+        }
 
-            nameText = generatedText;
-            labelRoot = canvasObject.transform;
+        private void SetVisible(bool isVisible)
+        {
+            if (canvas != null)
+            {
+                canvas.enabled = isVisible;
+            }
+            else
+            {
+                gameObject.SetActive(isVisible);
+            }
         }
     }
 }

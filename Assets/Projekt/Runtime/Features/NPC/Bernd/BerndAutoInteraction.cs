@@ -126,8 +126,6 @@ namespace ITAA.NPC.Bernd
             onInteractionStarted?.Invoke();
             onQuizLevel1Requested?.Invoke();
             quizStarter?.StartQuiz(EndInteraction);
-
-            Debug.Log("Bernd Betatest: Level-1-Quiz gestartet.");
         }
 
         public void EndInteraction()
@@ -138,8 +136,6 @@ namespace ITAA.NPC.Bernd
             animationController?.SetTalking(false);
 
             onInteractionEnded?.Invoke();
-
-            Debug.Log("Bernd Betatest: Interaktion beendet.");
         }
 
         public bool IsInteractionActive()

@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections;
 using System.IO;
+using ITAA.Core.SceneManagement;
 using ITAA.Data;
 using ITAA.Player.Session;
 using ITAA.System.Savegame;
@@ -111,7 +112,7 @@ namespace ITAA.UI.Panels
 
             if (ensureDummySaveOnShow)
             {
-                saveSystem.EnsureDummySaveExists();
+                EnsureDemoSaveSlots();
             }
 
             if (enableDebugLogs)
@@ -123,7 +124,6 @@ namespace ITAA.UI.Panels
 
             ResetSelectionToFirstSlot();
             ReloadSlots();
-            ShowFirstSlot();
         }
 
         public void Hide()
@@ -153,7 +153,7 @@ namespace ITAA.UI.Panels
                 saveSystem = new SaveSystem();
             }
 
-            slots = saveSystem.GetAllSlots(Mathf.Max(1, slotCount));
+            slots = NormalizeSlotsForDisplay(saveSystem.GetAllSlots(Mathf.Max(1, slotCount)));
 
             if (slots == null || slots.Count == 0)
             {
@@ -165,18 +165,12 @@ namespace ITAA.UI.Panels
                     Debug.LogWarning($"[{nameof(LoadGamePanel)}] Keine Slots geladen.", this);
                 }
 
-                if (largeSlotItem != null)
-                {
-                    largeSlotItem.Setup(null, HandleSlotSelected);
-                }
-
-                UpdateHeader(null);
-                UpdatePageIndicator();
-                UpdateNavigationState();
+                RefreshCurrentSlotView();
                 return;
             }
 
             currentIndex = Mathf.Clamp(currentIndex, 0, slots.Count - 1);
+            RefreshCurrentSlotView();
         }
 
         public void ShowPreviousSlot()
@@ -193,7 +187,7 @@ namespace ITAA.UI.Panels
                 currentIndex = slots.Count - 1;
             }
 
-            ShowSlot(currentIndex);
+            RefreshCurrentSlotView();
         }
 
         public void ShowNextSlot()
@@ -210,7 +204,7 @@ namespace ITAA.UI.Panels
                 currentIndex = 0;
             }
 
-            ShowSlot(currentIndex);
+            RefreshCurrentSlotView();
         }
 
         #endregion
@@ -384,29 +378,9 @@ namespace ITAA.UI.Panels
             currentIndex = FirstSlotIndex;
         }
 
-        private void ShowFirstSlot()
+        private void RefreshCurrentSlotView()
         {
-            ShowSlot(FirstSlotIndex);
-        }
-
-        private void ShowSlot(int index)
-        {
-            if (!HasSlots())
-            {
-                if (largeSlotItem != null)
-                {
-                    largeSlotItem.Setup(null, HandleSlotSelected);
-                }
-
-                UpdateHeader(null);
-                UpdatePageIndicator();
-                UpdateNavigationState();
-                return;
-            }
-
-            currentIndex = Mathf.Clamp(index, 0, slots.Count - 1);
-
-            SaveSlotEntity slot = slots[currentIndex];
+            SaveSlotEntity slot = GetCurrentSlot();
 
             if (largeSlotItem != null)
             {
@@ -424,10 +398,21 @@ namespace ITAA.UI.Panels
             if (enableDebugLogs)
             {
                 Debug.Log(
-                    $"[{nameof(LoadGamePanel)}] Zeige Slot-Index {currentIndex} / SlotId {slot.SlotId}",
+                    $"[{nameof(LoadGamePanel)}] Zeige Slot-Index {currentIndex} / SlotId {(slot != null ? slot.SlotId : 0)}",
                     this
                 );
             }
+        }
+
+        private SaveSlotEntity GetCurrentSlot()
+        {
+            if (!HasSlots())
+            {
+                return null;
+            }
+
+            currentIndex = Mathf.Clamp(currentIndex, 0, slots.Count - 1);
+            return slots[currentIndex];
         }
 
         private void UpdateHeader(SaveSlotEntity slot)
@@ -527,6 +512,123 @@ namespace ITAA.UI.Panels
         private bool HasSlots()
         {
             return slots != null && slots.Count > 0;
+        }
+
+        private static IReadOnlyList<SaveSlotEntity> NormalizeSlotsForDisplay(IReadOnlyList<SaveSlotEntity> sourceSlots)
+        {
+            if (sourceSlots == null || sourceSlots.Count == 0)
+            {
+                return Array.Empty<SaveSlotEntity>();
+            }
+
+            List<SaveSlotEntity> normalizedSlots = new List<SaveSlotEntity>(sourceSlots.Count);
+
+            for (int i = 0; i < sourceSlots.Count; i++)
+            {
+                SaveSlotEntity source = sourceSlots[i];
+
+                if (source == null)
+                {
+                    normalizedSlots.Add(SaveSlotEntity.CreateEmpty(i + 1));
+                    continue;
+                }
+
+                if (source.HasData)
+                {
+                    normalizedSlots.Add(source);
+                    continue;
+                }
+
+                source.DisplayName = "Leerer Spielstand";
+                source.SceneName = "-";
+                source.SavedAtText = "-";
+                normalizedSlots.Add(source);
+            }
+
+            return normalizedSlots;
+        }
+
+        private void EnsureDemoSaveSlots()
+        {
+            saveSystem.EnsureDummySaveExists();
+
+            EnsureDemoSaveSlot(
+                1,
+                "Testslot Arthur",
+                "Martin",
+                3,
+                1200,
+                new Vector3(2f, 1f, 0f));
+
+            EnsureDemoSaveSlot(
+                2,
+                "Testslot Bernd",
+                "Bernd",
+                1,
+                0,
+                new Vector3(-23f, -6.55f, 0f));
+        }
+
+        private void EnsureDemoSaveSlot(
+            int slotId,
+            string displayName,
+            string playerName,
+            int level,
+            int score,
+            Vector3 playerPosition)
+        {
+            SaveGameData existing = saveSystem.Load(slotId);
+
+            if (existing != null && existing.HasData)
+            {
+                bool changed = false;
+
+                if (string.IsNullOrWhiteSpace(existing.DisplayName))
+                {
+                    existing.DisplayName = displayName;
+                    changed = true;
+                }
+
+                if (string.IsNullOrWhiteSpace(existing.PlayerName))
+                {
+                    existing.PlayerName = playerName;
+                    changed = true;
+                }
+
+                if (string.IsNullOrWhiteSpace(existing.SceneName) || existing.SceneName == SceneNames.LegacyGameScene)
+                {
+                    existing.SceneName = SceneNames.StartScene;
+                    changed = true;
+                }
+
+                if (string.IsNullOrWhiteSpace(existing.SavedAtText))
+                {
+                    existing.SavedAtText = DateTime.Now.ToString("dd.MM.yyyy HH:mm");
+                    changed = true;
+                }
+
+                if (changed)
+                {
+                    saveSystem.Save(slotId, existing);
+                }
+
+                return;
+            }
+
+            SaveGameData demoSave = new SaveGameData
+            {
+                SlotId = slotId,
+                DisplayName = displayName,
+                PlayerName = playerName,
+                SceneName = SceneNames.StartScene,
+                SavedAtText = DateTime.Now.ToString("dd.MM.yyyy HH:mm"),
+                Level = level,
+                Score = score,
+                HasData = true
+            };
+
+            demoSave.SetPlayerPosition(playerPosition);
+            saveSystem.Save(slotId, demoSave);
         }
 
         private IEnumerator LoadSelectedSlotAsync(SaveSlotEntity slot, SaveGameData loadedSave)
@@ -703,7 +805,7 @@ namespace ITAA.UI.Panels
             textComponent.fontSize = fontSize;
             textComponent.fontStyle = fontStyle;
             textComponent.color = Color.white;
-            textComponent.enableWordWrapping = false;
+            textComponent.textWrappingMode = TextWrappingModes.NoWrap;
             return textComponent;
         }
 

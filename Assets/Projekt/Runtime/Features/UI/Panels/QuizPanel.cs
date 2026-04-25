@@ -252,7 +252,7 @@ namespace ITAA.UI.Panels
             SetRect(titleText.rectTransform, 0f, 1f, 1f, 1f, 0f, -28f, -56f, 42f);
 
             questionText = CreateText("QuestionText", card, 27f, FontStyles.Bold);
-            questionText.enableWordWrapping = true;
+            questionText.textWrappingMode = TextWrappingModes.Normal;
             SetRect(questionText.rectTransform, 0f, 1f, 1f, 1f, 0f, -92f, -80f, 70f);
 
             answerButtons = new Button[4];
@@ -267,7 +267,7 @@ namespace ITAA.UI.Panels
             }
 
             explanationText = CreateText("ExplanationText", card, 22f, FontStyles.Normal);
-            explanationText.enableWordWrapping = true;
+            explanationText.textWrappingMode = TextWrappingModes.Normal;
             SetRect(explanationText.rectTransform, 0f, 0f, 1f, 0f, 0f, 86f, -96f, 70f);
 
             RectTransform nextRect = CreateButton("NextButton", card, out nextButton, out TMP_Text nextLabel);

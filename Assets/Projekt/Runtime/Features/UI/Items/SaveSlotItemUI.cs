@@ -3,7 +3,7 @@
  * Zweck: Stellt einen einzelnen Save-Slot in der UI dar und bereitet dessen Daten für kleine sowie große Slot-Ansichten auf.
  * Verantwortung:
  * - Zeigt Save-Slot-Daten strukturiert und lesbar an
- * - Unterstützt getrennte Textfelder und einen kombinierten Info-Block
+ * - Setzt die vier Inspector-Textfelder fuer Slotname, Szene, Zeitstempel und Status
  * - Löst Auswahl/Laden per Button oder Klick auf die gesamte Slot-Karte aus
  * - Hebt den aktuell sichtbaren großen Slot visuell als aktive Auswahl hervor
  * - Unterscheidet sauber zwischen belegten und leeren Slots
@@ -110,6 +110,8 @@ namespace ITAA.UI.Items
 
         public void Setup(SaveSlotEntity slot, Action<SaveSlotEntity> onSelectedCallback)
         {
+            ResolveReferences();
+
             currentSlot = slot;
             onSelected = onSelectedCallback;
 
@@ -120,47 +122,20 @@ namespace ITAA.UI.Items
             }
 
             bool hasData = slot.HasData;
-            bool useCombinedInfoLayout = UsesCombinedInfoLayout();
 
-            string slotLabel = $"Slot {slot.SlotId}";
-            string playerName = hasData
-                ? GetSafeText(slot.PlayerName, GetSafeText(slot.DisplayName, "Spieler"))
-                : "Kein Spieler";
-            string sceneName = hasData
-                ? GetSafeText(slot.SceneName, "-")
-                : "Kein Spielstand";
-            string savedAt = hasData
-                ? GetSafeText(slot.SavedAtText, "-")
-                : "-";
+            string displayName = GetSafeText(slot.DisplayName, $"Slot {slot.SlotId}");
+            string playerName = GetSafeText(slot.PlayerName, displayName);
+            string sceneName = GetSafeText(slot.SceneName, "-");
+            string savedAt = GetSafeText(slot.SavedAtText, hasData ? "-" : "Leer");
             string status = hasData ? "Belegt" : "Leer";
 
-            if (useCombinedInfoLayout)
-            {
-                TMP_Text combinedInfoText = GetCombinedInfoTextTarget();
+            SetText(slotNameText, displayName);
+            SetText(titleText, playerName);
+            SetText(sceneNameText, sceneName);
+            SetText(savedAtText, savedAt);
+            SetText(statusText, status);
 
-                SetText(titleText, hasData ? playerName : "Spielstand waehlen");
-                SetText(
-                    combinedInfoText,
-                    BuildCombinedInfoText(
-                        slotLabel,
-                        playerName,
-                        sceneName,
-                        savedAt,
-                        status,
-                        slot.Level,
-                        slot.Score,
-                        hasData));
-            }
-            else
-            {
-                SetText(slotNameText, slotLabel);
-                SetText(titleText, playerName);
-                SetText(sceneNameText, $"Szene: {sceneName}");
-                SetText(savedAtText, $"Gespeichert: {savedAt}");
-                SetText(statusText, $"Status: {status}");
-            }
-
-            ApplyTextColors(hasData, useCombinedInfoLayout);
+            ApplyTextColors(hasData);
 
             if (hasDataRoot != null)
             {
@@ -201,7 +176,7 @@ namespace ITAA.UI.Items
             if (enableDebugLogs)
             {
                 Debug.Log(
-                    $"[{nameof(SaveSlotItemUI)}] Setup Slot {slot.SlotId} | HasData={slot.HasData} | CombinedLayout={useCombinedInfoLayout}",
+                    $"[{nameof(SaveSlotItemUI)}] Setup Slot {slot.SlotId} | HasData={slot.HasData}",
                     this);
             }
         }
@@ -229,7 +204,11 @@ namespace ITAA.UI.Items
         {
             if (currentSlot == null)
             {
-                Debug.LogWarning($"[{nameof(SaveSlotItemUI)}] Kein SaveSlotEntity gesetzt auf '{gameObject.name}'.", this);
+                if (enableDebugLogs)
+                {
+                    Debug.Log($"[{nameof(SaveSlotItemUI)}] Klick ohne SaveSlotEntity auf '{gameObject.name}' ignoriert.", this);
+                }
+
                 return;
             }
 
@@ -253,21 +232,15 @@ namespace ITAA.UI.Items
 
         private void ApplyNullState()
         {
-            SetText(slotNameText, "Slot ?");
+            ResolveReferences();
+
+            SetText(slotNameText, "Leerer Spielstand");
             SetText(titleText, "Spieler");
+            SetText(sceneNameText, "-");
+            SetText(savedAtText, "-");
+            SetText(statusText, "Nicht belegt");
 
-            if (UsesCombinedInfoLayout())
-            {
-                SetText(GetCombinedInfoTextTarget(), "Slotdaten konnten nicht geladen werden.");
-            }
-            else
-            {
-                SetText(sceneNameText, "Szene: -");
-                SetText(savedAtText, "Gespeichert: -");
-                SetText(statusText, "Status: Fehler");
-            }
-
-            ApplyTextColors(false, UsesCombinedInfoLayout());
+            ApplyTextColors(false);
 
             if (hasDataRoot != null)
             {
@@ -298,7 +271,7 @@ namespace ITAA.UI.Items
                 selectButton.interactable = false;
             }
 
-            SetText(actionButtonLabelText, "Fehler");
+            SetText(actionButtonLabelText, "Leer");
 
             if (actionButtonLabelText != null)
             {
@@ -420,118 +393,16 @@ namespace ITAA.UI.Items
             return string.IsNullOrWhiteSpace(value) ? fallback : value;
         }
 
-        private bool UsesCombinedInfoLayout()
-        {
-            int uniqueCount = 0;
-            TMP_Text[] candidates = { slotNameText, sceneNameText, savedAtText, statusText };
-
-            for (int i = 0; i < candidates.Length; i++)
-            {
-                TMP_Text candidate = candidates[i];
-
-                if (candidate == null || ReferenceEquals(candidate, titleText))
-                {
-                    continue;
-                }
-
-                bool alreadyCounted = false;
-
-                for (int j = 0; j < i; j++)
-                {
-                    if (ReferenceEquals(candidates[j], candidate))
-                    {
-                        alreadyCounted = true;
-                        break;
-                    }
-                }
-
-                if (!alreadyCounted)
-                {
-                    uniqueCount++;
-                }
-            }
-
-            return uniqueCount > 0 && uniqueCount < 4;
-        }
-
-        private TMP_Text GetCombinedInfoTextTarget()
-        {
-            if (IsUsableInfoTarget(statusText))
-            {
-                return statusText;
-            }
-
-            if (IsUsableInfoTarget(sceneNameText))
-            {
-                return sceneNameText;
-            }
-
-            if (IsUsableInfoTarget(savedAtText))
-            {
-                return savedAtText;
-            }
-
-            if (IsUsableInfoTarget(slotNameText))
-            {
-                return slotNameText;
-            }
-
-            return null;
-        }
-
-        private bool IsUsableInfoTarget(TMP_Text candidate)
-        {
-            return candidate != null && !ReferenceEquals(candidate, titleText);
-        }
-
-        private static string BuildCombinedInfoText(
-            string slotLabel,
-            string playerName,
-            string sceneName,
-            string savedAt,
-            string status,
-            int level,
-            int score,
-            bool hasData)
-        {
-            if (!hasData)
-            {
-                return
-                    "<b><color=#9CA3AF>Auswahl sichtbar</color></b>\n" +
-                    $"{slotLabel}\n" +
-                    $"Spieler: {playerName}\n" +
-                    $"Szene: {sceneName}\n" +
-                    $"Gespeichert: {savedAt}\n" +
-                    $"Status: {status}";
-            }
-
-            return
-                "<b><color=#D97706>Ausgewahlt</color></b>\n" +
-                $"{slotLabel}\n" +
-                $"Spieler: {playerName}\n" +
-                $"Szene: {sceneName}\n" +
-                $"Gespeichert: {savedAt}\n" +
-                $"<color=#198F45>Status: {status}</color>\n" +
-                $"Level: {level}   Score: {score}";
-        }
-
-        private void ApplyTextColors(bool hasData, bool useCombinedInfoLayout)
+        private void ApplyTextColors(bool hasData)
         {
             Color resolvedTitleColor = hasData ? titleColor : emptyInfoColor;
             Color resolvedInfoColor = hasData ? infoColor : emptyInfoColor;
 
             SetTextColor(titleText, resolvedTitleColor);
-
-            if (!useCombinedInfoLayout)
-            {
-                SetTextColor(slotNameText, resolvedTitleColor);
-                SetTextColor(sceneNameText, resolvedInfoColor);
-                SetTextColor(savedAtText, resolvedInfoColor);
-                SetTextColor(statusText, hasData ? accentColor : emptyInfoColor);
-                return;
-            }
-
-            SetTextColor(GetCombinedInfoTextTarget(), resolvedInfoColor);
+            SetTextColor(slotNameText, resolvedTitleColor);
+            SetTextColor(sceneNameText, resolvedInfoColor);
+            SetTextColor(savedAtText, resolvedInfoColor);
+            SetTextColor(statusText, hasData ? accentColor : emptyInfoColor);
         }
 
         private void EnsureSelectionOutline()
