@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38b2dbb1022e46bb95c0c6bd9b022c11, type: 3}
+  m_Name: BerndIntroQuiz
+  m_EditorClassIdentifier: Assembly-CSharp::ITAA.Quiz.QuizSet
+  QuizId: bernd_intro
+  DisplayName: Bernds IT-Grundlagen
+  Questions:
+  - QuestionText: Was bedeutet CPU?
+    AnswerOptions:
+    - Text: Central Processing Unit
+    - Text: Computer Power Utility
+    - Text: Core Program Unit
+    CorrectAnswerIndex: 0
+    Explanation: Die CPU ist der Hauptprozessor und fuehrt Programmbefehle aus.
+  - QuestionText: Welche Aussage beschreibt ein Backup am besten?
+    AnswerOptions:
+    - Text: Eine Kopie wichtiger Daten zur Wiederherstellung
+    - Text: Ein schnellerer Internetzugang
+    - Text: Ein neues Benutzerkonto
+    CorrectAnswerIndex: 0
+    Explanation: Ein Backup hilft, Daten nach Fehlern, Verlust oder Defekten wiederherzustellen.
+  - QuestionText: Welche Taste wird in diesem Prototyp fuer Interaktion genutzt?
+    AnswerOptions:
+    - Text: E
+    - Text: Tab
+    - Text: Escape
+    CorrectAnswerIndex: 0
+    Explanation: Bernd reagiert aktuell auf die Interaktionstaste E.

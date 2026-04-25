@@ -3,7 +3,7 @@
 ## 📖 Overview
 
 **Bernd** ist ein modular aufgebauter NPC im Projekt *IT-AA 2D*.
-Er nutzt ein eigenständiges Feature-Set für **Bewegung, Animation und Interaktion**.
+Er nutzt ein eigenständiges Feature-Set für **Bewegung, Animation, Interaktion und Quiz-Start**.
 
 Ziel ist ein wiederverwendbares NPC-System nach dem Prinzip:
 **„Plug & Play NPC mit klarer Verantwortung pro Script“**
@@ -19,6 +19,8 @@ Bernd/
 ├── BerndMovementToPlayer.cs
 ├── BerndDetectionZone.cs
 ├── BerndAutoInteraction.cs
+├── BerndQuizStarter.cs
+├── BerndNameTag.cs
 ├── README.md
 
 ### 🔹 Verantwortlichkeiten
@@ -27,6 +29,8 @@ Bernd/
 * **BerndMovementToPlayer** → Bewegt Bernd Richtung Spieler
 * **BerndDetectionZone** → Erkennt Spieler via Trigger
 * **BerndAutoInteraction** → Startet Interaktion (automatisch oder per Input)
+* **BerndQuizStarter** → Startet Bernds zugewiesenes `QuizSet`
+* **BerndNameTag** → Erzeugt Bernds Namensanzeige ueber dem Kopf
 
 ---
 
@@ -54,6 +58,14 @@ Bernd/
 
   * automatisch **oder**
   * via Input (z. B. `E`)
+
+### 5. Quiz
+
+* `BerndQuizStarter`:
+
+  * referenziert `BerndIntroQuiz`
+  * findet oder nutzt das zugewiesene `QuizPanel`
+  * startet das Quiz ohne hart codierte Fragen im UI-Code
 
 ---
 
@@ -87,6 +99,11 @@ Base Layer
     * BerndMovementToPlayer
     * BerndDetectionZone
     * BerndAutoInteraction
+    * BerndQuizStarter
+    * BerndNameTag
+
+Aktuell ist Bernd bereits in `Assets/Projekt/Content/Scenes/StartScene.unity` angelegt und mit
+`Assets/Projekt/Content/Quiz/BerndIntroQuiz.asset` sowie dem `QuizPanel` verbunden.
 
 ---
 
@@ -96,6 +113,7 @@ Das System ist vorbereitet für:
 
 * Dialogsystem
 * Quest-System
+* Mehrere QuizSets pro NPC
 * Unterschiedliche NPC-Verhalten (passiv / aggressiv)
 * Austauschbare Animationen
 
@@ -105,7 +123,8 @@ Das System ist vorbereitet für:
 
 * Animation läuft nicht → State-Name falsch
 * NPC bewegt sich nicht → Player nicht erkannt
-* Interaktion startet nicht → Input nicht gesetzt
+* Interaktion startet nicht → Input nicht gesetzt oder Player nicht im Trigger
+* Quiz oeffnet nicht → `QuizSet` oder `QuizPanel` fehlt auf `BerndQuizStarter`
 * Animator Fehler → falscher Layer / Pfad
 
 ---
@@ -113,7 +132,8 @@ Das System ist vorbereitet für:
 ## 🚀 Roadmap
 
 * Walk Animationen ergänzen
-* Dialog UI integrieren
+* Quiz-UI visuell ausbauen
+* Dialogsystem vor/nach Quiz integrieren
 * NPC Verhalten variabel machen
 * Event-System anbinden
 
@@ -130,5 +150,5 @@ Das System ist vorbereitet für:
 
 ## 📌 Hinweis
 
-Dieses Feature ist **unabhängig nutzbar** und kann leicht für weitere NPCs
-(z. B. „Arthur“) adaptiert werden.
+Dieses Feature bleibt bewusst leichtgewichtig. Das eigentliche Quiz-System liegt unter
+`Assets/Projekt/Runtime/Features/Quiz/` und kann spaeter auch von weiteren NPCs genutzt werden.

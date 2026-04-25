@@ -1,19 +1,9 @@
 /*
  * Datei: BerndAutoInteraction.cs
  * Zweck: Zentrale Interaktion für Bernd als Questgeber.
- * Verantwortung:
- * - Prüft, ob Spieler in Reichweite ist
- * - Reagiert auf Interaktionstaste
- * - Sperrt Bewegung während Gespräch/Quiz
- * - Startet das erste einfache Quiz über Event
- *
- * Hinweis:
- * - Dieses Script ist bewusst allgemein gehalten.
- * - Das Quiz kann später per UnityEvent an UI/Quest-System gekoppelt werden.
- *
- * Voraussetzung:
- * - Neues Input System aktiv oder Package installiert
- * - Wenn nicht vorhanden, kann die Tastenerkennung leicht umgestellt werden
+ * Verantwortung: Prüft Nähe und Interaktionstaste, sperrt Bewegung während der Interaktion und startet Bernds Quiz.
+ * Abhaengigkeiten: BerndDetectionZone, BerndMovementToPlayer, BerndAnimationController, BerndQuizStarter, Unity Input System.
+ * Verwendung: Wird auf Bernds GameObject in der StartScene eingesetzt und per YAML mit dem Quiz-System verbunden.
  */
 
 using UnityEngine;
@@ -31,6 +21,7 @@ namespace ITAA.NPC.Bernd
         [SerializeField] private BerndDetectionZone detectionZone;
         [SerializeField] private BerndMovementToPlayer movementToPlayer;
         [SerializeField] private BerndAnimationController animationController;
+        [SerializeField] private BerndQuizStarter quizStarter;
 
         [Header("Interaction")]
         [SerializeField] private Key interactionKey = Key.E;
@@ -68,6 +59,11 @@ namespace ITAA.NPC.Bernd
             if (animationController == null)
             {
                 animationController = GetComponent<BerndAnimationController>();
+            }
+
+            if (quizStarter == null)
+            {
+                quizStarter = GetComponent<BerndQuizStarter>();
             }
         }
 
@@ -129,6 +125,7 @@ namespace ITAA.NPC.Bernd
 
             onInteractionStarted?.Invoke();
             onQuizLevel1Requested?.Invoke();
+            quizStarter?.StartQuiz(EndInteraction);
 
             Debug.Log("Bernd Betatest: Level-1-Quiz gestartet.");
         }

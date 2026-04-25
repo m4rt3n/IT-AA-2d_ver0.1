@@ -41,6 +41,11 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
   - Auto-Approach zum Player
   - Trigger-basierte Interaktion
   - Richtungsbasierte Idle-/Walk-Animationen mit gemerkter Blickrichtung
+- 🧑‍🏫 **NPC Bernd + Quiz**
+  - Bernd ist in `StartScene` als NPC mit Sprite, Animator, Trigger und Namensanzeige angelegt
+  - Interaktion per **E** startet ein lokales, erweiterbares Quiz
+  - Quiz-Fragen liegen als `QuizSet`-Datenmodell unter `Assets/Projekt/Content/Quiz/`
+  - Quiz-UI wird ueber `QuizPanel` geoeffnet und enthaelt keine hart codierten Fragen
 - 🧩 **UI System**
   - MenuManager (zentrale Steuerung)
   - StartMenu + LoadGamePanel
@@ -114,12 +119,25 @@ Assets/
 │ │ │ ├── ArthurMovementToPlayer
 │ │ │ ├── ArthurAnimationController
 │ │ │ └── ArthurNameUI
+│ │ │ └── Bernd/
+│ │ │ ├── BerndAutoInteraction
+│ │ │ ├── BerndMovementToPlayer
+│ │ │ ├── BerndAnimationController
+│ │ │ ├── BerndQuizStarter
+│ │ │ └── BerndNameTag
+│ │ ├── Quiz/
+│ │ │ ├── QuizSet
+│ │ │ ├── QuizQuestion
+│ │ │ ├── QuizAnswerOption
+│ │ │ ├── QuizRunner
+│ │ │ └── QuizResult
 │ │ │
 │ │ └── UI/
 │ │ ├── Managers/
 │ │ │ └── MenuManager
 │ │ └── Panels/
-│ │ └── LoadGamePanel
+│ │ ├── LoadGamePanel
+│ │ └── QuizPanel
 │ │
 │ └── System/
 │ └── Savegame/
@@ -153,6 +171,16 @@ Hinweis: Kurzfristig ist `StartScene` die zentrale Laufzeit-Szene für Menü und
 2. Arthur läuft zum Player  
 3. Player wird **gelockt**  
 4. **StartMenu öffnet sich**
+
+---
+
+### Bernd Quiz-Interaktion
+
+1. Player betritt Bernds Trigger  
+2. Bernd kann zum Player laufen und richtet seine Animation aus  
+3. Player drueckt **E**  
+4. `BerndQuizStarter` oeffnet das `QuizPanel` mit `BerndIntroQuiz`  
+5. Antworten werden durch `QuizRunner` gegen das `QuizSet` ausgewertet  
 
 ---
 
