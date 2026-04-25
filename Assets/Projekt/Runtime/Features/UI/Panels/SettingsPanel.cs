@@ -1,4 +1,10 @@
-// Datei: Assets/Projekt/Runtime/Features/UI/Panels/SettingsPanel.cs
+/*
+ * Datei: SettingsPanel.cs
+ * Zweck: Verwaltet das Einstellungs-Panel innerhalb der UI.
+ * Verantwortung: Reagiert auf Oeffnen und Schliessen des Panels.
+ * Abhaengigkeiten: BasePanel, Unity Debug-Logging.
+ * Verwendung: Wird als konkretes UI-Panel fuer spaetere Einstellungsoptionen genutzt.
+ */
 
 using UnityEngine;
 

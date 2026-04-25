@@ -15,15 +15,18 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class HealthBarWidget : MonoBehaviour
+namespace ITAA.UI.Widgets
 {
-    [SerializeField] private Image fillImage;
-
-    public void SetHealth(float current, float max)
+    public class HealthBarWidget : MonoBehaviour
     {
-        if (fillImage == null) return;
+        [SerializeField] private Image fillImage;
 
-        float value = Mathf.Clamp01(current / max);
-        fillImage.fillAmount = value;
+        public void SetHealth(float current, float max)
+        {
+            if (fillImage == null) return;
+
+            float value = Mathf.Clamp01(current / max);
+            fillImage.fillAmount = value;
+        }
     }
 }

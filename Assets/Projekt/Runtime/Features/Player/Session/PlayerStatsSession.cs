@@ -11,21 +11,24 @@
  */
 using UnityEngine;
 
-public class PlayerStatsSession : MonoBehaviour
+namespace ITAA.Player.Session
 {
-    public int MaxHealth = 100;
-    public int CurrentHealth = 100;
-
-    public float MaxStamina = 100f;
-    public float CurrentStamina = 100f;
-
-    public void TakeDamage(int amount)
+    public class PlayerStatsSession : MonoBehaviour
     {
-        CurrentHealth = Mathf.Max(CurrentHealth - amount, 0);
-    }
+        public int MaxHealth = 100;
+        public int CurrentHealth = 100;
 
-    public void Heal(int amount)
-    {
-        CurrentHealth = Mathf.Min(CurrentHealth + amount, MaxHealth);
+        public float MaxStamina = 100f;
+        public float CurrentStamina = 100f;
+
+        public void TakeDamage(int amount)
+        {
+            CurrentHealth = Mathf.Max(CurrentHealth - amount, 0);
+        }
+
+        public void Heal(int amount)
+        {
+            CurrentHealth = Mathf.Min(CurrentHealth + amount, MaxHealth);
+        }
     }
 }

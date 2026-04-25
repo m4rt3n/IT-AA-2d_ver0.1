@@ -15,33 +15,36 @@
  */
 using UnityEngine;
 
-public class AudioManager : MonoBehaviour
+namespace ITAA.UI.Managers
 {
-    public static AudioManager Instance { get; private set; }
-
-    [SerializeField] private AudioSource musicSource;
-    [SerializeField] private AudioSource sfxSource;
-
-    private void Awake()
+    public class AudioManager : MonoBehaviour
     {
-        if (Instance != null)
+        public static AudioManager Instance { get; private set; }
+
+        [SerializeField] private AudioSource musicSource;
+        [SerializeField] private AudioSource sfxSource;
+
+        private void Awake()
         {
-            Destroy(gameObject);
-            return;
+            if (Instance != null)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
         }
 
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-    }
+        public void PlayMusic(AudioClip clip)
+        {
+            musicSource.clip = clip;
+            musicSource.Play();
+        }
 
-    public void PlayMusic(AudioClip clip)
-    {
-        musicSource.clip = clip;
-        musicSource.Play();
-    }
-
-    public void PlaySFX(AudioClip clip)
-    {
-        sfxSource.PlayOneShot(clip);
+        public void PlaySFX(AudioClip clip)
+        {
+            sfxSource.PlayOneShot(clip);
+        }
     }
 }

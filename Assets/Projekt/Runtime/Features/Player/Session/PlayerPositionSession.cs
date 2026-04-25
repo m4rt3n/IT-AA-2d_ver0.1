@@ -10,17 +10,20 @@
  */
 using UnityEngine;
 
-public class PlayerPositionSession : MonoBehaviour
+namespace ITAA.Player.Session
 {
-    private Vector3 savedPosition;
-
-    public void SavePosition(Transform player)
+    public class PlayerPositionSession : MonoBehaviour
     {
-        savedPosition = player.position;
-    }
+        private Vector3 savedPosition;
 
-    public void LoadPosition(Transform player)
-    {
-        player.position = savedPosition;
+        public void SavePosition(Transform player)
+        {
+            savedPosition = player.position;
+        }
+
+        public void LoadPosition(Transform player)
+        {
+            player.position = savedPosition;
+        }
     }
 }

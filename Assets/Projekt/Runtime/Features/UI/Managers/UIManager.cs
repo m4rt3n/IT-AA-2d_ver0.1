@@ -14,22 +14,25 @@
  */
 using UnityEngine;
 
-public class UIManager : MonoBehaviour
+namespace ITAA.UI.Managers
 {
-    public static UIManager Instance { get; private set; }
-
-    private void Awake()
+    public class UIManager : MonoBehaviour
     {
-        Instance = this;
-    }
+        public static UIManager Instance { get; private set; }
 
-    public void OpenPanel(GameObject panel)
-    {
-        panel.SetActive(true);
-    }
+        private void Awake()
+        {
+            Instance = this;
+        }
 
-    public void ClosePanel(GameObject panel)
-    {
-        panel.SetActive(false);
+        public void OpenPanel(GameObject panel)
+        {
+            panel.SetActive(true);
+        }
+
+        public void ClosePanel(GameObject panel)
+        {
+            panel.SetActive(false);
+        }
     }
 }

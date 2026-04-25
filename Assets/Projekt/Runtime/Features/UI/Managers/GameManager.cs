@@ -15,48 +15,51 @@
  */
 using UnityEngine;
 
-public class GameManager : MonoBehaviour
+namespace ITAA.UI.Managers
 {
-    public static GameManager Instance { get; private set; }
-
-    public enum GameState
+    public class GameManager : MonoBehaviour
     {
-        MainMenu,
-        Gameplay,
-        Paused
-    }
+        public static GameManager Instance { get; private set; }
 
-    public GameState CurrentState { get; private set; }
-
-    private void Awake()
-    {
-        if (Instance != null)
+        public enum GameState
         {
-            Destroy(gameObject);
-            return;
+            MainMenu,
+            Gameplay,
+            Paused
         }
 
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-    }
+        public GameState CurrentState { get; private set; }
 
-    public void SetState(GameState newState)
-    {
-        CurrentState = newState;
-
-        switch (newState)
+        private void Awake()
         {
-            case GameState.MainMenu:
-                Time.timeScale = 1f;
-                break;
+            if (Instance != null)
+            {
+                Destroy(gameObject);
+                return;
+            }
 
-            case GameState.Gameplay:
-                Time.timeScale = 1f;
-                break;
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
 
-            case GameState.Paused:
-                Time.timeScale = 0f;
-                break;
+        public void SetState(GameState newState)
+        {
+            CurrentState = newState;
+
+            switch (newState)
+            {
+                case GameState.MainMenu:
+                    Time.timeScale = 1f;
+                    break;
+
+                case GameState.Gameplay:
+                    Time.timeScale = 1f;
+                    break;
+
+                case GameState.Paused:
+                    Time.timeScale = 0f;
+                    break;
+            }
         }
     }
 }

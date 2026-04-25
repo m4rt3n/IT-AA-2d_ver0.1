@@ -15,9 +15,12 @@
  */
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "PlayerMovementConfig", menuName = "Projekt/Player/Movement Config")]
-public class PlayerMovementConfig : ScriptableObject
+namespace ITAA.Player.Movement
 {
-    public float walkSpeed = 5f;
-    public float sprintMultiplier = 1.5f;
+    [CreateAssetMenu(fileName = "PlayerMovementConfig", menuName = "Projekt/Player/Movement Config")]
+    public class PlayerMovementConfig : ScriptableObject
+    {
+        public float walkSpeed = 5f;
+        public float sprintMultiplier = 1.5f;
+    }
 }

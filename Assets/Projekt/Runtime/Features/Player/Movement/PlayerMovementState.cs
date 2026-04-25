@@ -15,33 +15,36 @@
  */
 using UnityEngine;
 
-public class PlayerMovementState : MonoBehaviour
+namespace ITAA.Player.Movement
 {
-    public enum MovementState
+    public class PlayerMovementState : MonoBehaviour
     {
-        Idle,
-        Walking,
-        Sprinting
-    }
-
-    #region Public Properties
-
-    public MovementState CurrentState { get; private set; } = MovementState.Idle;
-
-    #endregion
-
-    #region Public Methods
-
-    public void UpdateState(Vector2 moveInput, bool isSprinting)
-    {
-        if (moveInput == Vector2.zero)
+        public enum MovementState
         {
-            CurrentState = MovementState.Idle;
-            return;
+            Idle,
+            Walking,
+            Sprinting
         }
 
-        CurrentState = isSprinting ? MovementState.Sprinting : MovementState.Walking;
-    }
+        #region Public Properties
 
-    #endregion
+        public MovementState CurrentState { get; private set; } = MovementState.Idle;
+
+        #endregion
+
+        #region Public Methods
+
+        public void UpdateState(Vector2 moveInput, bool isSprinting)
+        {
+            if (moveInput == Vector2.zero)
+            {
+                CurrentState = MovementState.Idle;
+                return;
+            }
+
+            CurrentState = isSprinting ? MovementState.Sprinting : MovementState.Walking;
+        }
+
+        #endregion
+    }
 }

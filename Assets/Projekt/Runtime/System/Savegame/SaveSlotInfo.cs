@@ -1,21 +1,32 @@
+/*
+ * Datei: SaveSlotInfo.cs
+ * Zweck: Beschreibt kompakte Metadaten eines SaveSlots.
+ * Verantwortung: Haelt Anzeige- und Fortschrittsdaten fuer SaveSlot-Uebersichten.
+ * Abhaengigkeiten: System.Serializable.
+ * Verwendung: Kann von Save-/Load-UI oder Datenhaltung fuer Slot-Listen genutzt werden.
+ */
+
 using System;
 
-[Serializable]
-public class SaveSlotInfo
+namespace ITAA.System.Savegame
 {
-    #region Fields
+    [Serializable]
+    public class SaveSlotInfo
+    {
+        #region Fields
 
-    public int SaveSlotId;
-    public int UserId;
+        public int SaveSlotId;
+        public int UserId;
 
-    public string Username;
-    public string SaveSlotName;
+        public string Username;
+        public string SaveSlotName;
 
-    public int Level;
-    public int Score;
-    public int ProgressPercent;
+        public int Level;
+        public int Score;
+        public int ProgressPercent;
 
-    public string LastPlayedUtc;
+        public string LastPlayedUtc;
 
-    #endregion
+        #endregion
+    }
 }

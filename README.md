@@ -44,6 +44,8 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
 - 🧩 **UI System**
   - MenuManager (zentrale Steuerung)
   - StartMenu + LoadGamePanel
+  - Leere Panel-Platzhalter wurden als minimale `BasePanel`-Ableitungen bereinigt (`DialoguePanel`, `InventoryPanel`, `QuestLogPanel`)
+  - Einfache Daten-, Player-Session-, Player-UI- und Widget-Klassen wurden auf passende `ITAA.*` Namespaces und Kopfkommentare gebracht
   - Close im LoadGamePanel führt sauber zurück ins Startmenü
   - Großer Save-Slot zeigt Dummy-/Save-Daten jetzt strukturiert an
   - Klick auf die große Slot-Karte oder den Button lädt belegte Slots direkt

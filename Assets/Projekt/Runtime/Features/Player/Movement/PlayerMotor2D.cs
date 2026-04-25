@@ -1,3 +1,11 @@
+/*
+ * Datei: PlayerMotor2D.cs
+ * Zweck: Fuehrt die physikbasierte 2D-Bewegung des Spielers aus.
+ * Verantwortung: Setzt Rigidbody2D-Geschwindigkeit, prueft Blockaden und stoppt Bewegung bei Sperren.
+ * Abhaengigkeiten: Rigidbody2D, LayerMask, Unity Physics2D.
+ * Verwendung: Wird vom PlayerController mit Bewegungsinput versorgt.
+ */
+
 using UnityEngine;
 
 namespace ITAA.Player.Movement

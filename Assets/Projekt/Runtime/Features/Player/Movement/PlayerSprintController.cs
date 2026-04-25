@@ -14,30 +14,33 @@
  */
 using UnityEngine;
 
-public class PlayerSprintController : MonoBehaviour
+namespace ITAA.Player.Movement
 {
-    #region Inspector
-
-    [Header("Sprint")]
-    [SerializeField] private KeyCode sprintKey = KeyCode.LeftShift;
-    [SerializeField] private float sprintMultiplier = 1.5f;
-
-    #endregion
-
-    #region Public Properties
-
-    public bool IsSprinting { get; private set; }
-
-    public float SprintMultiplier => sprintMultiplier;
-
-    #endregion
-
-    #region Unity Methods
-
-    private void Update()
+    public class PlayerSprintController : MonoBehaviour
     {
-        IsSprinting = Input.GetKey(sprintKey);
-    }
+        #region Inspector
 
-    #endregion
+        [Header("Sprint")]
+        [SerializeField] private KeyCode sprintKey = KeyCode.LeftShift;
+        [SerializeField] private float sprintMultiplier = 1.5f;
+
+        #endregion
+
+        #region Public Properties
+
+        public bool IsSprinting { get; private set; }
+
+        public float SprintMultiplier => sprintMultiplier;
+
+        #endregion
+
+        #region Unity Methods
+
+        private void Update()
+        {
+            IsSprinting = Input.GetKey(sprintKey);
+        }
+
+        #endregion
+    }
 }

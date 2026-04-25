@@ -12,27 +12,30 @@ using TMPro;
 using UnityEngine;
 using System.Collections;
 
-public class NotificationWidget : MonoBehaviour
+namespace ITAA.UI.Widgets
 {
-    [SerializeField] private TextMeshProUGUI messageText;
-    [SerializeField] private float duration = 2f;
-
-    public void Show(string message)
+    public class NotificationWidget : MonoBehaviour
     {
-        StopAllCoroutines();
-        gameObject.SetActive(true);
+        [SerializeField] private TextMeshProUGUI messageText;
+        [SerializeField] private float duration = 2f;
 
-        if (messageText != null)
+        public void Show(string message)
         {
-            messageText.text = message;
+            StopAllCoroutines();
+            gameObject.SetActive(true);
+
+            if (messageText != null)
+            {
+                messageText.text = message;
+            }
+
+            StartCoroutine(HideAfterTime());
         }
 
-        StartCoroutine(HideAfterTime());
-    }
-
-    private IEnumerator HideAfterTime()
-    {
-        yield return new WaitForSeconds(duration);
-        gameObject.SetActive(false);
+        private IEnumerator HideAfterTime()
+        {
+            yield return new WaitForSeconds(duration);
+            gameObject.SetActive(false);
+        }
     }
 }

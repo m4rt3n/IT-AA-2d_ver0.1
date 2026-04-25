@@ -11,23 +11,26 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerInventorySession : MonoBehaviour
+namespace ITAA.Player.Session
 {
-    private List<string> items = new List<string>();
-
-    public void AddItem(string item)
+    public class PlayerInventorySession : MonoBehaviour
     {
-        items.Add(item);
-        Debug.Log($"Item hinzugefügt: {item}");
-    }
+        private List<string> items = new List<string>();
 
-    public void RemoveItem(string item)
-    {
-        items.Remove(item);
-    }
+        public void AddItem(string item)
+        {
+            items.Add(item);
+            Debug.Log($"Item hinzugefügt: {item}");
+        }
 
-    public List<string> GetItems()
-    {
-        return items;
+        public void RemoveItem(string item)
+        {
+            items.Remove(item);
+        }
+
+        public List<string> GetItems()
+        {
+            return items;
+        }
     }
 }

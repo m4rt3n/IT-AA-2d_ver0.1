@@ -8,23 +8,26 @@
 using UnityEngine;
 using TMPro;
 
-public class PlayerInteractionPromptUI : MonoBehaviour
+namespace ITAA.Player.UI
 {
-    [SerializeField] private GameObject root;
-    [SerializeField] private TextMeshProUGUI promptText;
-
-    public void Show(string text)
+    public class PlayerInteractionPromptUI : MonoBehaviour
     {
-        if (root != null)
-            root.SetActive(true);
+        [SerializeField] private GameObject root;
+        [SerializeField] private TextMeshProUGUI promptText;
 
-        if (promptText != null)
-            promptText.text = text;
-    }
+        public void Show(string text)
+        {
+            if (root != null)
+                root.SetActive(true);
 
-    public void Hide()
-    {
-        if (root != null)
-            root.SetActive(false);
+            if (promptText != null)
+                promptText.text = text;
+        }
+
+        public void Hide()
+        {
+            if (root != null)
+                root.SetActive(false);
+        }
     }
 }

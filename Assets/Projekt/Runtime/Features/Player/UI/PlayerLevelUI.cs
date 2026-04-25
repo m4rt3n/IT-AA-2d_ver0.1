@@ -9,17 +9,20 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
-public class PlayerLevelUI : MonoBehaviour
+namespace ITAA.Player.UI
 {
-    [SerializeField] private TextMeshProUGUI levelText;
-    [SerializeField] private Image xpBar;
-
-    public void SetLevel(int level, float xpProgress)
+    public class PlayerLevelUI : MonoBehaviour
     {
-        if (levelText != null)
-            levelText.text = $"Level {level}";
+        [SerializeField] private TextMeshProUGUI levelText;
+        [SerializeField] private Image xpBar;
 
-        if (xpBar != null)
-            xpBar.fillAmount = Mathf.Clamp01(xpProgress);
+        public void SetLevel(int level, float xpProgress)
+        {
+            if (levelText != null)
+                levelText.text = $"Level {level}";
+
+            if (xpBar != null)
+                xpBar.fillAmount = Mathf.Clamp01(xpProgress);
+        }
     }
 }

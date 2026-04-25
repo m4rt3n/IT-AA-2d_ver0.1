@@ -10,31 +10,34 @@
 using TMPro;
 using UnityEngine;
 
-public class TimerWidget : MonoBehaviour
+namespace ITAA.UI.Widgets
 {
-    [SerializeField] private TextMeshProUGUI timeText;
-
-    private float time;
-
-    public void SetTime(float newTime)
+    public class TimerWidget : MonoBehaviour
     {
-        time = newTime;
-        UpdateText();
-    }
+        [SerializeField] private TextMeshProUGUI timeText;
 
-    public void AddTime(float delta)
-    {
-        time += delta;
-        UpdateText();
-    }
+        private float time;
 
-    private void UpdateText()
-    {
-        if (timeText == null) return;
+        public void SetTime(float newTime)
+        {
+            time = newTime;
+            UpdateText();
+        }
 
-        int minutes = Mathf.FloorToInt(time / 60);
-        int seconds = Mathf.FloorToInt(time % 60);
+        public void AddTime(float delta)
+        {
+            time += delta;
+            UpdateText();
+        }
 
-        timeText.text = $"{minutes:00}:{seconds:00}";
+        private void UpdateText()
+        {
+            if (timeText == null) return;
+
+            int minutes = Mathf.FloorToInt(time / 60);
+            int seconds = Mathf.FloorToInt(time % 60);
+
+            timeText.text = $"{minutes:00}:{seconds:00}";
+        }
     }
 }

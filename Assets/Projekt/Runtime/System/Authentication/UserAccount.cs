@@ -1,6 +1,14 @@
-using UnityEngine;
+/*
+ * Datei: UserAccount.cs
+ * Zweck: Reserviert ein Datenmodell fuer zukuenftige Benutzerkonten im Authentifizierungssystem.
+ * Verantwortung: Stellt aktuell einen bewusst leeren Typ fuer spaetere Account-Daten bereit.
+ * Abhaengigkeiten: Keine.
+ * Verwendung: Kann von AuthManager oder Login-/Registrierungslogik erweitert werden.
+ */
 
-public class UserAccount
+namespace ITAA.Authentication
 {
-    
+    public class UserAccount
+    {
+    }
 }

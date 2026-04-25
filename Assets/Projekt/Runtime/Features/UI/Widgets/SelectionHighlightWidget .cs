@@ -10,15 +10,18 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SelectionHighlightWidget : MonoBehaviour
+namespace ITAA.UI.Widgets
 {
-    [SerializeField] private Image highlightImage;
-
-    public void SetSelected(bool selected)
+    public class SelectionHighlightWidget : MonoBehaviour
     {
-        if (highlightImage != null)
+        [SerializeField] private Image highlightImage;
+
+        public void SetSelected(bool selected)
         {
-            highlightImage.enabled = selected;
+            if (highlightImage != null)
+            {
+                highlightImage.enabled = selected;
+            }
         }
     }
 }

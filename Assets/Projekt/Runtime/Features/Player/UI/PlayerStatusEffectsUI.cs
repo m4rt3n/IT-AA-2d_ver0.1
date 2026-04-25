@@ -9,27 +9,30 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 
-public class PlayerStatusEffectsUI : MonoBehaviour
+namespace ITAA.Player.UI
 {
-    [SerializeField] private Transform container;
-    [SerializeField] private GameObject effectIconPrefab;
-
-    private List<GameObject> activeIcons = new List<GameObject>();
-
-    public void AddEffect(Sprite icon)
+    public class PlayerStatusEffectsUI : MonoBehaviour
     {
-        GameObject obj = Instantiate(effectIconPrefab, container);
-        obj.GetComponent<Image>().sprite = icon;
-        activeIcons.Add(obj);
-    }
+        [SerializeField] private Transform container;
+        [SerializeField] private GameObject effectIconPrefab;
 
-    public void ClearEffects()
-    {
-        foreach (var icon in activeIcons)
+        private List<GameObject> activeIcons = new List<GameObject>();
+
+        public void AddEffect(Sprite icon)
         {
-            Destroy(icon);
+            GameObject obj = Instantiate(effectIconPrefab, container);
+            obj.GetComponent<Image>().sprite = icon;
+            activeIcons.Add(obj);
         }
 
-        activeIcons.Clear();
+        public void ClearEffects()
+        {
+            foreach (var icon in activeIcons)
+            {
+                Destroy(icon);
+            }
+
+            activeIcons.Clear();
+        }
     }
 }

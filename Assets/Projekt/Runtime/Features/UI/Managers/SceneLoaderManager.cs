@@ -15,17 +15,20 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class SceneLoaderManager : MonoBehaviour
+namespace ITAA.UI.Managers
 {
-    public static SceneLoaderManager Instance { get; private set; }
-
-    private void Awake()
+    public class SceneLoaderManager : MonoBehaviour
     {
-        Instance = this;
-    }
+        public static SceneLoaderManager Instance { get; private set; }
 
-    public void LoadScene(string sceneName)
-    {
-        SceneManager.LoadScene(sceneName);
+        private void Awake()
+        {
+            Instance = this;
+        }
+
+        public void LoadScene(string sceneName)
+        {
+            SceneManager.LoadScene(sceneName);
+        }
     }
 }

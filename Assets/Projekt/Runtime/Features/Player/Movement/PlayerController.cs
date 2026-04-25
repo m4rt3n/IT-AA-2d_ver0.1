@@ -1,3 +1,11 @@
+/*
+ * Datei: PlayerController.cs
+ * Zweck: Koordiniert Spielerinput, Bewegung und Animationsparameter.
+ * Verantwortung: Liest Bewegungsinput, steuert den PlayerMotor2D und sperrt/freigibt Bewegung.
+ * Abhaengigkeiten: PlayerInputReader, PlayerMotor2D, Animator.
+ * Verwendung: Wird auf dem Player-GameObject als zentrale Movement-Komponente eingesetzt.
+ */
+
 using UnityEngine;
 
 namespace ITAA.Player.Movement

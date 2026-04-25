@@ -10,14 +10,17 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ProgressBarWidget : MonoBehaviour
+namespace ITAA.UI.Widgets
 {
-    [SerializeField] private Image fillImage;
-
-    public void SetProgress(float value)
+    public class ProgressBarWidget : MonoBehaviour
     {
-        if (fillImage == null) return;
+        [SerializeField] private Image fillImage;
 
-        fillImage.fillAmount = Mathf.Clamp01(value);
+        public void SetProgress(float value)
+        {
+            if (fillImage == null) return;
+
+            fillImage.fillAmount = Mathf.Clamp01(value);
+        }
     }
 }

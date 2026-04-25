@@ -11,26 +11,29 @@
  */
 using UnityEngine;
 
-public class PlayerProgressSession : MonoBehaviour
+namespace ITAA.Player.Session
 {
-    public int Level = 1;
-    public float CurrentXP = 0f;
-    public float MaxXP = 100f;
-
-    public void AddXP(float amount)
+    public class PlayerProgressSession : MonoBehaviour
     {
-        CurrentXP += amount;
+        public int Level = 1;
+        public float CurrentXP = 0f;
+        public float MaxXP = 100f;
 
-        if (CurrentXP >= MaxXP)
+        public void AddXP(float amount)
         {
-            LevelUp();
-        }
-    }
+            CurrentXP += amount;
 
-    private void LevelUp()
-    {
-        Level++;
-        CurrentXP = 0f;
-        MaxXP *= 1.2f;
+            if (CurrentXP >= MaxXP)
+            {
+                LevelUp();
+            }
+        }
+
+        private void LevelUp()
+        {
+            Level++;
+            CurrentXP = 0f;
+            MaxXP *= 1.2f;
+        }
     }
 }

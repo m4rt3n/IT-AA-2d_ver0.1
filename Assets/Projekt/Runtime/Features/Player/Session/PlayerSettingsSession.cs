@@ -10,14 +10,17 @@
  */
 using UnityEngine;
 
-public class PlayerSettingsSession : MonoBehaviour
+namespace ITAA.Player.Session
 {
-    public float MusicVolume = 1f;
-    public float SFXVolume = 1f;
-    public float MouseSensitivity = 1f;
-
-    public void ApplySettings()
+    public class PlayerSettingsSession : MonoBehaviour
     {
-        AudioListener.volume = MusicVolume;
+        public float MusicVolume = 1f;
+        public float SFXVolume = 1f;
+        public float MouseSensitivity = 1f;
+
+        public void ApplySettings()
+        {
+            AudioListener.volume = MusicVolume;
+        }
     }
 }
