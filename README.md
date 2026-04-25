@@ -49,6 +49,52 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
   - Interaktion per **E** startet ein lokales, erweiterbares Quiz
   - Quiz-Fragen liegen als `QuizSet`-Datenmodell unter `Assets/Projekt/Content/Quiz/`
   - Quiz-UI wird ueber `QuizPanel` geoeffnet und enthaelt keine hart codierten Fragen
+- 🤝 **World Interaction System (MVP)**
+  - Neues Feature unter `Assets/Projekt/Runtime/Features/Interaction/`
+  - Erkennt interaktive Ziele ueber `IInteractable`
+  - Zeigt optional einen Prompt wie `E druecken`
+  - Loest Interaktionen ueber Unity Input System oder E-Fallback aus
+  - Bernd besitzt einen optionalen `BerndInteractableAdapter`, der an die bestehende Quiz-Logik delegiert
+  - Arthur bleibt vorerst unveraendert, bis der Menue-Flow sauber migriert werden kann
+- 🧭 **Scenario System (MVP)**
+  - Neues Feature unter `Assets/Projekt/Runtime/Features/Scenarios/`
+  - Buendelt IT-Lernsituationen als datengetriebene `ScenarioDefinition`
+  - Verwaltet Schritte und Fortschritt ueber `ScenarioManager`
+  - Enthaltenes Demo-Szenario: `no_internet_basic` / `Kein Internet`
+  - HUD, Quiz, Dialog und Savegame bleiben entkoppelt und koennen spaeter andocken
+- 🛠️ **DevPanel (MVP)**
+  - Neues optionales Entwicklerwerkzeug unter `Assets/Projekt/Runtime/Features/DevTools/`
+  - Runtime-Panel kann per `F12` geoeffnet werden
+  - Bietet Debug-Aktionen fuer SaveSlots, Dummy-Saves, Settings, Quiz-Drafts, PlayerSession und aktuelle Szene
+  - Nutzt bestehende Systeme defensiv und meldet fehlende Abhaengigkeiten per `Debug.LogWarning`
+- 📚 **Knowledge Base (MVP)**
+  - Neues Lexikon-Feature unter `Assets/Projekt/Runtime/Features/KnowledgeBase/`
+  - Enthält Demo-Artikel zu DNS, DHCP, Gateway, VPN und OSI-Modell
+  - UI-Panel trennt Artikel-Daten, Suche und Anzeige
+  - Quiz- und Szenario-Integration ist ueber Artikel-IDs vorbereitet
+- 💬 **Dialogue System (MVP)**
+  - Neues Dialog-Feature unter `Assets/Projekt/Runtime/Features/Dialogue/`
+  - Dialogdaten liegen in `DialogueSequence` und `DialogueLine`
+  - `DialogueManager` startet Dialoge und fuehrt optional einen Abschluss-Callback aus
+  - `DialoguePanel` kann seine einfache MVP-UI selbst erzeugen
+  - Arthur/Bernd sind vorbereitet, aber noch nicht automatisch migriert
+- 📈 **Quest / Progress System (MVP)**
+  - Neues Fortschritts-Feature unter `Assets/Projekt/Runtime/Features/Progress/`
+  - Verwaltet Quests und Quiz-Statistiken im Speicher
+  - Demo-Quests: `talk_to_bernd`, `answer_3_dns_questions`, `complete_easy_quiz`
+  - `QuizProgressReporter` bereitet die spätere Quiz-Anbindung vor
+  - Savegame-Persistenz ist vorbereitet, aber noch nicht aktiv angebunden
+- 🧭 **HUD System (MVP)**
+  - Neues HUD-Feature unter `Assets/Projekt/Runtime/Features/HUD/`
+  - Zeigt Spielername, aktuelles Ziel, Quizpunkte, Thema und kurze Meldungen
+  - Nutzt `PlayerSession` und optional `ProgressManager`
+  - Liest nicht direkt aus dem SaveSystem und bleibt dadurch optional einsetzbar
+- 🖥️ **IT Terminal Minigames (MVP)**
+  - Neues Terminal-Feature unter `Assets/Projekt/Runtime/Features/Terminal/`
+  - Simuliert IT-Support-Befehle wie `help`, `ipconfig`, `ping`, `nslookup`, `clear` und `exit`
+  - Fuehrt keine echten OS-Befehle aus und nutzt keine echten Netzwerkzugriffe
+  - Trennt Befehlsdaten, Emulator-Logik und UI-Panel
+  - `TerminalPanel` kann eine einfache MVP-UI selbst erzeugen oder per Inspector verdrahtet werden
 - 🧩 **UI System**
   - MenuManager (zentrale Steuerung)
   - StartMenu + LoadGamePanel
@@ -126,6 +172,7 @@ Assets/
 │ │ │ ├── BerndAutoInteraction
 │ │ │ ├── BerndMovementToPlayer
 │ │ │ ├── BerndAnimationController
+│ │ │ ├── BerndInteractableAdapter
 │ │ │ ├── BerndQuizStarter
 │ │ │ └── BerndNameTag
 │ │ ├── Quiz/
@@ -134,6 +181,43 @@ Assets/
 │ │ │ ├── QuizAnswerOption
 │ │ │ ├── QuizRunner
 │ │ │ └── QuizResult
+│ │ ├── Scenarios/
+│ │ │ ├── ScenarioDefinition
+│ │ │ ├── ScenarioStep
+│ │ │ ├── ScenarioProgress
+│ │ │ ├── ScenarioManager
+│ │ │ └── ScenarioStatus
+│ │ ├── DevTools/
+│ │ │ ├── DevPanelController
+│ │ │ └── DevPanelBootstrap
+│ │ ├── KnowledgeBase/
+│ │ │ ├── KnowledgeArticle
+│ │ │ ├── KnowledgeBaseRepository
+│ │ │ ├── KnowledgeBasePanel
+│ │ │ ├── KnowledgeArticleListItemUI
+│ │ │ └── KnowledgeTopic
+│ │ ├── Dialogue/
+│ │ │ ├── DialogueLine
+│ │ │ ├── DialogueSequence
+│ │ │ ├── DialogueManager
+│ │ │ ├── DialoguePanel
+│ │ │ └── IDialogueTrigger
+│ │ ├── Progress/
+│ │ │ ├── QuestDefinition
+│ │ │ ├── QuestProgress
+│ │ │ ├── ProgressProfile
+│ │ │ ├── ProgressManager
+│ │ │ └── QuizProgressReporter
+│ │ ├── HUD/
+│ │ │ ├── HudController
+│ │ │ ├── HudView
+│ │ │ └── HudNotification
+│ │ ├── Terminal/
+│ │ │ ├── TerminalCommand
+│ │ │ ├── TerminalCommandResult
+│ │ │ ├── TerminalCommandType
+│ │ │ ├── TerminalEmulator
+│ │ │ └── TerminalPanel
 │ │ │
 │ │ └── UI/
 │ │ ├── Managers/

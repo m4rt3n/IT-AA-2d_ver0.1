@@ -15,3 +15,10 @@ Regeln:
 - Bei Änderungen an UI, SaveSystem, Player oder Arthur immer Pfade angeben.
 - Ziel: saubere Feature-driven Architecture, SOLID, wartbare Klassen.
 - README.md immer aktualisieren
+
+## Start für Codex
+
+1. docs/core/AI_CONTEXT.md lesen
+2. docs/core/FEATURE_REGISTRY.md lesen
+3. docs/task/NEXT.md lesen
+4. ersten Task abarbeiten

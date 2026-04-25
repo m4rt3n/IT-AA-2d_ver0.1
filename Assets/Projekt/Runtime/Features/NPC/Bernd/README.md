@@ -19,6 +19,7 @@ Bernd/
 ├── BerndMovementToPlayer.cs
 ├── BerndDetectionZone.cs
 ├── BerndAutoInteraction.cs
+├── BerndInteractableAdapter.cs
 ├── BerndQuizStarter.cs
 ├── BerndNameTag.cs
 ├── README.md
@@ -29,6 +30,7 @@ Bernd/
 * **BerndMovementToPlayer** → Bewegt Bernd Richtung Spieler
 * **BerndDetectionZone** → Erkennt Spieler via Trigger
 * **BerndAutoInteraction** → Startet Interaktion (automatisch oder per Input)
+* **BerndInteractableAdapter** → Macht Bernd optional mit dem World Interaction System kompatibel
 * **BerndQuizStarter** → Startet Bernds zugewiesenes `QuizSet`
 * **BerndNameTag** → Zeigt Bernds Namensanzeige bei Player-Naehe wie Arthurs NameTag
 
@@ -58,6 +60,12 @@ Bernd/
 
   * automatisch **oder**
   * via Input (z. B. `E`)
+
+* `BerndInteractableAdapter`:
+
+  * implementiert `IInteractable`
+  * delegiert bevorzugt an `BerndAutoInteraction`
+  * nutzt `BerndQuizStarter` nur als Fallback, wenn die AutoInteraction-Komponente fehlt
 
 ### 5. Quiz
 
@@ -126,6 +134,7 @@ Base Layer
     * BerndMovementToPlayer
     * BerndDetectionZone
     * BerndAutoInteraction
+    * BerndInteractableAdapter (optional fuer World Interaction System)
     * BerndQuizStarter
     * BerndNameTag
 
@@ -133,6 +142,10 @@ Aktuell ist Bernd bereits in `Assets/Projekt/Content/Scenes/StartScene.unity` an
 `Assets/Projekt/Content/Quiz/BerndIntroQuiz.asset` sowie dem `QuizPanel` verbunden.
 Das `NameTagCanvas` ist als Child von Bernd angelegt und wird ueber `BerndNameTag` automatisch
 bei Naehe zum Player sichtbar.
+
+Wenn das World Interaction System am Player genutzt wird, kann `BerndInteractableAdapter` auf Bernd
+ergaenzt werden. Die bestehende Bernd-Logik bleibt dabei aktiv; fuer die finale Migration sollte die
+alte direkte E-Tasten-Logik erst kontrolliert deaktiviert werden, damit keine doppelte Ausloesung entsteht.
 
 ---
 
