@@ -1,7 +1,7 @@
 /*
  * Datei: QuizPanel.cs
  * Zweck: Zeigt ein QuizSet als einfaches interaktives UI-Panel an.
- * Verantwortung: Baut bei Bedarf seine UI, zeigt Fragen/Antworten und delegiert Auswertung an QuizRunner.
+ * Verantwortung: Baut bei Bedarf seine UI, zeigt Fragen, Multiple-Choice-/Freitext-Antworten und delegiert Auswertung an QuizRunner.
  * Abhaengigkeiten: BasePanel, ITAA.Quiz, TextMeshPro, Unity UI.
  * Verwendung: Wird von NPCs wie BerndQuizStarter geoeffnet, ohne Fragen hart im UI-Code zu speichern.
  */
@@ -23,6 +23,8 @@ namespace ITAA.UI.Panels
         [SerializeField] private TMP_Text questionText;
         [SerializeField] private TMP_Text explanationText;
         [SerializeField] private Button[] answerButtons;
+        [SerializeField] private TMP_InputField freeTextInput;
+        [SerializeField] private Button freeTextSubmitButton;
         [SerializeField] private Button nextButton;
         [SerializeField] private Button closeButton;
 
@@ -65,6 +67,7 @@ namespace ITAA.UI.Panels
                 SetText(questionText, "Keine Fragen vorhanden.");
                 SetText(explanationText, string.Empty);
                 SetAnswersInteractable(false);
+                SetFreeTextVisible(false);
                 SetNextButtonVisible(false);
                 return;
             }
@@ -92,22 +95,25 @@ namespace ITAA.UI.Panels
             {
                 SetText(questionText, "Keine Frage geladen.");
                 SetAnswersInteractable(false);
+                SetFreeTextVisible(false);
                 return;
             }
 
             SetText(questionText, currentQuestion.QuestionText);
             ApplyAnswers(currentQuestion);
+            ApplyFreeText(currentQuestion);
         }
 
         private void ApplyAnswers(QuizQuestion question)
         {
             int optionCount = question.AnswerOptions != null ? question.AnswerOptions.Count : 0;
+            bool useFreeText = ShouldUseFreeText(question);
 
             for (int i = 0; i < answerButtons.Length; i++)
             {
                 Button button = answerButtons[i];
                 TMP_Text label = i < answerLabels.Count ? answerLabels[i] : null;
-                bool hasOption = i < optionCount;
+                bool hasOption = !useFreeText && i < optionCount;
 
                 if (button != null)
                 {
@@ -116,6 +122,23 @@ namespace ITAA.UI.Panels
                 }
 
                 SetText(label, hasOption ? question.AnswerOptions[i].Text : string.Empty);
+            }
+        }
+
+        private void ApplyFreeText(QuizQuestion question)
+        {
+            bool useFreeText = ShouldUseFreeText(question);
+            SetFreeTextVisible(useFreeText);
+
+            if (freeTextInput != null)
+            {
+                freeTextInput.text = string.Empty;
+                freeTextInput.interactable = useFreeText;
+            }
+
+            if (freeTextSubmitButton != null)
+            {
+                freeTextSubmitButton.interactable = useFreeText;
             }
         }
 
@@ -129,6 +152,24 @@ namespace ITAA.UI.Panels
             QuizResult result = runner.AnswerCurrentQuestion(answerIndex);
             answerSelected = true;
             SetAnswersInteractable(false);
+
+            string prefix = result.IsCorrect ? "Richtig." : "Nicht ganz.";
+            string explanation = result.Question != null ? result.Question.Explanation : string.Empty;
+            SetText(explanationText, string.IsNullOrWhiteSpace(explanation) ? prefix : $"{prefix} {explanation}");
+            SetNextButtonVisible(true);
+        }
+
+        private void HandleFreeTextSubmitted()
+        {
+            if (runner == null || answerSelected)
+            {
+                return;
+            }
+
+            string textAnswer = freeTextInput != null ? freeTextInput.text : string.Empty;
+            QuizResult result = runner.AnswerCurrentQuestion(textAnswer);
+            answerSelected = true;
+            SetFreeTextInteractable(false);
 
             string prefix = result.IsCorrect ? "Richtig." : "Nicht ganz.";
             string explanation = result.Question != null ? result.Question.Explanation : string.Empty;
@@ -175,6 +216,18 @@ namespace ITAA.UI.Panels
                 }
             }
 
+            if (freeTextSubmitButton != null)
+            {
+                freeTextSubmitButton.onClick.RemoveAllListeners();
+                freeTextSubmitButton.onClick.AddListener(HandleFreeTextSubmitted);
+            }
+
+            if (freeTextInput != null)
+            {
+                freeTextInput.onSubmit.RemoveAllListeners();
+                freeTextInput.onSubmit.AddListener(_ => HandleFreeTextSubmitted());
+            }
+
             if (nextButton != null)
             {
                 nextButton.onClick.RemoveAllListeners();
@@ -185,6 +238,32 @@ namespace ITAA.UI.Panels
             {
                 closeButton.onClick.RemoveAllListeners();
                 closeButton.onClick.AddListener(Close);
+            }
+        }
+
+        private void SetFreeTextVisible(bool visible)
+        {
+            if (freeTextInput != null)
+            {
+                freeTextInput.gameObject.SetActive(visible);
+            }
+
+            if (freeTextSubmitButton != null)
+            {
+                freeTextSubmitButton.gameObject.SetActive(visible);
+            }
+        }
+
+        private void SetFreeTextInteractable(bool interactable)
+        {
+            if (freeTextInput != null)
+            {
+                freeTextInput.interactable = interactable;
+            }
+
+            if (freeTextSubmitButton != null)
+            {
+                freeTextSubmitButton.interactable = interactable;
             }
         }
 
@@ -214,12 +293,29 @@ namespace ITAA.UI.Panels
 
         private void EnsureGeneratedUi()
         {
+            bool hasCoreUi =
+                panelRoot != null &&
+                titleText != null &&
+                questionText != null &&
+                explanationText != null &&
+                answerButtons != null &&
+                answerButtons.Length > 0 &&
+                nextButton != null &&
+                closeButton != null;
+
+            if (hasCoreUi)
+            {
+                return;
+            }
+
             if (panelRoot != null &&
                 titleText != null &&
                 questionText != null &&
                 explanationText != null &&
                 answerButtons != null &&
                 answerButtons.Length > 0 &&
+                freeTextInput != null &&
+                freeTextSubmitButton != null &&
                 nextButton != null &&
                 closeButton != null)
             {
@@ -266,6 +362,13 @@ namespace ITAA.UI.Panels
                 answerLabels.Add(label);
             }
 
+            RectTransform inputRect = CreateInputField("FreeTextInput", card, out freeTextInput);
+            SetRect(inputRect, 0f, 0f, 1f, 0f, -84f, 154f, -220f, 48f);
+
+            RectTransform submitRect = CreateButton("FreeTextSubmitButton", card, out freeTextSubmitButton, out TMP_Text submitLabel);
+            SetText(submitLabel, "Antworten");
+            SetRect(submitRect, 1f, 0f, 1f, 0f, -146f, 154f, 172f, 48f);
+
             explanationText = CreateText("ExplanationText", card, 22f, FontStyles.Normal);
             explanationText.textWrappingMode = TextWrappingModes.Normal;
             SetRect(explanationText.rectTransform, 0f, 0f, 1f, 0f, 0f, 86f, -96f, 70f);
@@ -311,6 +414,31 @@ namespace ITAA.UI.Panels
             return rect;
         }
 
+        private static RectTransform CreateInputField(string objectName, Transform parent, out TMP_InputField inputField)
+        {
+            RectTransform rect = CreateRect(objectName, parent);
+            Image image = rect.gameObject.AddComponent<Image>();
+            image.color = new Color(0.96f, 0.97f, 1f, 1f);
+
+            inputField = rect.gameObject.AddComponent<TMP_InputField>();
+
+            TMP_Text text = CreateText("Text", rect, 22f, FontStyles.Normal);
+            text.color = new Color(0.08f, 0.1f, 0.14f, 1f);
+            text.alignment = TextAlignmentOptions.MidlineLeft;
+            SetRect(text.rectTransform, 0f, 0f, 1f, 1f, 12f, 0f, -24f, 0f);
+
+            TMP_Text placeholder = CreateText("Placeholder", rect, 22f, FontStyles.Italic);
+            placeholder.color = new Color(0.38f, 0.42f, 0.5f, 1f);
+            placeholder.alignment = TextAlignmentOptions.MidlineLeft;
+            placeholder.text = "Antwort eingeben";
+            SetRect(placeholder.rectTransform, 0f, 0f, 1f, 1f, 12f, 0f, -24f, 0f);
+
+            inputField.textComponent = text;
+            inputField.placeholder = placeholder;
+            inputField.lineType = TMP_InputField.LineType.SingleLine;
+            return rect;
+        }
+
         private static void Stretch(RectTransform rectTransform)
         {
             rectTransform.anchorMin = Vector2.zero;
@@ -335,6 +463,12 @@ namespace ITAA.UI.Panels
             {
                 target.text = value;
             }
+        }
+
+        private static bool ShouldUseFreeText(QuizQuestion question)
+        {
+            int optionCount = question != null && question.AnswerOptions != null ? question.AnswerOptions.Count : 0;
+            return question != null && question.HasAcceptedTextAnswers() && optionCount <= 0;
         }
     }
 }

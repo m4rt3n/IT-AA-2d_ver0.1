@@ -53,15 +53,15 @@ Wenn keine aktiven Tasks mehr in `NEXT.md` stehen:
 
 ## Aktuelle Tasks
 
-### 1. Settings System (MEDIUM)
-- Ziel: Zentrales Settings-System fuer Audio, Video, Input und Gameplay vorbereiten
+### 1. Quiz Dynamic Difficulty (MEDIUM)
+- Ziel: Dynamische Schwierigkeit im Quiz-System vorbereiten
 - Task-Datei:
-  - docs/settings/CODEX_TASK_SETTINGS.md
+  - docs/quiz/CODEX_TASK_DYNAMIC_DIFFICULTY.md
 - Feature-Doku:
-  - docs/settings/FEATURE_SETTINGS.md
+  - docs/quiz/QUIZ_FEATURE.md
 - Abhängigkeiten:
-  - UI System optional
-  - Application.persistentDataPath
+  - Bestehendes Quiz-System
+  - Multiple-Choice- und FreeText-Bewertung duerfen nicht gebrochen werden
 - Status:
   - Not Started
 

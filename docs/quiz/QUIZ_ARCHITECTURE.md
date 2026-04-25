@@ -40,6 +40,12 @@ Verwaltet laufendes Quiz:
 - Fortschritt
 - Auswertung
 
+### QuizTextAnswerEvaluator
+Bewertet Freitextantworten:
+- Normalisierung
+- Vergleich mit akzeptierten Antworten
+- vorsichtiges Fuzzy-Matching bei kleinen Tippfehlern
+
 ### QuizManager
 Zentrale Steuerung:
 - Quiz starten

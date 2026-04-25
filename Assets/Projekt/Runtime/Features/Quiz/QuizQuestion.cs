@@ -1,7 +1,7 @@
 /*
  * Datei: QuizQuestion.cs
- * Zweck: Beschreibt eine einzelne Quizfrage inklusive Antworten und optionaler Erklaerung.
- * Verantwortung: Haelt Fragetext, Antwortoptionen, korrekten Antwortindex und Feedbacktext.
+ * Zweck: Beschreibt eine einzelne Quizfrage inklusive Antworten, optionalen Freitextantworten und Erklaerung.
+ * Verantwortung: Haelt Fragetext, Antwortoptionen, korrekten Antwortindex, akzeptierte Freitextantworten und Feedbacktext.
  * Abhaengigkeiten: QuizAnswerOption, System.Serializable, System.Collections.Generic.
  * Verwendung: Wird in QuizSet-Assets serialisiert und vom QuizRunner ausgewertet.
  */
@@ -17,6 +17,9 @@ namespace ITAA.Quiz
         public string QuestionText;
         public List<QuizAnswerOption> AnswerOptions = new();
         public int CorrectAnswerIndex;
+        public List<string> AcceptedTextAnswers = new();
+        public bool AllowFuzzyTextMatch = true;
+        public int MaxTextAnswerDistance = 1;
         public string Explanation;
 
         public bool HasValidAnswerIndex()
@@ -25,6 +28,11 @@ namespace ITAA.Quiz
                    AnswerOptions.Count > 0 &&
                    CorrectAnswerIndex >= 0 &&
                    CorrectAnswerIndex < AnswerOptions.Count;
+        }
+
+        public bool HasAcceptedTextAnswers()
+        {
+            return AcceptedTextAnswers != null && AcceptedTextAnswers.Count > 0;
         }
     }
 }

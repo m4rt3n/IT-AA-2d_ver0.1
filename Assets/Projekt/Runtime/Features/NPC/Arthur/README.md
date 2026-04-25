@@ -39,6 +39,8 @@ Arthur/
 
 * **ArthurAutoInteraction**
   → Startet Interaktion (z. B. Menü öffnen)
+  → Oeffnet das Startmenue in der aktuellen `StartScene` automatisch ueber `openMenuWhenArthurReachesPlayer`
+  → Laesst `interactAction` dort bewusst leer; fuer spaetere manuelle Interaktion ist `Player/Interact` aus `Assets/PlayerControls.inputactions` vorgesehen
 
 ---
 
@@ -65,7 +67,8 @@ Arthur/
 * `ArthurAutoInteraction`:
 
   * prüft Spieler in Reichweite
-  * wartet optional auf Input (z. B. `E`)
+  * oeffnet das Startmenue aktuell automatisch, wenn `openMenuWhenArthurReachesPlayer` aktiv ist
+  * kann optional auf Input warten, wenn spaeter eine `InputActionReference` gesetzt wird
   * öffnet z. B.:
 
     * StartMenu
@@ -74,11 +77,34 @@ Arthur/
 
 👉 **Arthur ist dein primärer „Entry Point“ für Gameplay-Interaktionen**
 
+### Aktueller StartScene-Input-Stand
+
+In `Assets/Projekt/Content/Scenes/StartScene.unity` bleibt `ArthurAutoInteraction.interactAction` bewusst leer.
+Arthur nutzt dort den Auto-Open-Flow:
+
+1. Player betritt Arthurs Trigger.
+2. Arthur bewegt sich zum Player.
+3. `openMenuWhenArthurReachesPlayer` oeffnet das Startmenue.
+
+Fuer eine spaetere manuelle Interaktion soll die Action `Player/Interact` aus `Assets/PlayerControls.inputactions` verwendet werden.
+Diese Action ist aktuell auf `E` und Gamepad `buttonNorth` gebunden.
+
 ---
 
 ## 🎬 Animation Setup
 
-Animator erwartet folgende States:
+Aktueller Stand in `Assets/Projekt/Content/Scenes/StartScene.unity`:
+
+* Arthur nutzt die vorhandenen Animator-States:
+  * `Arthur_Idle`
+  * `Arthur_Walk`
+* Richtung und Bewegung werden ueber diese Parameter gesteuert:
+  * `MoveX`
+  * `MoveY`
+  * `IsMoving`
+* `ArthurAnimationController` kann weiterhin richtungsbasierte State-Namen verwenden, wenn der Animator spaeter passende States erhaelt.
+
+Optional vorbereitete richtungsbasierte States:
 
 Base Layer
 
@@ -91,7 +117,7 @@ Base Layer
 * Arthur_WalkLeft
 * Arthur_WalkRight
 
-👉 State-Namen müssen exakt stimmen (String-basiert im Code)
+👉 In der aktuellen `StartScene` muessen nur `Arthur_Idle` und `Arthur_Walk` vorhanden sein.
 
 ---
 

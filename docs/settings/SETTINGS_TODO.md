@@ -1,10 +1,10 @@
 # TODO Settings System
 
 ## Phase 1 (MVP)
-- SettingsData erstellen
-- SettingsManager implementieren
-- JSON Save/Load
-- Audio Settings im UI
+- SettingsData erstellen ✅
+- SettingsManager implementieren ✅
+- JSON Save/Load ✅
+- Audio Settings im UI vorbereiten ✅
 
 ## Phase 2
 - Video Settings

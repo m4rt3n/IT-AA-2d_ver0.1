@@ -1,8 +1,8 @@
 /*
  * Datei: QuizRunner.cs
  * Zweck: Fuehrt ein QuizSet zustandsbasiert durch.
- * Verantwortung: Verwaltet aktuelle Frage, Antwortpruefung und Fortschritt im Quiz.
- * Abhaengigkeiten: QuizSet, QuizQuestion, QuizResult.
+ * Verantwortung: Verwaltet aktuelle Frage, Multiple-Choice- und Freitext-Antwortpruefung sowie Fortschritt im Quiz.
+ * Abhaengigkeiten: QuizSet, QuizQuestion, QuizResult, QuizTextAnswerEvaluator.
  * Verwendung: Wird von QuizPanel genutzt, damit UI und Quizlogik getrennt bleiben.
  */
 
@@ -41,6 +41,32 @@ namespace ITAA.Quiz
                              selectedAnswerIndex == question.CorrectAnswerIndex;
 
             return new QuizResult(question, selectedAnswerIndex, isCorrect);
+        }
+
+        public QuizResult AnswerCurrentQuestion(string textAnswer)
+        {
+            QuizQuestion question = GetCurrentQuestion();
+            bool isCorrect = false;
+
+            if (question != null && question.HasAcceptedTextAnswers())
+            {
+                for (int i = 0; i < question.AcceptedTextAnswers.Count; i++)
+                {
+                    string acceptedAnswer = question.AcceptedTextAnswers[i];
+
+                    if (QuizTextAnswerEvaluator.IsAnswerAccepted(
+                            textAnswer,
+                            acceptedAnswer,
+                            question.AllowFuzzyTextMatch,
+                            question.MaxTextAnswerDistance))
+                    {
+                        isCorrect = true;
+                        break;
+                    }
+                }
+            }
+
+            return new QuizResult(question, -1, textAnswer, isCorrect);
         }
 
         public bool MoveNext()

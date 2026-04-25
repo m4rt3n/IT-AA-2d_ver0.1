@@ -45,6 +45,12 @@ Wichtige NPCs:
 - Arthur
 - Bernd
 
+Routine-MVP:
+- ITAA.NPC.Routines
+- NpcRoutineStepType.cs
+- NpcRoutineStep.cs
+- NpcRoutineController.cs
+
 Regel:
 - Kein neues paralleles NPC-System bauen
 - Gemeinsame Logik später extrahieren
@@ -101,7 +107,7 @@ Zuständig für:
 ---
 
 ### Settings
-Geplanter Namespace:
+Namespace:
 - ITAA.System.Settings
 
 Zuständig für:
@@ -110,6 +116,15 @@ Zuständig für:
 - Input
 - Gameplay-Einstellungen
 - Speicherung als settings.json
+
+Wichtige Dateien:
+- SettingsData.cs
+- SettingsManager.cs
+- SettingsUIController.cs
+
+Status:
+- MVP implementiert
+- Input-Rebinding ist als gespeicherte Tastenbasis vorbereitet, aber noch nicht an PlayerControls angebunden
 
 ---
 
@@ -149,3 +164,70 @@ Zuständig für:
 - abgeschlossene Quizthemen
 - Statistiken
 - Spielerfortschritt
+
+---
+
+### Inventory / Toolbelt
+Namespace:
+- ITAA.Features.Inventory
+
+Zuständig für:
+- Item-Datenmodell
+- Runtime-Inventar
+- Toolbelt-Auswahl
+- spaetere IT-Support-Werkzeuge
+
+Wichtige Dateien:
+- InventoryItemCategory.cs
+- InventoryItemData.cs
+- InventoryItemStack.cs
+- RuntimeInventory.cs
+- ToolbeltController.cs
+
+Status:
+- MVP implementiert
+- Keine UI-, Savegame- oder World-Interaction-Anbindung im ersten Schritt
+
+---
+
+### Skill / Level
+Namespace:
+- ITAA.Features.Skills
+
+Zuständig für:
+- Skill-Datenmodell
+- XP-Vergabe
+- Level-Up-Regeln
+- Runtime-Skillprofil
+
+Wichtige Dateien:
+- SkillDefinition.cs
+- SkillProgress.cs
+- SkillProfile.cs
+- SkillRuntimeManager.cs
+
+Status:
+- MVP implementiert
+- Keine direkte Kopplung an PlayerSession, ProgressManager, UI oder Savegame
+
+---
+
+### Achievements
+Namespace:
+- ITAA.Features.Achievements
+
+Zuständig für:
+- Achievement-Datenmodell
+- Unlock-Status
+- Fortschrittswerte
+- Runtime-Unlock-Events
+
+Wichtige Dateien:
+- AchievementDefinition.cs
+- AchievementProgress.cs
+- AchievementProfile.cs
+- AchievementManager.cs
+
+Status:
+- MVP implementiert
+- Keine direkte Kopplung an Progress, Skills, HUD, UI oder Savegame

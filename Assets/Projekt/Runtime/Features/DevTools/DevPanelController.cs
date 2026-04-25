@@ -2,7 +2,7 @@
  * Datei: DevPanelController.cs
  * Zweck: Stellt ein optionales Entwickler-Panel mit Debug- und Testaktionen bereit.
  * Verantwortung: Verdrahtet UI-Buttons mit bestehenden Systemen wie SaveSystem, LoadGamePanel und PlayerSession.
- * Abhaengigkeiten: SaveSystem, LoadGamePanel, PlayerSession, PlayerSettingsSession, Unity UI, SceneManager.
+ * Abhaengigkeiten: SaveSystem, LoadGamePanel, PlayerSession, SettingsManager, Unity UI, SceneManager.
  * Verwendung: Wird auf ein DevPanel-GameObject gesetzt oder vom DevPanelBootstrap zur Laufzeit erzeugt.
  */
 
@@ -10,6 +10,7 @@ using System;
 using ITAA.Core.SceneManagement;
 using ITAA.Player.Session;
 using ITAA.System.Savegame;
+using ITAA.System.Settings;
 using ITAA.UI.Panels;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -116,21 +117,10 @@ namespace ITAA.DevTools
 
         public void ResetSettings()
         {
-            PlayerSettingsSession settingsSession = FindAnyObjectByType<PlayerSettingsSession>(FindObjectsInactive.Include);
+            SettingsManager settingsManager = SettingsManager.GetOrCreate();
+            settingsManager.ResetToDefaults();
 
-            if (settingsSession == null)
-            {
-                Debug.LogWarning($"[{nameof(DevPanelController)}] PlayerSettingsSession fehlt. Settings-Reset nur als Stub ausgefuehrt.", this);
-                AudioListener.volume = 1f;
-                return;
-            }
-
-            settingsSession.MusicVolume = 1f;
-            settingsSession.SFXVolume = 1f;
-            settingsSession.MouseSensitivity = 1f;
-            settingsSession.ApplySettings();
-
-            Log("PlayerSettingsSession auf Standardwerte gesetzt.");
+            Log("SettingsManager auf Standardwerte gesetzt.");
         }
 
         public void GenerateDummyQuizDraft()

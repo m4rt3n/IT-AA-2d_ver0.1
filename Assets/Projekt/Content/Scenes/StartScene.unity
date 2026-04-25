@@ -95681,7 +95681,7 @@ MonoBehaviour:
   movementToPlayer: {fileID: 745381518}
   animationController: {fileID: 745381520}
   nameUI: {fileID: 745381521}
-  menuManager: {fileID: 0}
+  menuManager: {fileID: 749671471}
   openMenuWhenArthurReachesPlayer: 1
   interactAction: {fileID: 0}
   playerTag: Player
@@ -95740,14 +95740,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ITAA.NPC.Arthur.ArthurAnimationController
   animator: {fileID: 745381517}
-  idleDownState: Arthur_IdleDown
-  idleUpState: Arthur_IdleUp
-  idleLeftState: Arthur_IdleLeft
-  idleRightState: Arthur_IdleRight
-  walkDownState: Arthur_WalkDown
-  walkUpState: Arthur_WalkUp
-  walkLeftState: Arthur_WalkLeft
-  walkRightState: Arthur_WalkRight
+  idleDownState: Arthur_Idle
+  idleUpState: Arthur_Idle
+  idleLeftState: Arthur_Idle
+  idleRightState: Arthur_Idle
+  walkDownState: Arthur_Walk
+  walkUpState: Arthur_Walk
+  walkLeftState: Arthur_Walk
+  walkRightState: Arthur_Walk
   idleFallbackState: Arthur_Idle
   walkFallbackState: Arthur_Walk
   moveXParameter: MoveX
@@ -95837,7 +95837,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &932743356
 RectTransform:
   m_ObjectHideFlags: 0
@@ -100757,7 +100757,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 1620738754}
+    m_TransformParent: {fileID: 2116193408}
     m_Modifications:
     - target: {fileID: 181886076460018422, guid: 6933d7bc336d55b4cab6f7aaa17c1d62, type: 3}
       propertyPath: m_Color.a

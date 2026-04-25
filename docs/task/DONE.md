@@ -49,6 +49,176 @@ Optional:
 
 ## Einträge
 
+### [2026-04-25] Quiz FreeText Bewertung
+- Beschreibung:
+  - Freitext-Bewertung im Quiz-System robuster vorbereitet.
+- Betroffene Systeme:
+  - `Assets/Projekt/Runtime/Features/Quiz/`
+  - `Assets/Projekt/Runtime/Features/UI/Panels/QuizPanel.cs`
+  - `README.md`
+  - `docs/quiz/QUIZ_FEATURE.md`
+  - `docs/quiz/QUIZ_ARCHITECTURE.md`
+  - `docs/task/NEXT.md`
+  - `docs/task/BACKLOG.md`
+  - `docs/task/DONE.md`
+- Wichtige Änderungen:
+  - `QuizTextAnswerEvaluator` erstellt.
+  - `QuizQuestion` um akzeptierte Freitextantworten und Fuzzy-Grenzen erweitert.
+  - `QuizRunner.AnswerCurrentQuestion(string)` ergaenzt, ohne den Multiple-Choice-Pfad zu veraendern.
+  - `QuizResult` kann optional die Freitextantwort tragen.
+  - `QuizPanel` zeigt fuer reine Freitextfragen optional ein Eingabefeld und einen Submit-Button.
+  - `Quiz Dynamic Difficulty` als naechster Task aus dem Backlog nach `NEXT.md` vorbereitet.
+- Tests / Prüfung:
+  - Statische Pruefung der Namespaces und Dateien.
+  - `git diff --check` ohne Whitespace-Fehler; nur bestehende Line-Ending-Warnungen.
+  - Unity Batchmode Script-Compilation erfolgreich: `Tundra build success`.
+- Risiken / Follow-Ups:
+  - Freitextfragen benoetigen gepflegte `AcceptedTextAnswers` in QuizSet-Daten.
+  - Fuzzy-Matching ist bewusst konservativ und sollte mit echten Fragen getestet werden.
+  - Noch keine Editor-Tools fuer Synonympflege.
+- Commit:
+  - Vorschlag: `feat: improve quiz free text evaluation`
+
+### [2026-04-25] Achievement System
+- Beschreibung:
+  - Kleines Achievement-System fuer Lern- und Gameplay-Meilensteine als MVP vorbereitet.
+- Betroffene Systeme:
+  - `Assets/Projekt/Runtime/Features/Achievements/`
+  - `README.md`
+  - `docs/core/FEATURE_REGISTRY.md`
+  - `docs/achievements/ACHIEVEMENT_FEATURE.md`
+  - `docs/task/NEXT.md`
+  - `docs/task/BACKLOG.md`
+  - `docs/task/DONE.md`
+- Wichtige Änderungen:
+  - `AchievementDefinition`, `AchievementProgress`, `AchievementProfile` und `AchievementManager` erstellt.
+  - Unlock-, Progress- und Query-API vorbereitet.
+  - Demo-Achievements `first_login`, `first_quiz` und `network_beginner` vorbereitet.
+  - Keine direkte Kopplung an Progress, Skills, HUD, UI oder Savegame eingebaut.
+  - `Quiz FreeText Bewertung` als naechster Task aus dem Backlog nach `NEXT.md` vorbereitet.
+- Tests / Prüfung:
+  - Statische Pruefung der Namespaces und Dateien.
+  - `git diff --check` ohne Whitespace-Fehler; nur bestehende Line-Ending-Warnungen.
+  - Unity Batchmode Script-Compilation erfolgreich: `Tundra build success`.
+- Risiken / Follow-Ups:
+  - Noch keine Scene-/Prefab-Anbindung.
+  - Keine Savegame-Persistenz.
+  - HUD-, Progress-, Skill- und Quiz-Anbindung sollten spaeter kontrolliert ueber Adapter erfolgen.
+- Commit:
+  - Vorschlag: `feat: add achievement system`
+
+### [2026-04-25] Skill / Level System
+- Beschreibung:
+  - Leichtgewichtiges Skill- und Level-System als MVP vorbereitet.
+- Betroffene Systeme:
+  - `Assets/Projekt/Runtime/Features/Skills/`
+  - `README.md`
+  - `docs/core/FEATURE_REGISTRY.md`
+  - `docs/skills/SKILL_LEVEL_FEATURE.md`
+  - `docs/task/NEXT.md`
+  - `docs/task/BACKLOG.md`
+  - `docs/task/DONE.md`
+- Wichtige Änderungen:
+  - `SkillDefinition`, `SkillProgress`, `SkillProfile` und `SkillRuntimeManager` erstellt.
+  - XP-Vergabe, Level-Up-Regeln und Level-Up-Events vorbereitet.
+  - Demo-Skills `networking`, `support` und `terminal` vorbereitet.
+  - Keine direkte Kopplung an PlayerSession, ProgressManager, UI oder Savegame eingebaut.
+  - `Achievement System` als naechster Task aus dem Backlog nach `NEXT.md` vorbereitet.
+- Tests / Prüfung:
+  - Statische Pruefung der Namespaces und Dateien.
+  - `git diff --check` ohne Whitespace-Fehler; nur bestehende Line-Ending-Warnungen.
+  - Unity Batchmode Script-Compilation erfolgreich: `Tundra build success`.
+- Risiken / Follow-Ups:
+  - Noch keine Scene-/Prefab-Anbindung.
+  - Keine Savegame-Persistenz.
+  - Quiz-, Quest- und Scenario-Anbindung sollten spaeter kontrolliert ueber Adapter erfolgen.
+- Commit:
+  - Vorschlag: `feat: add skill level system`
+
+### [2026-04-25] Inventory / Toolbelt
+- Beschreibung:
+  - Leichtgewichtiges Inventar- und Toolbelt-System als MVP vorbereitet.
+- Betroffene Systeme:
+  - `Assets/Projekt/Runtime/Features/Inventory/`
+  - `README.md`
+  - `docs/core/FEATURE_REGISTRY.md`
+  - `docs/inventory/INVENTORY_TOOLBELT_FEATURE.md`
+  - `docs/task/NEXT.md`
+  - `docs/task/BACKLOG.md`
+  - `docs/task/DONE.md`
+- Wichtige Änderungen:
+  - `InventoryItemCategory`, `InventoryItemData`, `InventoryItemStack`, `RuntimeInventory` und `ToolbeltController` erstellt.
+  - Runtime-Inventar unterstuetzt Add/Remove/Contains/Clear und meldet Aenderungen per Event.
+  - Toolbelt verwaltet Slot-Zuweisungen, Auswahl und Use-Events.
+  - Keine harte Kopplung an UI, Savegame oder World Interaction eingebaut.
+  - `Skill / Level System` als naechster Task aus dem Backlog nach `NEXT.md` vorbereitet.
+- Tests / Prüfung:
+  - Statische Pruefung der Namespaces und Dateien.
+  - `git diff --check` ohne Whitespace-Fehler; nur bestehende Line-Ending-Warnungen.
+  - Unity Batchmode Script-Compilation erfolgreich: `Tundra build success`.
+- Risiken / Follow-Ups:
+  - Noch keine Scene-/Prefab-Anbindung.
+  - Keine Savegame-Persistenz.
+  - Kein Pickup-Adapter fuer World Interaction; dieser sollte spaeter kontrolliert ergaenzt werden.
+- Commit:
+  - Vorschlag: `feat: add inventory toolbelt system`
+
+### [2026-04-25] NPC Routine System
+- Beschreibung:
+  - Einfaches optionales Routine-System fuer NPC-Ablaufplaene als MVP vorbereitet.
+- Betroffene Systeme:
+  - `Assets/Projekt/Runtime/Features/NPC/Routines/`
+  - `Assets/Projekt/Runtime/Features/NPC/Readme.md`
+  - `README.md`
+  - `docs/core/FEATURE_REGISTRY.md`
+  - `docs/npc/NPC_ROUTINE_FEATURE.md`
+  - `docs/task/NEXT.md`
+  - `docs/task/BACKLOG.md`
+  - `docs/task/DONE.md`
+- Wichtige Änderungen:
+  - `NpcRoutineStepType`, `NpcRoutineStep` und `NpcRoutineController` erstellt.
+  - Routine-Schritte fuer `Wait`, `LookDirection` und `MoveToPoint` vorbereitet.
+  - Animator-Parameter `MoveX`, `MoveY` und `IsMoving` werden defensiv nur gesetzt, wenn vorhanden.
+  - Arthur und Bernd wurden nicht migriert oder veraendert.
+  - `Inventory / Toolbelt` als naechster Task aus dem Backlog nach `NEXT.md` vorbereitet.
+- Tests / Prüfung:
+  - Statische Pruefung der Namespaces und Dateien.
+  - `git diff --check` ohne Whitespace-Fehler; nur bestehende Line-Ending-Warnungen.
+  - Unity Batchmode Script-Compilation erfolgreich: `Tundra build success`.
+- Risiken / Follow-Ups:
+  - Noch keine Scene-/Prefab-Anbindung.
+  - Keine Savegame-Persistenz.
+  - Konkrete Arthur-/Bernd-Anbindung sollte spaeter nur kontrolliert erfolgen, damit keine doppelte Bewegungslogik entsteht.
+- Commit:
+  - Vorschlag: `feat: add npc routine system`
+
+### [2026-04-25] Settings System
+- Beschreibung:
+  - Zentrales Settings-System fuer Audio, Video, Input und Gameplay als MVP umgesetzt.
+- Betroffene Systeme:
+  - `Assets/Projekt/Runtime/System/Settings/`
+  - `Assets/Projekt/Runtime/Features/DevTools/DevPanelController.cs`
+  - `README.md`
+  - `docs/core/FEATURE_REGISTRY.md`
+  - `docs/settings/SETTINGS_TODO.md`
+  - `docs/task/NEXT.md`
+  - `docs/task/DONE.md`
+- Wichtige Änderungen:
+  - `SettingsData`, `SettingsManager` und `SettingsUIController` erstellt.
+  - Settings werden als `settings.json` unter `Application.persistentDataPath` gespeichert.
+  - Defaultwerte, Sanitizing, Reset, Save/Load und Runtime-Apply fuer Audio-/Video-Basiswerte umgesetzt.
+  - `SettingsUIController` kann optionale Slider, Toggles, Dropdowns und Inputfelder per Inspector anbinden.
+  - DevPanel-Reset nutzt jetzt den zentralen `SettingsManager`.
+- Tests / Prüfung:
+  - `git diff --check` ohne Whitespace-Fehler; nur bestehende Line-Ending-Warnung.
+  - Unity Batchmode Script-Compilation erfolgreich: `Tundra build success`.
+- Risiken / Follow-Ups:
+  - Noch keine Scene-/Prefab-Anbindung.
+  - Music-/SFX-Volume werden gespeichert, aber noch nicht an konkrete AudioMixer/AudioSource-Gruppen angebunden.
+  - Input-Rebinding speichert Tastenwerte, ist aber noch nicht an `PlayerControls.inputactions` gekoppelt.
+- Commit:
+  - Vorschlag: `feat: add settings system`
+
 ### [2026-04-25] IT Terminal Minigames
 - Beschreibung:
   - Simuliertes Terminal fuer IT-Support-Minispiele als MVP umgesetzt.

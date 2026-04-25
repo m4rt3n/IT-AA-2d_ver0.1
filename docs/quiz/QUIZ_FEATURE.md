@@ -6,7 +6,15 @@ Das Quiz-System soll mehrere Fragetypen, Schwierigkeitsgrade und Quellen unterst
 ## Fragetypen
 - ButtonClick: einfache Auswahl über Buttons
 - MultipleChoice: mehrere Antwortoptionen, eine oder mehrere richtige Antworten
-- FreeText: freie Texteingabe mit einfacher Auswertung
+- FreeText: freie Texteingabe mit normalisierter Auswertung und vorsichtigem Fuzzy-Matching
+
+## Aktueller FreeText-MVP
+- `QuizQuestion.AcceptedTextAnswers` speichert akzeptierte Freitextantworten
+- `QuizTextAnswerEvaluator` normalisiert Eingaben, entfernt Akzente und vereinheitlicht Leerzeichen/Trennzeichen
+- optionales Fuzzy-Matching ist ueber `AllowFuzzyTextMatch` und `MaxTextAnswerDistance` begrenzt
+- `QuizRunner.AnswerCurrentQuestion(string)` wertet Freitext aus
+- `QuizPanel` zeigt fuer Fragen ohne Antwortoptionen und mit akzeptierten Textantworten ein Eingabefeld
+- bestehende Multiple-Choice-Bewertung ueber Antwortindex bleibt unveraendert
 
 ## Schwierigkeitsgrade
 - Easy

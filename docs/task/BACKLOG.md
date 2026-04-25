@@ -32,16 +32,10 @@ Blockierte Tasks gehören nicht in den Backlog zurück.
 Sie bleiben in `NEXT.md`, bis der Blocker gelöst oder der Nutzer die Priorität ändert.
 
 ## Gameplay Features
-- NPC Routine System (Zeitpläne)
-- Inventory / Toolbelt
-- Skill / Level System
-- Achievement System
 
 ---
 
 ## Quiz Erweiterungen
-- FreeText Bewertung verbessern (Fuzzy Matching)
-- Schwierigkeit dynamisch anpassen
 - Themen-Fortschritt visualisieren
 - Frage-Qualitätsbewertung
 

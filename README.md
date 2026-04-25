@@ -40,7 +40,14 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
 - 🤖 **NPC System (Arthur)**
   - Auto-Approach zum Player
   - Trigger-basierte Interaktion
-  - Richtungsbasierte Idle-/Walk-Animationen mit gemerkter Blickrichtung
+  - Oeffnet das Startmenue aktuell automatisch ueber `openMenuWhenArthurReachesPlayer`
+  - `ArthurAutoInteraction.interactAction` bleibt in der `StartScene` bewusst leer; fuer spaetere manuelle Interaktion ist `Player/Interact` aus `Assets/PlayerControls.inputactions` vorgesehen
+  - Animator nutzt in der `StartScene` die vorhandenen Blend-Tree-States `Arthur_Idle` und `Arthur_Walk`; Richtung wird ueber `MoveX`, `MoveY` und `IsMoving` gesteuert
+- 🧭 **NPC Routine System (MVP)**
+  - Neues optionales Routine-Feature unter `Assets/Projekt/Runtime/Features/NPC/Routines/`
+  - Bietet einfache Schrittsequenzen fuer Warten, Blickrichtung und Bewegung zu Zielpunkten
+  - Bleibt bewusst unabhaengig von Arthur und Bernd, damit bestehende Interaktionen stabil bleiben
+  - Noch keine Scene-/Prefab-Anbindung und keine Savegame-Persistenz
 - 🧑‍🏫 **NPC Bernd + Quiz**
   - Bernd ist in `StartScene` als NPC mit Sprite, Animator, Trigger und Namensanzeige angelegt
   - Namensanzeige nutzt wie Arthur ein World-Space-`NameTagCanvas` und wird nur bei Player-Naehe eingeblendet
@@ -49,6 +56,7 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
   - Interaktion per **E** startet ein lokales, erweiterbares Quiz
   - Quiz-Fragen liegen als `QuizSet`-Datenmodell unter `Assets/Projekt/Content/Quiz/`
   - Quiz-UI wird ueber `QuizPanel` geoeffnet und enthaelt keine hart codierten Fragen
+  - Freitextfragen koennen akzeptierte Antworten mit Normalisierung und vorsichtigem Fuzzy-Matching auswerten
 - 🤝 **World Interaction System (MVP)**
   - Neues Feature unter `Assets/Projekt/Runtime/Features/Interaction/`
   - Erkennt interaktive Ziele ueber `IInteractable`
@@ -84,6 +92,21 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
   - Demo-Quests: `talk_to_bernd`, `answer_3_dns_questions`, `complete_easy_quiz`
   - `QuizProgressReporter` bereitet die spätere Quiz-Anbindung vor
   - Savegame-Persistenz ist vorbereitet, aber noch nicht aktiv angebunden
+- 🎒 **Inventory / Toolbelt (MVP)**
+  - Neues Inventar-Feature unter `Assets/Projekt/Runtime/Features/Inventory/`
+  - Bietet Item-Datenmodell, Item-Stacks und Runtime-Inventar
+  - `ToolbeltController` verwaltet Slot-Zuweisung, Auswahl und Use-Events
+  - Bleibt ohne harte UI-, Savegame- oder World-Interaction-Kopplung
+- 📊 **Skill / Level System (MVP)**
+  - Neues Skill-Feature unter `Assets/Projekt/Runtime/Features/Skills/`
+  - Verwaltet Skill-Definitionen, XP, Level und Level-Up-Events im Speicher
+  - Enthaltene Demo-Skills: `networking`, `support`, `terminal`
+  - Bleibt ohne harte Kopplung an PlayerSession, ProgressManager, UI oder Savegame
+- 🏆 **Achievement System (MVP)**
+  - Neues Achievement-Feature unter `Assets/Projekt/Runtime/Features/Achievements/`
+  - Verwaltet Achievement-Definitionen, Unlock-Status und Fortschritt im Speicher
+  - Enthaltene Demo-Achievements: `first_login`, `first_quiz`, `network_beginner`
+  - Bleibt ohne harte Kopplung an Progress, Skills, HUD, UI oder Savegame
 - 🧭 **HUD System (MVP)**
   - Neues HUD-Feature unter `Assets/Projekt/Runtime/Features/HUD/`
   - Zeigt Spielername, aktuelles Ziel, Quizpunkte, Thema und kurze Meldungen
@@ -95,6 +118,13 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
   - Fuehrt keine echten OS-Befehle aus und nutzt keine echten Netzwerkzugriffe
   - Trennt Befehlsdaten, Emulator-Logik und UI-Panel
   - `TerminalPanel` kann eine einfache MVP-UI selbst erzeugen oder per Inspector verdrahtet werden
+- ⚙️ **Settings System (MVP)**
+  - Neues globales Settings-System unter `Assets/Projekt/Runtime/System/Settings/`
+  - Speichert Audio-, Video-, Input- und Gameplay-Basiswerte als `settings.json`
+  - Nutzt `Application.persistentDataPath` und legt bei fehlender Datei Defaultwerte an
+  - `SettingsManager` stellt zentrale Getter, Reset, Apply und Save/Load bereit
+  - `SettingsUIController` kann optionale Slider, Toggles, Dropdowns und Inputfelder per Inspector anbinden
+  - DevPanel-Reset nutzt jetzt den zentralen `SettingsManager`
 - 🧩 **UI System**
   - MenuManager (zentrale Steuerung)
   - StartMenu + LoadGamePanel
@@ -175,10 +205,15 @@ Assets/
 │ │ │ ├── BerndInteractableAdapter
 │ │ │ ├── BerndQuizStarter
 │ │ │ └── BerndNameTag
+│ │ │ └── Routines/
+│ │ │ ├── NpcRoutineStepType
+│ │ │ ├── NpcRoutineStep
+│ │ │ └── NpcRoutineController
 │ │ ├── Quiz/
 │ │ │ ├── QuizSet
 │ │ │ ├── QuizQuestion
 │ │ │ ├── QuizAnswerOption
+│ │ │ ├── QuizTextAnswerEvaluator
 │ │ │ ├── QuizRunner
 │ │ │ └── QuizResult
 │ │ ├── Scenarios/
@@ -208,6 +243,22 @@ Assets/
 │ │ │ ├── ProgressProfile
 │ │ │ ├── ProgressManager
 │ │ │ └── QuizProgressReporter
+│ │ ├── Inventory/
+│ │ │ ├── InventoryItemCategory
+│ │ │ ├── InventoryItemData
+│ │ │ ├── InventoryItemStack
+│ │ │ ├── RuntimeInventory
+│ │ │ └── ToolbeltController
+│ │ ├── Skills/
+│ │ │ ├── SkillDefinition
+│ │ │ ├── SkillProgress
+│ │ │ ├── SkillProfile
+│ │ │ └── SkillRuntimeManager
+│ │ ├── Achievements/
+│ │ │ ├── AchievementDefinition
+│ │ │ ├── AchievementProgress
+│ │ │ ├── AchievementProfile
+│ │ │ └── AchievementManager
 │ │ ├── HUD/
 │ │ │ ├── HudController
 │ │ │ ├── HudView
@@ -233,6 +284,10 @@ Assets/
 │ ├── SaveSlotEntity
 │ ├── SavegameRuntimeSession
 │ └── DummySaveBootstrap
+│ └── Settings/
+│ ├── SettingsData
+│ ├── SettingsManager
+│ └── SettingsUIController
 │
 ├── Settings/
 ├── ScriptableObjects/
@@ -258,6 +313,16 @@ Hinweis: Kurzfristig ist `StartScene` die zentrale Laufzeit-Szene für Menü und
 2. Arthur läuft zum Player  
 3. Player wird **gelockt**  
 4. **StartMenu öffnet sich**
+
+Aktueller Input-Stand:
+- Arthur nutzt in der `StartScene` den automatischen Menue-Flow ueber `openMenuWhenArthurReachesPlayer`.
+- `ArthurAutoInteraction.interactAction` bleibt dort bewusst leer, damit keine doppelte Eingabelogik entsteht.
+- Fuer eine spaetere manuelle Wieder-Interaktion ist `Player/Interact` aus `Assets/PlayerControls.inputactions` vorgesehen.
+
+Aktueller Animator-Stand:
+- Die Szene verwendet fuer Arthur die vorhandenen States `Arthur_Idle` und `Arthur_Walk`.
+- Richtung und Bewegung laufen ueber die Animator-Parameter `MoveX`, `MoveY` und `IsMoving`.
+- Richtungsbasierte Einzel-State-Namen wie `Arthur_IdleDown` bleiben als spaetere Erweiterung im Code vorbereitet, werden in der aktuellen `StartScene` aber nicht als Inspector-State verwendet.
 
 ---
 
@@ -318,6 +383,26 @@ Aktueller Dummy-Stand:
 - `SceneName` wird zentral über `SceneNames.StartScene` gesetzt
 - Bereits vorhandene Dummy-Saves mit altem `GameScene`-Wert werden auf `StartScene` migriert
 - Dadurch bleiben Dummy-Save, Auth-Startszene und Build Settings kurzfristig synchron
+
+---
+
+## ⚙️ Settings System
+
+- Speicherort:
+Application.persistentDataPath/settings.json
+
+- Inhalt:
+- MasterVolume, MusicVolume, SfxVolume
+- Fullscreen, ResolutionWidth, ResolutionHeight, VSync
+- InteractKey, MoveUpKey, MoveDownKey, MoveLeftKey, MoveRightKey
+- TextSpeed, ShowTutorials
+
+Aktueller MVP-Stand:
+- `SettingsManager` laedt und speichert Settings zentral als JSON
+- fehlende oder defekte Settings fallen auf Defaultwerte zurueck
+- Audio-Mastervolume und Video-Basiswerte werden runtime angewendet
+- `SettingsUIController` ist vorbereitet fuer Inspector-verdrahtete Settings-UI
+- echte Input-Rebinding-Anbindung an `PlayerControls.inputactions` ist noch offen
 
 ---
 

@@ -35,6 +35,12 @@ NPC/
 │   ├── BerndAutoInteraction.cs
 │   └── README.md
 │
+├── Routines/
+│   ├── NpcRoutineStepType.cs
+│   ├── NpcRoutineStep.cs
+│   ├── NpcRoutineController.cs
+│   └── README.md
+│
 └── README.md
 
 ---
@@ -54,6 +60,15 @@ Jeder NPC besteht aus mehreren kleinen Komponenten mit klarer Verantwortung:
 
 * **Interaction Controller**
   → startet Interaktionen, Menüs oder Dialoge
+
+  Arthur nutzt in der aktuellen `StartScene` den automatischen Menue-Flow ueber
+  `ArthurAutoInteraction.openMenuWhenArthurReachesPlayer`. Das Feld
+  `ArthurAutoInteraction.interactAction` bleibt dort bewusst leer. Fuer eine
+  spaetere manuelle Interaktion ist `Player/Interact` aus
+  `Assets/PlayerControls.inputactions` vorgesehen.
+
+* **Routine Controller**
+  → kann spaeter einfache optionale Ablaufplaene ausfuehren
 
 Dieses Muster sorgt für:
 
@@ -117,7 +132,13 @@ In der Praxis werden diese States pro NPC benannt, z. B.:
 * `Arthur_IdleDown`
 * `Bernd_IdleDown`
 
-👉 Wichtig: Die State-Namen müssen exakt mit der Code-Logik übereinstimmen.
+Aktueller Arthur-Stand in der `StartScene`:
+
+* Arthur verwendet die vorhandenen Blend-Tree-States `Arthur_Idle` und `Arthur_Walk`.
+* Richtung und Bewegung laufen ueber `MoveX`, `MoveY` und `IsMoving`.
+* Richtungsbasierte Arthur-State-Namen bleiben optional vorbereitet, sind aber nicht die aktive Szenenverdrahtung.
+
+👉 Wichtig: Die in der Szene eingetragenen State-Namen müssen exakt im Animator vorhanden sein.
 
 ---
 
@@ -168,6 +189,7 @@ Das NPC-System ist als Basis für spätere Features gedacht:
 ## 🚀 Roadmap
 
 * generische NPC-Basis schaffen
+* Routine-System kontrolliert an konkrete NPCs anbinden
 * gemeinsame Interfaces / Basisklassen definieren
 * Dialogsystem anbinden
 * Quest-System integrieren
