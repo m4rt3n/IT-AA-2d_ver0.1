@@ -94,7 +94,7 @@ namespace ITAA.DevTools
             panelRect.anchorMax = new Vector2(1f, 0.5f);
             panelRect.pivot = new Vector2(1f, 0.5f);
             panelRect.anchoredPosition = new Vector2(-32f, 0f);
-            panelRect.sizeDelta = new Vector2(420f, 560f);
+            panelRect.sizeDelta = new Vector2(420f, 720f);
 
             Image panelImage = panelObject.AddComponent<Image>();
             panelImage.color = new Color(0.08f, 0.1f, 0.14f, 0.96f);
@@ -117,6 +117,9 @@ namespace ITAA.DevTools
             Button quizDraftButton = CreateButton(panelObject.transform, "Generate Dummy Quiz Draft");
             Button printSessionButton = CreateButton(panelObject.transform, "Print Player Session");
             Button printSceneButton = CreateButton(panelObject.transform, "Print Current Scene");
+            Button printFeatureManagersButton = CreateButton(panelObject.transform, "Print Feature Managers");
+            Button grantSkillXpButton = CreateButton(panelObject.transform, "Grant Demo Skill XP");
+            Button unlockAchievementButton = CreateButton(panelObject.transform, "Unlock Demo Achievement");
             Button closeButton = CreateButton(panelObject.transform, "Close DevPanel");
 
             DevPanelController runtimeController = panelObject.AddComponent<DevPanelController>();
@@ -128,6 +131,9 @@ namespace ITAA.DevTools
                 quizDraftButton,
                 printSessionButton,
                 printSceneButton,
+                printFeatureManagersButton,
+                grantSkillXpButton,
+                unlockAchievementButton,
                 closeButton);
 
             Log("Runtime-DevPanel erzeugt.");

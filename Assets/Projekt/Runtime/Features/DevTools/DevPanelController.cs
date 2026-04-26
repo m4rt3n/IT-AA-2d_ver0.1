@@ -1,13 +1,18 @@
 /*
  * Datei: DevPanelController.cs
  * Zweck: Stellt ein optionales Entwickler-Panel mit Debug- und Testaktionen bereit.
- * Verantwortung: Verdrahtet UI-Buttons mit bestehenden Systemen wie SaveSystem, LoadGamePanel und PlayerSession.
- * Abhaengigkeiten: SaveSystem, LoadGamePanel, PlayerSession, SettingsManager, Unity UI, SceneManager.
+ * Verantwortung: Verdrahtet UI-Buttons mit bestehenden Systemen wie SaveSystem, LoadGamePanel, PlayerSession und Feature-Managern.
+ * Abhaengigkeiten: SaveSystem, LoadGamePanel, PlayerSession, SettingsManager, Feature-Manager, Unity UI, SceneManager.
  * Verwendung: Wird auf ein DevPanel-GameObject gesetzt oder vom DevPanelBootstrap zur Laufzeit erzeugt.
  */
 
 using System;
 using ITAA.Core.SceneManagement;
+using ITAA.Features.Achievements;
+using ITAA.Features.Inventory;
+using ITAA.Features.Progress;
+using ITAA.Features.Scenarios;
+using ITAA.Features.Skills;
 using ITAA.Player.Session;
 using ITAA.System.Savegame;
 using ITAA.System.Settings;
@@ -37,6 +42,9 @@ namespace ITAA.DevTools
         [SerializeField] private Button generateDummyQuizDraftButton;
         [SerializeField] private Button printPlayerSessionButton;
         [SerializeField] private Button printCurrentSceneButton;
+        [SerializeField] private Button printFeatureManagersButton;
+        [SerializeField] private Button grantDemoSkillXpButton;
+        [SerializeField] private Button unlockDemoAchievementButton;
         [SerializeField] private Button closeDevPanelButton;
 
         [Header("Debug")]
@@ -173,6 +181,57 @@ namespace ITAA.DevTools
             );
         }
 
+        public void PrintFeatureManagers()
+        {
+            ProgressManager progressManager = FindAnyObjectByType<ProgressManager>(FindObjectsInactive.Include);
+            ScenarioManager scenarioManager = FindAnyObjectByType<ScenarioManager>(FindObjectsInactive.Include);
+            AchievementManager achievementManager = FindAnyObjectByType<AchievementManager>(FindObjectsInactive.Include);
+            SkillRuntimeManager skillRuntimeManager = FindAnyObjectByType<SkillRuntimeManager>(FindObjectsInactive.Include);
+            RuntimeInventory runtimeInventory = FindAnyObjectByType<RuntimeInventory>(FindObjectsInactive.Include);
+            ToolbeltController toolbeltController = FindAnyObjectByType<ToolbeltController>(FindObjectsInactive.Include);
+            SettingsManager settingsManager = SettingsManager.GetOrCreate();
+
+            Debug.Log(
+                $"[{nameof(DevPanelController)}] Feature Managers: " +
+                $"Settings={(settingsManager != null ? "ok" : "fehlt")}, " +
+                $"Progress={(progressManager != null ? "ok" : "fehlt")}, " +
+                $"Scenario={(scenarioManager != null ? "ok" : "fehlt")}, " +
+                $"Achievements={(achievementManager != null ? achievementManager.GetAchievementDefinitions().Count.ToString() : "fehlt")}, " +
+                $"Skills={(skillRuntimeManager != null ? skillRuntimeManager.GetSkillDefinitions().Count.ToString() : "fehlt")}, " +
+                $"Inventory={(runtimeInventory != null ? runtimeInventory.Count.ToString() : "fehlt")}, " +
+                $"Toolbelt={(toolbeltController != null ? toolbeltController.SlotCount.ToString() : "fehlt")}",
+                this
+            );
+        }
+
+        public void GrantDemoSkillXp()
+        {
+            SkillRuntimeManager skillRuntimeManager = FindAnyObjectByType<SkillRuntimeManager>(FindObjectsInactive.Include);
+
+            if (skillRuntimeManager == null)
+            {
+                Debug.LogWarning($"[{nameof(DevPanelController)}] SkillRuntimeManager fehlt.", this);
+                return;
+            }
+
+            skillRuntimeManager.AddXp("networking", 25);
+            Log("Demo-XP fuer Skill 'networking' vergeben.");
+        }
+
+        public void UnlockDemoAchievement()
+        {
+            AchievementManager achievementManager = FindAnyObjectByType<AchievementManager>(FindObjectsInactive.Include);
+
+            if (achievementManager == null)
+            {
+                Debug.LogWarning($"[{nameof(DevPanelController)}] AchievementManager fehlt.", this);
+                return;
+            }
+
+            achievementManager.UnlockAchievement("first_login");
+            Log("Demo-Achievement 'first_login' freigeschaltet oder war bereits aktiv.");
+        }
+
         public void AssignButtons(
             Button reloadSaveSlots,
             Button generateDummySaves,
@@ -180,6 +239,9 @@ namespace ITAA.DevTools
             Button generateDummyQuizDraft,
             Button printPlayerSession,
             Button printCurrentScene,
+            Button printFeatureManagers,
+            Button grantDemoSkillXp,
+            Button unlockDemoAchievement,
             Button closeDevPanel)
         {
             UnwireButtons();
@@ -190,6 +252,9 @@ namespace ITAA.DevTools
             generateDummyQuizDraftButton = generateDummyQuizDraft;
             printPlayerSessionButton = printPlayerSession;
             printCurrentSceneButton = printCurrentScene;
+            printFeatureManagersButton = printFeatureManagers;
+            grantDemoSkillXpButton = grantDemoSkillXp;
+            unlockDemoAchievementButton = unlockDemoAchievement;
             closeDevPanelButton = closeDevPanel;
 
             WireButtons();
@@ -225,6 +290,9 @@ namespace ITAA.DevTools
             WireButton(generateDummyQuizDraftButton, GenerateDummyQuizDraft);
             WireButton(printPlayerSessionButton, PrintPlayerSession);
             WireButton(printCurrentSceneButton, PrintCurrentScene);
+            WireButton(printFeatureManagersButton, PrintFeatureManagers);
+            WireButton(grantDemoSkillXpButton, GrantDemoSkillXp);
+            WireButton(unlockDemoAchievementButton, UnlockDemoAchievement);
             WireButton(closeDevPanelButton, CloseDevPanel);
         }
 
@@ -236,6 +304,9 @@ namespace ITAA.DevTools
             UnwireButton(generateDummyQuizDraftButton, GenerateDummyQuizDraft);
             UnwireButton(printPlayerSessionButton, PrintPlayerSession);
             UnwireButton(printCurrentSceneButton, PrintCurrentScene);
+            UnwireButton(printFeatureManagersButton, PrintFeatureManagers);
+            UnwireButton(grantDemoSkillXpButton, GrantDemoSkillXp);
+            UnwireButton(unlockDemoAchievementButton, UnlockDemoAchievement);
             UnwireButton(closeDevPanelButton, CloseDevPanel);
         }
 

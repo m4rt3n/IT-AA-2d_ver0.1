@@ -49,6 +49,28 @@ Optional:
 
 ## Einträge
 
+### [2026-04-26] StartScene Feature Integration
+- Beschreibung:
+  - Vorbereitete MVP-Features defensiv fuer die `StartScene` erreichbar gemacht.
+- Betroffene Systeme:
+  - `Assets/Projekt/Runtime/Core/SceneManagement/StartSceneFeatureBootstrap.cs`
+  - `Assets/Projekt/Runtime/Features/DevTools/`
+  - `README.md`
+  - `docs/task/DONE.md`
+- Wichtige Änderungen:
+  - `StartSceneFeatureBootstrap` erzeugt bei Bedarf `StartSceneRuntimeFeatures`.
+  - Optionale Manager werden in der `StartScene` initialisiert: Settings, Progress, Scenario, Achievements, Skills, RuntimeInventory, Toolbelt und DevPanel.
+  - DevPanel um Debug-Aktionen fuer Feature-Manager, Demo-Skill-XP und Demo-Achievement erweitert.
+  - Keine Szene-, Prefab-, Arthur-, Bernd- oder Animator-Controller-Referenzen manuell umverdrahtet.
+- Tests / Prüfung:
+  - Statische Pruefung und Kompilationspruefung siehe Abschlussbericht.
+- Risiken / Follow-Ups:
+  - NPC Routines bleiben absichtlich nicht an Arthur oder Bernd angebunden.
+  - Konkrete UI-Panels fuer Achievements, Skills und Inventory sind weiterhin manuelle Folgearbeit.
+  - Savegame-Persistenz fuer neue Profile bleibt offen.
+- Commit:
+  - Vorschlag: `feat: integrate prepared features in start scene`
+
 ### [2026-04-25] Quiz FreeText Bewertung
 - Beschreibung:
   - Freitext-Bewertung im Quiz-System robuster vorbereitet.

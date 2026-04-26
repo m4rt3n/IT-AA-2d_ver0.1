@@ -73,7 +73,8 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
 - 🛠️ **DevPanel (MVP)**
   - Neues optionales Entwicklerwerkzeug unter `Assets/Projekt/Runtime/Features/DevTools/`
   - Runtime-Panel kann per `F12` geoeffnet werden
-  - Bietet Debug-Aktionen fuer SaveSlots, Dummy-Saves, Settings, Quiz-Drafts, PlayerSession und aktuelle Szene
+  - Bietet Debug-Aktionen fuer SaveSlots, Dummy-Saves, Settings, Quiz-Drafts, PlayerSession, aktuelle Szene und vorbereitete Feature-Manager
+  - `StartSceneFeatureBootstrap` erzeugt das DevPanel in der `StartScene` bei Bedarf automatisch
   - Nutzt bestehende Systeme defensiv und meldet fehlende Abhaengigkeiten per `Debug.LogWarning`
 - 📚 **Knowledge Base (MVP)**
   - Neues Lexikon-Feature unter `Assets/Projekt/Runtime/Features/KnowledgeBase/`
@@ -96,17 +97,17 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
   - Neues Inventar-Feature unter `Assets/Projekt/Runtime/Features/Inventory/`
   - Bietet Item-Datenmodell, Item-Stacks und Runtime-Inventar
   - `ToolbeltController` verwaltet Slot-Zuweisung, Auswahl und Use-Events
-  - Bleibt ohne harte UI-, Savegame- oder World-Interaction-Kopplung
+  - Wird in der `StartScene` als optionales Runtime-System initialisiert, bleibt aber ohne harte UI-, Savegame- oder World-Interaction-Kopplung
 - 📊 **Skill / Level System (MVP)**
   - Neues Skill-Feature unter `Assets/Projekt/Runtime/Features/Skills/`
   - Verwaltet Skill-Definitionen, XP, Level und Level-Up-Events im Speicher
   - Enthaltene Demo-Skills: `networking`, `support`, `terminal`
-  - Bleibt ohne harte Kopplung an PlayerSession, ProgressManager, UI oder Savegame
+  - Wird in der `StartScene` als optionaler Runtime-Manager initialisiert und bleibt ohne harte Kopplung an PlayerSession, ProgressManager, UI oder Savegame
 - 🏆 **Achievement System (MVP)**
   - Neues Achievement-Feature unter `Assets/Projekt/Runtime/Features/Achievements/`
   - Verwaltet Achievement-Definitionen, Unlock-Status und Fortschritt im Speicher
   - Enthaltene Demo-Achievements: `first_login`, `first_quiz`, `network_beginner`
-  - Bleibt ohne harte Kopplung an Progress, Skills, HUD, UI oder Savegame
+  - Wird in der `StartScene` als optionaler Runtime-Manager initialisiert und bleibt ohne harte Kopplung an Progress, Skills, HUD, UI oder Savegame
 - 🧭 **HUD System (MVP)**
   - Neues HUD-Feature unter `Assets/Projekt/Runtime/Features/HUD/`
   - Zeigt Spielername, aktuelles Ziel, Quizpunkte, Thema und kurze Meldungen
@@ -302,6 +303,10 @@ Assets/
 
 StartScene  
 → StartMenu wird automatisch geöffnet  
+
+Beim Laden der `StartScene` erzeugt `StartSceneFeatureBootstrap` bei Bedarf ein Runtime-Objekt `StartSceneRuntimeFeatures`.
+Darueber werden optionale MVP-Systeme initialisiert: `SettingsManager`, `ProgressManager`, `ScenarioManager`, `AchievementManager`, `SkillRuntimeManager`, `RuntimeInventory`, `ToolbeltController` und `DevPanelBootstrap`.
+Arthur, Bernd, bestehende UI-Inspector-Referenzen, Prefabs und Animator-Controller werden dadurch nicht umverdrahtet.
 
 Hinweis: Kurzfristig ist `StartScene` die zentrale Laufzeit-Szene für Menü und geladenen Dummy-Spielstand. Eine separate `GameScene` ist als späterer Portfolio-Ausbau vorgesehen.
 
