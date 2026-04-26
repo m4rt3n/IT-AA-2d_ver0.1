@@ -348,9 +348,16 @@ Hinweis: `StartScene` bleibt die Menü-/Ladeszene. Geladene Spielstände wechsel
 `_SceneRoot`, `_Bootstrap`, `_Systems`, `_UI`, `World`, `Characters`, `Cameras`, `Lighting`
 
 Enthalten:
-- Schnee-Boden und Wege als Tilemaps aus vorhandenen `cloud_tileset`-Tile-Assets
-- Häuser, Bäume, Blumen, Zäune und Interaktionspunkte aus vorhandenen Tileset-Sprites
-- Mauern/Zäune und Gebäude mit Collider-Boundaries
+- 40x30 Winter-Hub mit festem Grid-Koordinatenlayout
+- Pflicht-Tilemaps: `Ground_Base`, `Ground_Details`, `Roads`, `Buildings`, `Roofs`, `Nature`, `Props`, `Interactables`, `Collision`
+- Zentraler Platz bei X 15-25 / Y 10-18, Kreuzweg bei X 20 und Y 14
+- Quiz-Zone oben, Inventory-Zone links, Skill-Zone rechts, Sued-Ausgang unten
+- Bereinigtes 32x32-Tileset: `Assets/Projekt/Content/Art/TestWorld/WinterTownTileset_Clean_32.png`
+- Benannte Tile-Assets und Mapping: `Assets/Projekt/Content/Tiles/TestWorld/`
+- Unity-ready Art-Atlas ohne Preview-Labels: `Assets/Projekt/Content/Art/Tiles/WinterTownTileset_Clean_32.png`
+- Art-Atlas-Mapping: `Assets/Projekt/Content/Art/Tiles/WinterTownTileset_Clean_32.mapping.json`
+- Separate grosse Testwelt-Props: `Assets/Projekt/Content/Art/Props/TestWorld/`
+- Blockierende Zellen gesammelt auf der `Collision`-Tilemap mit CompositeCollider2D
 - Player mit vorhandenen Movement-Komponenten, Rigidbody2D, CapsuleCollider2D und InteractionDetector
 - Arthur als NPC-Präsenz
 - Bernd als Quiz-NPC mit `BerndQuizStarter`, `BerndInteractableAdapter` und `BerndIntroQuiz`
@@ -360,6 +367,9 @@ Enthalten:
 Editor-Menüs:
 - `ITAA/Scenes/Rebuild GameScene`
 - `ITAA/Scenes/Rebuild GameScene Visual World`
+- `ITAA/Scenes/Rebuild Structured Winter Hub`
+- `ITAA/Tilesets/Rebuild Clean Winter Town Tileset`
+- `ITAA/Tilesets/Create Clean 32x32 Winter Town Tileset`
 - `ITAA/Scenes/Open GameScene`
 - `ITAA/Validation/Validate GameScene`
 

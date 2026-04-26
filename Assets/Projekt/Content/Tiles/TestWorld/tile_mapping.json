@@ -1,0 +1,466 @@
+{
+  "ground_snow_01": {
+    "category": "Ground",
+    "spriteName": "ground_snow_01",
+    "sourceSpriteName": "winter_town_tileset[16,68]",
+    "collision": false,
+    "sortingOrder": 0,
+    "usage": "Base snow ground"
+  },
+  "ground_snow_02": {
+    "category": "Ground",
+    "spriteName": "ground_snow_02",
+    "sourceSpriteName": "winter_town_tileset[68,68]",
+    "collision": false,
+    "sortingOrder": 0,
+    "usage": "Alternative snow ground"
+  },
+  "ground_snow_detail_01": {
+    "category": "Ground",
+    "spriteName": "ground_snow_detail_01",
+    "sourceSpriteName": "winter_town_tileset[16,124]",
+    "collision": false,
+    "sortingOrder": 2,
+    "usage": "Snow variation ground detail"
+  },
+  "ground_ice_01": {
+    "category": "Ground",
+    "spriteName": "ground_ice_01",
+    "sourceSpriteName": "winter_town_tileset[16,180]",
+    "collision": false,
+    "sortingOrder": 0,
+    "usage": "Ice-like ground alternative"
+  },
+  "road_cobble_center": {
+    "category": "Roads",
+    "spriteName": "road_cobble_center",
+    "sourceSpriteName": "winter_town_tileset[16,267]",
+    "collision": false,
+    "sortingOrder": 1,
+    "usage": "Central plaza cobble"
+  },
+  "road_cobble_h": {
+    "category": "Roads",
+    "spriteName": "road_cobble_h",
+    "sourceSpriteName": "winter_town_tileset[68,267]",
+    "collision": false,
+    "sortingOrder": 1,
+    "usage": "Horizontal main road"
+  },
+  "road_cobble_v": {
+    "category": "Roads",
+    "spriteName": "road_cobble_v",
+    "sourceSpriteName": "winter_town_tileset[120,267]",
+    "collision": false,
+    "sortingOrder": 1,
+    "usage": "Vertical main road"
+  },
+  "road_cobble_cross": {
+    "category": "Roads",
+    "spriteName": "road_cobble_cross",
+    "sourceSpriteName": "winter_town_tileset[172,267]",
+    "collision": false,
+    "sortingOrder": 1,
+    "usage": "Road crossing"
+  },
+  "road_cobble_corner_tl": {
+    "category": "Roads",
+    "spriteName": "road_cobble_corner_tl",
+    "sourceSpriteName": "winter_town_tileset[224,267]",
+    "collision": false,
+    "sortingOrder": 1,
+    "usage": "Cobble corner top left"
+  },
+  "road_cobble_corner_tr": {
+    "category": "Roads",
+    "spriteName": "road_cobble_corner_tr",
+    "sourceSpriteName": "winter_town_tileset[276,267]",
+    "collision": false,
+    "sortingOrder": 1,
+    "usage": "Cobble corner top right"
+  },
+  "road_cobble_corner_bl": {
+    "category": "Roads",
+    "spriteName": "road_cobble_corner_bl",
+    "sourceSpriteName": "winter_town_tileset[328,267]",
+    "collision": false,
+    "sortingOrder": 1,
+    "usage": "Cobble corner bottom left"
+  },
+  "road_cobble_corner_br": {
+    "category": "Roads",
+    "spriteName": "road_cobble_corner_br",
+    "sourceSpriteName": "winter_town_tileset[412,267]",
+    "collision": false,
+    "sortingOrder": 1,
+    "usage": "Cobble corner bottom right"
+  },
+  "road_cobble_edge_top": {
+    "category": "Roads",
+    "spriteName": "road_cobble_edge_top",
+    "sourceSpriteName": "winter_town_tileset[16,324]",
+    "collision": false,
+    "sortingOrder": 1,
+    "usage": "Road edge top"
+  },
+  "road_cobble_edge_bottom": {
+    "category": "Roads",
+    "spriteName": "road_cobble_edge_bottom",
+    "sourceSpriteName": "winter_town_tileset[68,324]",
+    "collision": false,
+    "sortingOrder": 1,
+    "usage": "Road edge bottom"
+  },
+  "road_cobble_edge_left": {
+    "category": "Roads",
+    "spriteName": "road_cobble_edge_left",
+    "sourceSpriteName": "winter_town_tileset[120,324]",
+    "collision": false,
+    "sortingOrder": 1,
+    "usage": "Road edge left"
+  },
+  "road_cobble_edge_right": {
+    "category": "Roads",
+    "spriteName": "road_cobble_edge_right",
+    "sourceSpriteName": "winter_town_tileset[172,324]",
+    "collision": false,
+    "sortingOrder": 1,
+    "usage": "Road edge right"
+  },
+  "wall_stone_h": {
+    "category": "Walls",
+    "spriteName": "wall_stone_h",
+    "sourceSpriteName": "winter_town_tileset[16,413]",
+    "collision": true,
+    "sortingOrder": 6,
+    "usage": "Blocking horizontal wall"
+  },
+  "wall_stone_v": {
+    "category": "Walls",
+    "spriteName": "wall_stone_v",
+    "sourceSpriteName": "winter_town_tileset[120,413]",
+    "collision": true,
+    "sortingOrder": 6,
+    "usage": "Blocking vertical wall"
+  },
+  "wall_stone_corner": {
+    "category": "Walls",
+    "spriteName": "wall_stone_corner",
+    "sourceSpriteName": "winter_town_tileset[276,413]",
+    "collision": true,
+    "sortingOrder": 6,
+    "usage": "Blocking wall corner"
+  },
+  "fence_wood_h": {
+    "category": "Walls",
+    "spriteName": "fence_wood_h",
+    "sourceSpriteName": "winter_town_tileset[328,413]",
+    "collision": true,
+    "sortingOrder": 6,
+    "usage": "Blocking fence horizontal"
+  },
+  "fence_wood_v": {
+    "category": "Walls",
+    "spriteName": "fence_wood_v",
+    "sourceSpriteName": "winter_town_tileset[432,413]",
+    "collision": true,
+    "sortingOrder": 6,
+    "usage": "Blocking fence vertical"
+  },
+  "fence_wood_gate": {
+    "category": "Walls",
+    "spriteName": "fence_wood_gate",
+    "sourceSpriteName": "winter_town_tileset[224,465]",
+    "collision": true,
+    "sortingOrder": 6,
+    "usage": "Blocked south gate marker"
+  },
+  "building_wall_wood_01": {
+    "category": "Buildings",
+    "spriteName": "building_wall_wood_01",
+    "sourceSpriteName": "winter_town_tileset[16,536]",
+    "collision": true,
+    "sortingOrder": 5,
+    "usage": "Wood building wall"
+  },
+  "building_wall_stone_01": {
+    "category": "Buildings",
+    "spriteName": "building_wall_stone_01",
+    "sourceSpriteName": "winter_town_tileset[224,536]",
+    "collision": true,
+    "sortingOrder": 5,
+    "usage": "Stone building wall"
+  },
+  "building_window_blue": {
+    "category": "Buildings",
+    "spriteName": "building_window_blue",
+    "sourceSpriteName": "winter_town_tileset[16,588]",
+    "collision": true,
+    "sortingOrder": 5,
+    "usage": "Blue window"
+  },
+  "building_door_wood": {
+    "category": "Buildings",
+    "spriteName": "building_door_wood",
+    "sourceSpriteName": "winter_town_tileset[120,588]",
+    "collision": false,
+    "sortingOrder": 5,
+    "usage": "Wood building door visual"
+  },
+  "building_door_stone": {
+    "category": "Buildings",
+    "spriteName": "building_door_stone",
+    "sourceSpriteName": "winter_town_tileset[224,588]",
+    "collision": false,
+    "sortingOrder": 5,
+    "usage": "Stone building door visual"
+  },
+  "roof_blue_center": {
+    "category": "Roofs",
+    "spriteName": "roof_blue_center",
+    "sourceSpriteName": "winter_town_tileset[502,68]",
+    "collision": true,
+    "sortingOrder": 12,
+    "usage": "Blue roof center"
+  },
+  "roof_blue_edge_top": {
+    "category": "Roofs",
+    "spriteName": "roof_blue_edge_top",
+    "sourceSpriteName": "winter_town_tileset[554,68]",
+    "collision": true,
+    "sortingOrder": 12,
+    "usage": "Blue roof top edge"
+  },
+  "roof_blue_edge_bottom": {
+    "category": "Roofs",
+    "spriteName": "roof_blue_edge_bottom",
+    "sourceSpriteName": "winter_town_tileset[606,68]",
+    "collision": true,
+    "sortingOrder": 12,
+    "usage": "Blue roof bottom edge"
+  },
+  "roof_blue_corner_tl": {
+    "category": "Roofs",
+    "spriteName": "roof_blue_corner_tl",
+    "sourceSpriteName": "winter_town_tileset[658,68]",
+    "collision": true,
+    "sortingOrder": 12,
+    "usage": "Blue roof corner top left"
+  },
+  "roof_blue_corner_tr": {
+    "category": "Roofs",
+    "spriteName": "roof_blue_corner_tr",
+    "sourceSpriteName": "winter_town_tileset[710,68]",
+    "collision": true,
+    "sortingOrder": 12,
+    "usage": "Blue roof corner top right"
+  },
+  "roof_orange_center": {
+    "category": "Roofs",
+    "spriteName": "roof_orange_center",
+    "sourceSpriteName": "winter_town_tileset[502,179]",
+    "collision": true,
+    "sortingOrder": 12,
+    "usage": "Orange roof center"
+  },
+  "roof_purple_center": {
+    "category": "Roofs",
+    "spriteName": "roof_purple_center",
+    "sourceSpriteName": "winter_town_tileset[762,179]",
+    "collision": true,
+    "sortingOrder": 12,
+    "usage": "Purple roof center"
+  },
+  "tree_pine_01": {
+    "category": "Nature",
+    "spriteName": "tree_pine_01",
+    "sourceSpriteName": "winter_town_tileset[502,326]",
+    "collision": true,
+    "sortingOrder": 6,
+    "usage": "Snow pine tree"
+  },
+  "tree_pine_02": {
+    "category": "Nature",
+    "spriteName": "tree_pine_02",
+    "sourceSpriteName": "winter_town_tileset[554,326]",
+    "collision": true,
+    "sortingOrder": 6,
+    "usage": "Alternative snow pine tree"
+  },
+  "bush_snow_01": {
+    "category": "Nature",
+    "spriteName": "bush_snow_01",
+    "sourceSpriteName": "winter_town_tileset[502,431]",
+    "collision": false,
+    "sortingOrder": 6,
+    "usage": "Snow bush"
+  },
+  "flower_snow_01": {
+    "category": "Nature",
+    "spriteName": "flower_snow_01",
+    "sourceSpriteName": "winter_town_tileset[814,327]",
+    "collision": false,
+    "sortingOrder": 6,
+    "usage": "Small snow flower decoration"
+  },
+  "rock_snow_01": {
+    "category": "Nature",
+    "spriteName": "rock_snow_01",
+    "sourceSpriteName": "winter_town_tileset[710,326]",
+    "collision": true,
+    "sortingOrder": 6,
+    "usage": "Snow rock"
+  },
+  "crate_01": {
+    "category": "Props",
+    "spriteName": "crate_01",
+    "sourceSpriteName": "winter_town_tileset[502,477]",
+    "collision": true,
+    "sortingOrder": 4,
+    "usage": "Inventory zone crate"
+  },
+  "barrel_01": {
+    "category": "Props",
+    "spriteName": "barrel_01",
+    "sourceSpriteName": "winter_town_tileset[659,477]",
+    "collision": true,
+    "sortingOrder": 4,
+    "usage": "Barrel prop"
+  },
+  "lamp_post_01": {
+    "category": "Props",
+    "spriteName": "lamp_post_01",
+    "sourceSpriteName": "winter_town_tileset[918,477]",
+    "collision": true,
+    "sortingOrder": 4,
+    "usage": "Lamp post"
+  },
+  "bench_01": {
+    "category": "Props",
+    "spriteName": "bench_01",
+    "sourceSpriteName": "winter_town_tileset[502,590]",
+    "collision": true,
+    "sortingOrder": 4,
+    "usage": "Bench prop"
+  },
+  "sign_01": {
+    "category": "Props",
+    "spriteName": "sign_01",
+    "sourceSpriteName": "winter_town_tileset[606,536]",
+    "collision": false,
+    "sortingOrder": 4,
+    "usage": "Sign prop"
+  },
+  "fountain_01": {
+    "category": "Props",
+    "spriteName": "fountain_01",
+    "sourceSpriteName": "winter_town_tileset[814,588]",
+    "collision": true,
+    "sortingOrder": 4,
+    "usage": "Fountain prop"
+  },
+  "terminal_01": {
+    "category": "Interactables",
+    "spriteName": "terminal_01",
+    "sourceSpriteName": "winter_town_tileset[1104,73]",
+    "collision": false,
+    "sortingOrder": 8,
+    "usage": "Skill terminal visual"
+  },
+  "notice_board_01": {
+    "category": "Interactables",
+    "spriteName": "notice_board_01",
+    "sourceSpriteName": "winter_town_tileset[1190,73]",
+    "collision": false,
+    "sortingOrder": 8,
+    "usage": "Notice board visual"
+  },
+  "item_marker_01": {
+    "category": "Interactables",
+    "spriteName": "item_marker_01",
+    "sourceSpriteName": "winter_town_tileset[1280,134]",
+    "collision": false,
+    "sortingOrder": 8,
+    "usage": "Inventory item marker visual"
+  },
+  "npc_marker_quiz": {
+    "category": "Interactables",
+    "spriteName": "npc_marker_quiz",
+    "sourceSpriteName": "winter_town_tileset[1104,134]",
+    "collision": false,
+    "sortingOrder": 8,
+    "usage": "Quiz NPC marker visual"
+  },
+  "npc_marker_arthur": {
+    "category": "Interactables",
+    "spriteName": "npc_marker_arthur",
+    "sourceSpriteName": "winter_town_tileset[1156,134]",
+    "collision": false,
+    "sortingOrder": 8,
+    "usage": "Arthur marker visual"
+  },
+  "player_spawn_marker": {
+    "category": "Interactables",
+    "spriteName": "player_spawn_marker",
+    "sourceSpriteName": "winter_town_tileset[1208,134]",
+    "collision": false,
+    "sortingOrder": 8,
+    "usage": "Player spawn marker visual"
+  },
+  "water_ice_01": {
+    "category": "Water",
+    "spriteName": "water_ice_01",
+    "sourceSpriteName": "winter_town_tileset[16,735]",
+    "collision": false,
+    "sortingOrder": 0,
+    "usage": "Ice water"
+  },
+  "water_edge_01": {
+    "category": "Water",
+    "spriteName": "water_edge_01",
+    "sourceSpriteName": "winter_town_tileset[68,735]",
+    "collision": false,
+    "sortingOrder": 0,
+    "usage": "Water edge"
+  },
+  "waterfall_01": {
+    "category": "Water",
+    "spriteName": "waterfall_01",
+    "sourceSpriteName": "winter_town_tileset[276,735]",
+    "collision": false,
+    "sortingOrder": 0,
+    "usage": "Waterfall"
+  },
+  "snow_shadow_01": {
+    "category": "Details",
+    "spriteName": "snow_shadow_01",
+    "sourceSpriteName": "winter_town_tileset[1104,520]",
+    "collision": false,
+    "sortingOrder": 2,
+    "usage": "Snow shadow detail"
+  },
+  "snow_edge_01": {
+    "category": "Details",
+    "spriteName": "snow_edge_01",
+    "sourceSpriteName": "winter_town_tileset[1156,520]",
+    "collision": false,
+    "sortingOrder": 2,
+    "usage": "Snow edge detail"
+  },
+  "footprints_01": {
+    "category": "Details",
+    "spriteName": "footprints_01",
+    "sourceSpriteName": "winter_town_tileset[1208,520]",
+    "collision": false,
+    "sortingOrder": 2,
+    "usage": "Footprints"
+  },
+  "small_stone_01": {
+    "category": "Details",
+    "spriteName": "small_stone_01",
+    "sourceSpriteName": "winter_town_tileset[1416,646]",
+    "collision": false,
+    "sortingOrder": 2,
+    "usage": "Small stone detail"
+  }
+}
