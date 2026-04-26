@@ -36,16 +36,10 @@ Sie bleiben in `NEXT.md`, bis der Blocker gelöst oder der Nutzer die Priorität
 ---
 
 ## Quiz Erweiterungen
-- Themen-Fortschritt visualisieren
-- Frage-Qualitätsbewertung
 
 ---
 
 ## Scenario Erweiterungen
-- Mehrstufige Szenarien
-- Zufällige Fehlerursachen
-- Zeitbasierte Aufgaben
-- Multiple Lösungswege
 
 ---
 

@@ -1,13 +1,14 @@
 /*
  * Datei: QuizPanel.cs
  * Zweck: Zeigt ein QuizSet als einfaches interaktives UI-Panel an.
- * Verantwortung: Baut bei Bedarf seine UI, zeigt Fragen, Multiple-Choice-/Freitext-Antworten und delegiert Auswertung an QuizRunner.
- * Abhaengigkeiten: BasePanel, ITAA.Quiz, TextMeshPro, Unity UI.
+ * Verantwortung: Baut bei Bedarf seine UI, zeigt Fragen, Multiple-Choice-/Freitext-Antworten, delegiert Auswertung an QuizRunner und meldet optional Progress.
+ * Abhaengigkeiten: BasePanel, ITAA.Quiz, QuizProgressReporter, TextMeshPro, Unity UI.
  * Verwendung: Wird von NPCs wie BerndQuizStarter geoeffnet, ohne Fragen hart im UI-Code zu speichern.
  */
 
 using System;
 using System.Collections.Generic;
+using ITAA.Features.Progress;
 using ITAA.Quiz;
 using TMPro;
 using UnityEngine;
@@ -30,6 +31,9 @@ namespace ITAA.UI.Panels
 
         [Header("Generated UI")]
         [SerializeField] private bool createMissingUi = true;
+
+        [Header("Optional Progress")]
+        [SerializeField] private QuizProgressReporter progressReporter;
 
         private readonly List<TMP_Text> answerLabels = new();
         private QuizRunner runner;
@@ -58,6 +62,7 @@ namespace ITAA.UI.Panels
             runner = new QuizRunner(quizSet);
             onQuizClosed = closedCallback;
             answerSelected = false;
+            ResolveProgressReporter();
 
             Open();
 
@@ -109,6 +114,11 @@ namespace ITAA.UI.Panels
             int optionCount = question.AnswerOptions != null ? question.AnswerOptions.Count : 0;
             bool useFreeText = ShouldUseFreeText(question);
 
+            if (answerButtons == null)
+            {
+                return;
+            }
+
             for (int i = 0; i < answerButtons.Length; i++)
             {
                 Button button = answerButtons[i];
@@ -150,6 +160,7 @@ namespace ITAA.UI.Panels
             }
 
             QuizResult result = runner.AnswerCurrentQuestion(answerIndex);
+            ReportAnswerProgress(result);
             answerSelected = true;
             SetAnswersInteractable(false);
 
@@ -168,6 +179,7 @@ namespace ITAA.UI.Panels
 
             string textAnswer = freeTextInput != null ? freeTextInput.text : string.Empty;
             QuizResult result = runner.AnswerCurrentQuestion(textAnswer);
+            ReportAnswerProgress(result);
             answerSelected = true;
             SetFreeTextInteractable(false);
 
@@ -187,6 +199,7 @@ namespace ITAA.UI.Panels
 
             if (!runner.MoveNext())
             {
+                ReportQuizCompleted();
                 SetText(questionText, "Quiz abgeschlossen.");
                 SetText(explanationText, "Danke fuer deine Antwort.");
                 SetAnswersInteractable(false);
@@ -469,6 +482,38 @@ namespace ITAA.UI.Panels
         {
             int optionCount = question != null && question.AnswerOptions != null ? question.AnswerOptions.Count : 0;
             return question != null && question.HasAcceptedTextAnswers() && optionCount <= 0;
+        }
+
+        private void ResolveProgressReporter()
+        {
+            if (progressReporter == null)
+            {
+                progressReporter = FindAnyObjectByType<QuizProgressReporter>(FindObjectsInactive.Include);
+            }
+        }
+
+        private void ReportAnswerProgress(QuizResult result)
+        {
+            ResolveProgressReporter();
+
+            if (progressReporter == null || result.Question == null)
+            {
+                return;
+            }
+
+            progressReporter.ReportAnswer(result.Question.Topic, result.IsCorrect);
+        }
+
+        private void ReportQuizCompleted()
+        {
+            ResolveProgressReporter();
+
+            if (progressReporter == null || runner == null)
+            {
+                return;
+            }
+
+            progressReporter.ReportQuizCompleted(runner.CorrectAnswerCount, runner.AnsweredQuestionCount);
         }
     }
 }

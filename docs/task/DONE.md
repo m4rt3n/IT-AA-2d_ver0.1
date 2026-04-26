@@ -49,6 +49,176 @@ Optional:
 
 ## Einträge
 
+### [2026-04-26] Zeitbasierte Aufgaben
+- Beschreibung:
+  - Optionale zeitbasierte Aufgaben und Timerstatus fuer Szenarien vorbereitet.
+- Betroffene Systeme:
+  - `Assets/Projekt/Runtime/Features/Scenarios/`
+  - `README.md`
+  - `docs/scenarios/SCENARIO_SYSTEM_FEATURE.md`
+  - `docs/scenarios/CODEX_TASK_TIME_BASED_TASKS.md`
+  - `docs/task/NEXT.md`
+  - `docs/task/BACKLOG.md`
+  - `docs/task/DONE.md`
+- Wichtige Änderungen:
+  - `ScenarioTimeLimit` als serialisierbares Zeitlimit fuer Szenarien und Schritte ergaenzt.
+  - `ScenarioTimerState` als Laufzeitstatus fuer aktive Timer ergaenzt.
+  - `ScenarioDefinition` und `ScenarioStep` koennen optionale Zeitlimits halten.
+  - `ScenarioProgress` haelt Timerstatus fuer spaetere UI-/Savegame-Anbindung.
+  - `ScenarioManager` tickt aktive Timer, meldet `TimerChanged` und `TimerTimedOut` und kann optional bei Timeout failen.
+  - Demo-Szenario enthaelt ein 180-Sekunden-Zeitlimit fuer den DNS/DHCP-Pruefschritt.
+  - `Multiple Loesungswege` als naechster Task aus dem Backlog nach `NEXT.md` verschoben.
+- Tests / Prüfung:
+  - Statische Pruefung und Unity-Kompilationspruefung siehe Abschlussbericht.
+- Risiken / Follow-Ups:
+  - Keine Scene-/Prefab-Aenderungen.
+  - Keine Savegame-Persistenz fuer laufende Timer.
+  - Keine HUD-/UI-Anzeige und keine finale Pause-/Menuelogik fuer Timer.
+- Commit:
+  - Vorschlag: `feat: prepare scenario time limits`
+
+### [2026-04-26] Zufällige Fehlerursachen
+- Beschreibung:
+  - Optionale zufaellige Fehlerursachen fuer Szenarien vorbereitet.
+- Betroffene Systeme:
+  - `Assets/Projekt/Runtime/Features/Scenarios/`
+  - `README.md`
+  - `docs/scenarios/SCENARIO_SYSTEM_FEATURE.md`
+  - `docs/scenarios/CODEX_TASK_RANDOM_FAILURE_CAUSES.md`
+  - `docs/task/NEXT.md`
+  - `docs/task/DONE.md`
+- Wichtige Änderungen:
+  - `ScenarioFailureCause` als serialisierbares Ursachenmodell ergaenzt.
+  - `ScenarioFailureCauseSelector` fuer Zufallsauswahl und deterministische Auswahl per Index oder ID ergaenzt.
+  - `ScenarioDefinition` kann optionale `FailureCauses` halten und Ursachen per ID finden.
+  - `ScenarioProgress` speichert die aktive `ActiveFailureCauseId`.
+  - `ScenarioManager` waehlt beim Start optional eine aktive Fehlerursache und stellt `ActiveFailureCause` bereit.
+  - Demo-Szenario enthaelt DNS-, DHCP/Gateway- und Gateway-Erreichbarkeits-Ursachen.
+- Tests / Prüfung:
+  - Statische Pruefung und Unity-Kompilationspruefung siehe Abschlussbericht.
+- Risiken / Follow-Ups:
+  - Keine Scene-/Prefab-Aenderungen.
+  - Keine Savegame-Persistenz fuer aktive Ursachen.
+  - Keine HUD-/UI-Anzeige und keine finale Gameplay-UX fuer Ursachenhinweise.
+- Commit:
+  - Vorschlag: `feat: prepare scenario failure causes`
+
+### [2026-04-26] Mehrstufige Szenarien
+- Beschreibung:
+  - Bestehendes Scenario-System um optionale Mehrschritt-Metadaten und Abschluss-APIs erweitert.
+- Betroffene Systeme:
+  - `Assets/Projekt/Runtime/Features/Scenarios/`
+  - `README.md`
+  - `docs/scenarios/SCENARIO_SYSTEM_FEATURE.md`
+  - `docs/scenarios/CODEX_TASK_RANDOM_FAILURE_CAUSES.md`
+  - `docs/task/NEXT.md`
+  - `docs/task/BACKLOG.md`
+  - `docs/task/DONE.md`
+- Wichtige Änderungen:
+  - `ScenarioStepType` fuer Objective-, Dialogue-, Quiz-, Task- und Checkpoint-Schritte ergaenzt.
+  - `ScenarioStep` um Step-Typ, Completion-Key, ProgressQuestId und manuelle Completion-Hinweise erweitert.
+  - `ScenarioDefinition` kann Schritte per StepId, Completion-Key, QuizId oder DialogueId finden.
+  - `ScenarioProgress` kann spezifische und optionale Schritte abschliessen und `Progress01` berechnen.
+  - `ScenarioManager` stellt Abschlussmethoden fuer StepId, Completion-Key, LinkedQuiz und LinkedDialogue bereit.
+  - Demo-Szenario bleibt lauffaehig und nutzt die neuen Metadaten defensiv.
+  - `Zufällige Fehlerursachen` als naechster Task aus dem Backlog nach `NEXT.md` verschoben.
+- Tests / Prüfung:
+  - Statische Pruefung und Kompilationspruefung siehe Abschlussbericht.
+- Risiken / Follow-Ups:
+  - Keine Scene-/Prefab-Anbindung.
+  - HUD-, Quiz-, Dialog- und Progress-Adapter rufen die neuen Methoden noch nicht automatisch auf.
+  - Savegame-Persistenz fuer Szenariofortschritt bleibt offen.
+- Commit:
+  - Vorschlag: `feat: extend multi-step scenarios`
+
+### [2026-04-26] Quiz Frage-Qualitaetsbewertung
+- Beschreibung:
+  - Optionale Qualitaetsbewertung fuer einzelne Quizfragen vorbereitet.
+- Betroffene Systeme:
+  - `Assets/Projekt/Runtime/Features/Quiz/`
+  - `README.md`
+  - `docs/quiz/QUIZ_FEATURE.md`
+  - `docs/quiz/QUIZ_ARCHITECTURE.md`
+  - `docs/quiz/QUIZ_REVIEW_MODE.md`
+  - `docs/scenarios/CODEX_TASK_MULTI_STEP_SCENARIOS.md`
+  - `docs/task/NEXT.md`
+  - `docs/task/BACKLOG.md`
+  - `docs/task/DONE.md`
+- Wichtige Änderungen:
+  - `QuizQuestionQualitySeverity`, `QuizQuestionQualityIssue`, `QuizQuestionQualityReport` und `QuizQuestionQualityEvaluator` ergaenzt.
+  - Evaluator prueft Fragetext, Thema, Schwierigkeit, Antwortmodell, leere/doppelte Antworten und Erklaerung.
+  - Pruefung erzeugt nur Score und Hinweise; bestehende Fragen oder QuizSets werden nicht automatisch veraendert.
+  - Review-Mode-Doku um optionalen Qualitaetsbericht ergaenzt.
+  - `Mehrstufige Szenarien` als naechster Task aus dem Backlog nach `NEXT.md` verschoben.
+- Tests / Prüfung:
+  - Statische Pruefung und Kompilationspruefung siehe Abschlussbericht.
+- Risiken / Follow-Ups:
+  - Finale Bewertungsregeln fuer generierte Fragen muessen spaeter mit echten Drafts kalibriert werden.
+  - Noch keine Review-UI fuer die Anzeige der Quality-Issues.
+- Commit:
+  - Vorschlag: `feat: add quiz question quality evaluator`
+
+### [2026-04-26] Quiz Themen-Fortschritt visualisieren
+- Beschreibung:
+  - Optionalen Quiz-Themenfortschritt fuer Progress- und HUD-System vorbereitet.
+- Betroffene Systeme:
+  - `Assets/Projekt/Runtime/Features/Quiz/`
+  - `Assets/Projekt/Runtime/Features/Progress/`
+  - `Assets/Projekt/Runtime/Features/HUD/HudController.cs`
+  - `Assets/Projekt/Runtime/Features/UI/Panels/QuizPanel.cs`
+  - `Assets/Projekt/Runtime/Core/SceneManagement/StartSceneFeatureBootstrap.cs`
+  - `README.md`
+  - `docs/quiz/QUIZ_FEATURE.md`
+  - `docs/quiz/QUIZ_ARCHITECTURE.md`
+  - `docs/quest/QUEST_PROGRESS_FEATURE.md`
+  - `docs/hub/HUD_FEATURE.md`
+  - `docs/quiz/CODEX_TASK_QUESTION_QUALITY.md`
+  - `docs/task/NEXT.md`
+  - `docs/task/BACKLOG.md`
+  - `docs/task/DONE.md`
+- Wichtige Änderungen:
+  - `TopicProgress` in eigene Datei ausgelagert.
+  - `ProgressProfile.GetTopicProgress` ergaenzt.
+  - `QuizTopicProgressFormatter` fuer kurze HUD-/UI-Texte erstellt.
+  - `HudController` zeigt vorhandenen Themenfortschritt im Topic-Feld an.
+  - `QuizPanel` meldet Antworten und Quizabschluss optional an `QuizProgressReporter`.
+  - `StartSceneFeatureBootstrap` erzeugt in der `StartScene` bei Bedarf einen `QuizProgressReporter`.
+  - `Quiz Frage-Qualitaetsbewertung` als naechster Task aus dem Backlog nach `NEXT.md` verschoben.
+- Tests / Prüfung:
+  - Statische Pruefung und Kompilationspruefung siehe Abschlussbericht.
+- Risiken / Follow-Ups:
+  - Finale Themenfortschritts-UX ist weiterhin offen.
+  - Savegame-Persistenz fuer Themenfortschritt ist noch nicht angebunden.
+  - Bestehende QuizSets benoetigen gepflegte `Topic`-Werte fuer aussagekraeftige Themenanzeige.
+- Commit:
+  - Vorschlag: `feat: show quiz topic progress`
+
+### [2026-04-26] Quiz Dynamic Difficulty
+- Beschreibung:
+  - Optionale Difficulty-Empfehlung fuer Quizrunden vorbereitet.
+- Betroffene Systeme:
+  - `Assets/Projekt/Runtime/Features/Quiz/`
+  - `README.md`
+  - `docs/quiz/QUIZ_FEATURE.md`
+  - `docs/quiz/QUIZ_ARCHITECTURE.md`
+  - `docs/quiz/CODEX_TASK_TOPIC_PROGRESS.md`
+  - `docs/task/NEXT.md`
+  - `docs/task/BACKLOG.md`
+  - `docs/task/DONE.md`
+- Wichtige Änderungen:
+  - `QuizDifficulty`, `QuizDifficultyPerformance` und `QuizDifficultyEvaluator` ergaenzt.
+  - `QuizQuestion` um optionale Metadaten `QuestionId`, `Topic` und `Difficulty` erweitert.
+  - `QuizRunner` zaehlt beantwortete und richtige Fragen und stellt `RecommendedNextDifficulty` bereit.
+  - Multiple-Choice- und FreeText-Bewertung bleiben inhaltlich unveraendert.
+  - `Quiz Themen-Fortschritt visualisieren` als naechster Task aus dem Backlog nach `NEXT.md` verschoben.
+- Tests / Prüfung:
+  - Statische Pruefung und Kompilationspruefung siehe Abschlussbericht.
+- Risiken / Follow-Ups:
+  - Bestehende QuizSets werden nicht automatisch nach Schwierigkeit gefiltert oder umsortiert.
+  - Konkrete UI-/Progress-Anbindung fuer Difficulty bleibt ein spaeterer Integrationsschritt.
+- Commit:
+  - Vorschlag: `feat: prepare quiz dynamic difficulty`
+
 ### [2026-04-26] StartScene Feature Integration
 - Beschreibung:
   - Vorbereitete MVP-Features defensiv fuer die `StartScene` erreichbar gemacht.

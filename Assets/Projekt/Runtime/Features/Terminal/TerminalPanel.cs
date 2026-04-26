@@ -175,11 +175,6 @@ namespace ITAA.Features.Terminal
 
         private void HandleInputSubmitted(string submittedText)
         {
-            if (!Input.GetKeyDown(KeyCode.Return) && !Input.GetKeyDown(KeyCode.KeypadEnter))
-            {
-                return;
-            }
-
             SubmitCurrentInput();
         }
 

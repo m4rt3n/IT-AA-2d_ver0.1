@@ -1,8 +1,8 @@
 /*
  * Datei: QuizQuestion.cs
- * Zweck: Beschreibt eine einzelne Quizfrage inklusive Antworten, optionalen Freitextantworten und Erklaerung.
- * Verantwortung: Haelt Fragetext, Antwortoptionen, korrekten Antwortindex, akzeptierte Freitextantworten und Feedbacktext.
- * Abhaengigkeiten: QuizAnswerOption, System.Serializable, System.Collections.Generic.
+ * Zweck: Beschreibt eine einzelne Quizfrage inklusive Schwierigkeit, Thema, Antworten, optionalen Freitextantworten und Erklaerung.
+ * Verantwortung: Haelt Fragetext, optionale Metadaten, Antwortoptionen, korrekten Antwortindex, akzeptierte Freitextantworten und Feedbacktext.
+ * Abhaengigkeiten: QuizAnswerOption, QuizDifficulty, System.Serializable, System.Collections.Generic.
  * Verwendung: Wird in QuizSet-Assets serialisiert und vom QuizRunner ausgewertet.
  */
 
@@ -14,6 +14,9 @@ namespace ITAA.Quiz
     [Serializable]
     public class QuizQuestion
     {
+        public string QuestionId;
+        public string Topic;
+        public QuizDifficulty Difficulty = QuizDifficulty.Medium;
         public string QuestionText;
         public List<QuizAnswerOption> AnswerOptions = new();
         public int CorrectAnswerIndex;

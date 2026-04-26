@@ -28,6 +28,8 @@ namespace ITAA.Features.Progress
                 return null;
             }
 
+            EnsureLists();
+
             for (int i = 0; i < Quests.Count; i++)
             {
                 QuestProgress quest = Quests[i];
@@ -48,6 +50,8 @@ namespace ITAA.Features.Progress
                 return null;
             }
 
+            EnsureLists();
+
             QuestProgress existing = GetQuestProgress(definition.QuestId);
 
             if (existing != null)
@@ -62,6 +66,8 @@ namespace ITAA.Features.Progress
 
         public void RegisterQuizAnswer(string topic, bool isCorrect)
         {
+            EnsureLists();
+
             TotalQuizAnswers++;
 
             if (isCorrect)
@@ -80,6 +86,8 @@ namespace ITAA.Features.Progress
 
         public void MarkQuizCompleted(string quizId)
         {
+            EnsureLists();
+
             if (string.IsNullOrWhiteSpace(quizId) || CompletedQuizIds.Contains(quizId))
             {
                 return;
@@ -90,7 +98,9 @@ namespace ITAA.Features.Progress
 
         public TopicProgress GetOrCreateTopicProgress(string topic)
         {
-            string resolvedTopic = string.IsNullOrWhiteSpace(topic) ? "General" : topic;
+            EnsureLists();
+
+            string resolvedTopic = ResolveTopic(topic);
 
             for (int i = 0; i < Topics.Count; i++)
             {
@@ -111,27 +121,36 @@ namespace ITAA.Features.Progress
         {
             return TotalQuizAnswers <= 0 ? 0f : Mathf.Clamp01((float)CorrectQuizAnswers / TotalQuizAnswers);
         }
-    }
 
-    [Serializable]
-    public class TopicProgress
-    {
-        public string Topic;
-        public int Answers;
-        public int CorrectAnswers;
-
-        public TopicProgress()
+        public TopicProgress GetTopicProgress(string topic)
         {
+            EnsureLists();
+
+            string resolvedTopic = ResolveTopic(topic);
+
+            for (int i = 0; i < Topics.Count; i++)
+            {
+                TopicProgress item = Topics[i];
+
+                if (item != null && item.Topic == resolvedTopic)
+                {
+                    return item;
+                }
+            }
+
+            return null;
         }
 
-        public TopicProgress(string topic)
+        private static string ResolveTopic(string topic)
         {
-            Topic = topic;
+            return string.IsNullOrWhiteSpace(topic) ? "General" : topic.Trim();
         }
 
-        public float GetAccuracy01()
+        private void EnsureLists()
         {
-            return Answers <= 0 ? 0f : Mathf.Clamp01((float)CorrectAnswers / Answers);
+            Quests ??= new List<QuestProgress>();
+            CompletedQuizIds ??= new List<string>();
+            Topics ??= new List<TopicProgress>();
         }
     }
 }

@@ -57,6 +57,9 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
   - Quiz-Fragen liegen als `QuizSet`-Datenmodell unter `Assets/Projekt/Content/Quiz/`
   - Quiz-UI wird ueber `QuizPanel` geoeffnet und enthaelt keine hart codierten Fragen
   - Freitextfragen koennen akzeptierte Antworten mit Normalisierung und vorsichtigem Fuzzy-Matching auswerten
+  - Dynamische Schwierigkeit ist optional vorbereitet: `QuizDifficulty`, `QuizDifficultyPerformance` und `QuizDifficultyEvaluator` koennen anhand bisheriger Quizleistung eine naechste Schwierigkeit empfehlen
+  - Themenfortschritt wird optional ueber `QuizProgressReporter`, `ProgressProfile.TopicProgress` und `QuizTopicProgressFormatter` fuer das HUD vorbereitet
+  - Fragequalitaet kann optional ueber `QuizQuestionQualityEvaluator` geprueft werden, ohne QuizSets automatisch zu veraendern
 - 🤝 **World Interaction System (MVP)**
   - Neues Feature unter `Assets/Projekt/Runtime/Features/Interaction/`
   - Erkennt interaktive Ziele ueber `IInteractable`
@@ -69,6 +72,10 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
   - Buendelt IT-Lernsituationen als datengetriebene `ScenarioDefinition`
   - Verwaltet Schritte und Fortschritt ueber `ScenarioManager`
   - Enthaltenes Demo-Szenario: `no_internet_basic` / `Kein Internet`
+  - Mehrstufige Ablaeufe sind vorbereitet: Schritte koennen Typ, Completion-Key sowie optionale Quiz-, Dialog- und Quest-Hinweise tragen
+  - `ScenarioManager` kann Schritte defensiv per StepId, Completion-Key, QuizId oder DialogueId abschliessen
+  - Optionale zufaellige Fehlerursachen sind vorbereitet und koennen beim Szenariostart aktiv gewaehlt werden
+  - Optionale Zeitlimits fuer Szenario oder aktuellen Schritt sind vorbereitet; Timeouts werden gemeldet, ohne externe Systeme hart zu koppeln
   - HUD, Quiz, Dialog und Savegame bleiben entkoppelt und koennen spaeter andocken
 - 🛠️ **DevPanel (MVP)**
   - Neues optionales Entwicklerwerkzeug unter `Assets/Projekt/Runtime/Features/DevTools/`
@@ -80,12 +87,15 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
   - Neues Lexikon-Feature unter `Assets/Projekt/Runtime/Features/KnowledgeBase/`
   - Enthält Demo-Artikel zu DNS, DHCP, Gateway, VPN und OSI-Modell
   - UI-Panel trennt Artikel-Daten, Suche und Anzeige
+  - In der `StartScene` per `K` testbar; `KnowledgeBaseHotkeyController` erzeugt bei Bedarf ein Runtime-Panel
+  - Solange das Panel offen ist, wird die Player-Bewegung ueber `PlayerController.SetMovementEnabled(false)` gesperrt und beim Schliessen wieder freigegeben
   - Quiz- und Szenario-Integration ist ueber Artikel-IDs vorbereitet
 - 💬 **Dialogue System (MVP)**
   - Neues Dialog-Feature unter `Assets/Projekt/Runtime/Features/Dialogue/`
   - Dialogdaten liegen in `DialogueSequence` und `DialogueLine`
   - `DialogueManager` startet Dialoge und fuehrt optional einen Abschluss-Callback aus
   - `DialoguePanel` kann seine einfache MVP-UI selbst erzeugen
+  - `StartSceneFeatureBootstrap` stellt den `DialogueManager` in der `StartScene` bereit, ohne NPCs automatisch zu migrieren
   - Arthur/Bernd sind vorbereitet, aber noch nicht automatisch migriert
 - 📈 **Quest / Progress System (MVP)**
   - Neues Fortschritts-Feature unter `Assets/Projekt/Runtime/Features/Progress/`
@@ -125,6 +135,7 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
   - Nutzt `Application.persistentDataPath` und legt bei fehlender Datei Defaultwerte an
   - `SettingsManager` stellt zentrale Getter, Reset, Apply und Save/Load bereit
   - `SettingsUIController` kann optionale Slider, Toggles, Dropdowns und Inputfelder per Inspector anbinden
+  - In der `StartScene` per `O` oder `F10` testbar; `SettingsHotkeyController` erzeugt bei Bedarf ein Runtime-Panel
   - DevPanel-Reset nutzt jetzt den zentralen `SettingsManager`
 - 🧩 **UI System**
   - MenuManager (zentrale Steuerung)
@@ -211,15 +222,28 @@ Assets/
 │ │ │ ├── NpcRoutineStep
 │ │ │ └── NpcRoutineController
 │ │ ├── Quiz/
+│ │ │ ├── QuizDifficulty
+│ │ │ ├── QuizDifficultyPerformance
+│ │ │ ├── QuizDifficultyEvaluator
+│ │ │ ├── QuizTopicProgressFormatter
 │ │ │ ├── QuizSet
 │ │ │ ├── QuizQuestion
+│ │ │ ├── QuizQuestionQualityEvaluator
+│ │ │ ├── QuizQuestionQualityReport
+│ │ │ ├── QuizQuestionQualityIssue
+│ │ │ ├── QuizQuestionQualitySeverity
 │ │ │ ├── QuizAnswerOption
 │ │ │ ├── QuizTextAnswerEvaluator
 │ │ │ ├── QuizRunner
 │ │ │ └── QuizResult
 │ │ ├── Scenarios/
 │ │ │ ├── ScenarioDefinition
+│ │ │ ├── ScenarioFailureCause
+│ │ │ ├── ScenarioFailureCauseSelector
+│ │ │ ├── ScenarioTimeLimit
+│ │ │ ├── ScenarioTimerState
 │ │ │ ├── ScenarioStep
+│ │ │ ├── ScenarioStepType
 │ │ │ ├── ScenarioProgress
 │ │ │ ├── ScenarioManager
 │ │ │ └── ScenarioStatus
@@ -305,7 +329,7 @@ StartScene
 → StartMenu wird automatisch geöffnet  
 
 Beim Laden der `StartScene` erzeugt `StartSceneFeatureBootstrap` bei Bedarf ein Runtime-Objekt `StartSceneRuntimeFeatures`.
-Darueber werden optionale MVP-Systeme initialisiert: `SettingsManager`, `ProgressManager`, `ScenarioManager`, `AchievementManager`, `SkillRuntimeManager`, `RuntimeInventory`, `ToolbeltController` und `DevPanelBootstrap`.
+Darueber werden optionale MVP-Systeme initialisiert: `SettingsManager`, `SettingsHotkeyController`, `SavegameRuntimeSession`, `DialogueManager`, `KnowledgeBaseHotkeyController`, `ProgressManager`, `QuizProgressReporter`, `ScenarioManager`, `AchievementManager`, `SkillRuntimeManager`, `RuntimeInventory`, `ToolbeltController` und `DevPanelBootstrap`.
 Arthur, Bernd, bestehende UI-Inspector-Referenzen, Prefabs und Animator-Controller werden dadurch nicht umverdrahtet.
 
 Hinweis: Kurzfristig ist `StartScene` die zentrale Laufzeit-Szene für Menü und geladenen Dummy-Spielstand. Eine separate `GameScene` ist als späterer Portfolio-Ausbau vorgesehen.
@@ -406,7 +430,8 @@ Aktueller MVP-Stand:
 - `SettingsManager` laedt und speichert Settings zentral als JSON
 - fehlende oder defekte Settings fallen auf Defaultwerte zurueck
 - Audio-Mastervolume und Video-Basiswerte werden runtime angewendet
-- `SettingsUIController` ist vorbereitet fuer Inspector-verdrahtete Settings-UI
+- `SettingsUIController` ist vorbereitet fuer Inspector-verdrahtete Settings-UI und Runtime-UI
+- `SettingsHotkeyController` oeffnet/schliesst das Panel in der `StartScene` per `O` oder `F10`
 - echte Input-Rebinding-Anbindung an `PlayerControls.inputactions` ist noch offen
 
 ---
@@ -473,6 +498,34 @@ Backlog → Ready → In Progress → Review → Done
 4. Play drücken  
 
 ---
+
+## 🎮 Controls (Keyboard)
+
+### Allgemein
+| Taste | Funktion |
+|------|---------|
+| W A S D | Bewegung |
+| E | Interaktion (NPCs, Objekte) |
+
+### UI & Panels
+| Taste | Funktion |
+|------|---------|
+| F11 | HUD ein-/ausblenden |
+| K | Knowledge Base öffnen/schließen |
+| O / F10 | Settings öffnen/schließen |
+
+### Debug / Entwickler
+| Taste | Funktion |
+|------|---------|
+| F12 | Dev Panel öffnen/schließen |
+
+---
+
+## 🧠 Hinweise
+
+- Panels blockieren ggf. die Spielerbewegung
+- Mehrere Systeme nutzen das Interaction-System (kein doppeltes E-Handling)
+- Steuerung basiert auf dem **Unity Input System** (kein Legacy Input)
 
 ## 🤝 Contribution
 

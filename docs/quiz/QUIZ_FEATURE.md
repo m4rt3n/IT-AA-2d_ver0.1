@@ -22,6 +22,29 @@ Das Quiz-System soll mehrere Fragetypen, Schwierigkeitsgrade und Quellen unterst
 - Hard
 - Expert
 
+## Aktueller Dynamic-Difficulty-MVP
+- `QuizDifficulty` stellt feste Difficulty-Werte bereit.
+- `QuizQuestion.Difficulty` kann pro Frage gepflegt werden; bestehende Fragen fallen auf `Medium` zurueck.
+- `QuizDifficultyPerformance` beschreibt beantwortete Fragen, richtige Antworten und aktuelle Schwierigkeit.
+- `QuizDifficultyEvaluator` empfiehlt optional anhand der Trefferquote eine naechste Schwierigkeit.
+- `QuizRunner` zaehlt beantwortete und richtige Fragen mit und stellt `RecommendedNextDifficulty` bereit.
+- Bestehende QuizSets werden nicht automatisch gefiltert oder umsortiert.
+
+## Aktueller Themenfortschritt-MVP
+- `ProgressProfile` sammelt Quiz-Antworten pro Thema ueber `TopicProgress`.
+- `QuizPanel` meldet Antworten und Quizabschluss optional an `QuizProgressReporter`, wenn dieser vorhanden ist.
+- `QuizTopicProgressFormatter` erstellt kurze HUD-/UI-Texte wie `DNS: 2 / 3 (67%)`.
+- `HudController` zeigt fuer das aktuelle Thema vorhandenen Fortschritt im bestehenden Topic-Feld an.
+- `StartSceneFeatureBootstrap` erzeugt in der `StartScene` bei Bedarf einen `QuizProgressReporter`.
+- Savegame-Persistenz und finale Themenfortschritts-UX bleiben offen.
+
+## Aktueller Fragequalitaets-MVP
+- `QuizQuestionQualityEvaluator` prueft einzelne Fragen defensiv.
+- `QuizQuestionQualityReport` liefert Score, Hinweise und `IsUsable`.
+- Geprueft werden Mindestdaten, Thema, Schwierigkeit, Antwortmodell, leere/doppelte Antworten und Erklaerung.
+- Die Pruefung veraendert keine Frage und lehnt keine QuizSets automatisch ab.
+- Review Mode, Draft-Banks und DevTools koennen den Evaluator spaeter optional nutzen.
+
 ## Fragequellen
 1. StaticQuestionBank
    - feste Fragen im Projekt

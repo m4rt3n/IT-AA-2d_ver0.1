@@ -1,6 +1,6 @@
 /*
  * Datei: SettingsData.cs
- * Zweck: Speichert alle serialisierbaren Spieleinstellungen fuer Audio, Video, Input und Gameplay.
+ * Zweck: Speichert alle serialisierbaren Spieleinstellungen fuer Audio, Video, Input, Profil und Gameplay.
  * Verantwortung: Stellt ein reines Datenmodell mit Defaultwerten bereit, das vom SettingsManager als JSON gespeichert wird.
  * Abhaengigkeiten: System.Serializable, Unity JsonUtility-kompatible Felder.
  * Verwendung: Wird von SettingsManager geladen, gespeichert und an UI-/Runtime-Systeme weitergegeben.
@@ -30,6 +30,8 @@ namespace ITAA.System.Settings
 
         public string TextSpeed = "normal";
         public bool ShowTutorials = true;
+        public string Language = "de";
+        public string PlayerName = "Spieler";
 
         public static SettingsData CreateDefault()
         {
@@ -80,6 +82,16 @@ namespace ITAA.System.Settings
             if (string.IsNullOrWhiteSpace(TextSpeed))
             {
                 TextSpeed = "normal";
+            }
+
+            if (string.IsNullOrWhiteSpace(Language))
+            {
+                Language = "de";
+            }
+
+            if (string.IsNullOrWhiteSpace(PlayerName))
+            {
+                PlayerName = "Spieler";
             }
         }
 

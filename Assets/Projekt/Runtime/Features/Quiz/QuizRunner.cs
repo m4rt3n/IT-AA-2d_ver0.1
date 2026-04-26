@@ -1,8 +1,8 @@
 /*
  * Datei: QuizRunner.cs
  * Zweck: Fuehrt ein QuizSet zustandsbasiert durch.
- * Verantwortung: Verwaltet aktuelle Frage, Multiple-Choice- und Freitext-Antwortpruefung sowie Fortschritt im Quiz.
- * Abhaengigkeiten: QuizSet, QuizQuestion, QuizResult, QuizTextAnswerEvaluator.
+ * Verantwortung: Verwaltet aktuelle Frage, Multiple-Choice- und Freitext-Antwortpruefung, Fortschritt und optionale Difficulty-Empfehlung.
+ * Abhaengigkeiten: QuizSet, QuizQuestion, QuizResult, QuizTextAnswerEvaluator, QuizDifficultyEvaluator.
  * Verwendung: Wird von QuizPanel genutzt, damit UI und Quizlogik getrennt bleiben.
  */
 
@@ -12,6 +12,9 @@ namespace ITAA.Quiz
     {
         private readonly QuizSet quizSet;
         private int currentQuestionIndex;
+        private int answeredQuestionCount;
+        private int correctAnswerCount;
+        private bool currentQuestionAnswered;
 
         public QuizRunner(QuizSet quizSet)
         {
@@ -22,6 +25,14 @@ namespace ITAA.Quiz
         public int CurrentQuestionIndex => currentQuestionIndex;
         public int QuestionCount => quizSet != null && quizSet.Questions != null ? quizSet.Questions.Count : 0;
         public bool HasQuestions => quizSet != null && quizSet.HasQuestions();
+        public int AnsweredQuestionCount => answeredQuestionCount;
+        public int CorrectAnswerCount => correctAnswerCount;
+        public float Accuracy01 => answeredQuestionCount > 0 ? (float)correctAnswerCount / answeredQuestionCount : 0f;
+        public QuizDifficultyPerformance DifficultyPerformance => new QuizDifficultyPerformance(
+            answeredQuestionCount,
+            correctAnswerCount,
+            ResolveCurrentDifficulty());
+        public QuizDifficulty RecommendedNextDifficulty => QuizDifficultyEvaluator.RecommendNextDifficulty(DifficultyPerformance);
 
         public QuizQuestion GetCurrentQuestion()
         {
@@ -40,7 +51,9 @@ namespace ITAA.Quiz
                              question.HasValidAnswerIndex() &&
                              selectedAnswerIndex == question.CorrectAnswerIndex;
 
-            return new QuizResult(question, selectedAnswerIndex, isCorrect);
+            QuizResult result = new QuizResult(question, selectedAnswerIndex, isCorrect);
+            RecordAnswer(result);
+            return result;
         }
 
         public QuizResult AnswerCurrentQuestion(string textAnswer)
@@ -66,7 +79,9 @@ namespace ITAA.Quiz
                 }
             }
 
-            return new QuizResult(question, -1, textAnswer, isCorrect);
+            QuizResult result = new QuizResult(question, -1, textAnswer, isCorrect);
+            RecordAnswer(result);
+            return result;
         }
 
         public bool MoveNext()
@@ -82,7 +97,30 @@ namespace ITAA.Quiz
             }
 
             currentQuestionIndex++;
+            currentQuestionAnswered = false;
             return true;
+        }
+
+        private void RecordAnswer(QuizResult result)
+        {
+            if (currentQuestionAnswered || result.Question == null)
+            {
+                return;
+            }
+
+            currentQuestionAnswered = true;
+            answeredQuestionCount++;
+
+            if (result.IsCorrect)
+            {
+                correctAnswerCount++;
+            }
+        }
+
+        private QuizDifficulty ResolveCurrentDifficulty()
+        {
+            QuizQuestion currentQuestion = GetCurrentQuestion();
+            return currentQuestion != null ? currentQuestion.Difficulty : QuizDifficulty.Medium;
         }
     }
 }

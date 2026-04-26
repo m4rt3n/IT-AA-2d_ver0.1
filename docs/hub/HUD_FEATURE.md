@@ -32,6 +32,7 @@ ITAA.Features.HUD
 - aktuelles Ziel anzeigen
 - Quizpunkte anzeigen
 - einfache Nachricht anzeigen
+- Themenfortschritt kann optional im Topic-Feld angezeigt werden, wenn `ProgressManager` Quizdaten fuer das aktuelle Thema enthaelt
 
 ## Spätere Erweiterungen
 - kleine Icons

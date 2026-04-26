@@ -1,12 +1,13 @@
 /*
  * Datei: KnowledgeBasePanel.cs
  * Zweck: Zeigt das interne IT-Lexikon als einfaches UI-Panel an.
- * Verantwortung: Baut bei Bedarf UI, zeigt Artikel-Liste, oeffnet Artikel und sucht nach Titel.
+ * Verantwortung: Baut bei Bedarf UI, zeigt Artikel-Liste, oeffnet Artikel, sucht nach Titel und meldet Close-Ereignisse.
  * Abhaengigkeiten: BasePanel, KnowledgeBaseRepository, KnowledgeArticleListItemUI, TextMeshPro, Unity UI.
  * Verwendung: Kann in ein Canvas gelegt oder als Runtime-Panel genutzt werden; Quiz-/Szenario-Integration bleibt vorbereitet.
  */
 
 using System.Collections.Generic;
+using System;
 using ITAA.UI.Panels;
 using TMPro;
 using UnityEngine;
@@ -41,6 +42,7 @@ namespace ITAA.Features.KnowledgeBase
         private readonly List<KnowledgeArticleListItemUI> spawnedItems = new();
         private KnowledgeBaseRepository repository;
         private KnowledgeArticle currentArticle;
+        private Action closedCallback;
 
         #region Unity
 
@@ -129,6 +131,41 @@ namespace ITAA.Features.KnowledgeBase
         public KnowledgeArticle GetCurrentArticle()
         {
             return currentArticle;
+        }
+
+        public void SetClosedCallback(Action callback)
+        {
+            closedCallback = callback;
+        }
+
+        public override void Open()
+        {
+            if (createMissingUi)
+            {
+                EnsureGeneratedUi();
+            }
+
+            EnsureRepository();
+            WireUi();
+            RefreshArticleList();
+
+            if (currentArticle == null)
+            {
+                OpenFirstArticleIfAvailable();
+            }
+
+            base.Open();
+        }
+
+        public override void Close()
+        {
+            if (!IsOpen)
+            {
+                return;
+            }
+
+            base.Close();
+            closedCallback?.Invoke();
         }
 
         #endregion
@@ -282,7 +319,7 @@ namespace ITAA.Features.KnowledgeBase
             cardImage.color = new Color(0.1f, 0.12f, 0.16f, 0.98f);
 
             TMP_Text headingText = CreateText("HeadingText", card, 34f, FontStyles.Bold);
-            headingText.text = "IT-Lexikon";
+            headingText.text = "Knowledge Base";
             SetRect(headingText.rectTransform, 0f, 1f, 1f, 1f, 0f, -30f, -48f, 42f);
 
             searchInput = CreateSearchInput(card);
@@ -397,7 +434,7 @@ namespace ITAA.Features.KnowledgeBase
 
             TMP_Text placeholder = CreateText("Placeholder", rect, 20f, FontStyles.Italic);
             placeholder.color = new Color(0.4f, 0.45f, 0.52f, 1f);
-            placeholder.text = "Titel suchen";
+            placeholder.text = string.Empty;
             placeholder.alignment = TextAlignmentOptions.Left;
             SetRect(placeholder.rectTransform, 0f, 0f, 1f, 1f, 10f, 0f, -20f, 0f);
 

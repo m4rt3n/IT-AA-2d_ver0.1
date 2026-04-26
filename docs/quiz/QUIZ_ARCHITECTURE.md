@@ -21,6 +21,24 @@ Datenmodell für Antwortoptionen.
 ### QuizDifficulty
 Enum für Schwierigkeitsgrade.
 
+### QuizDifficultyPerformance
+Beschreibt beantwortete Fragen, richtige Antworten, aktuelle Schwierigkeit und Trefferquote.
+
+### QuizDifficultyEvaluator
+Empfiehlt optional die nächste Schwierigkeit anhand der bisherigen Quizleistung.
+
+### QuizTopicProgressFormatter
+Formatiert vorhandenen Themenfortschritt fuer HUD- oder UI-Anzeigen.
+
+### QuizQuestionQualityEvaluator
+Prueft einzelne Fragen auf Mindestdaten, Antwortmodell, Thema, Schwierigkeit und Erklaerung.
+
+### QuizQuestionQualityReport
+Beschreibt Score, Hinweise und Nutzbarkeit einer geprueften Frage.
+
+### QuizQuestionQualityIssue
+Beschreibt einen einzelnen Hinweis aus der Qualitaetspruefung.
+
 ### QuizQuestionType
 Enum für Fragetypen.
 
@@ -39,6 +57,7 @@ Verwaltet laufendes Quiz:
 - Punktestand
 - Fortschritt
 - Auswertung
+- optionale Difficulty-Empfehlung
 
 ### QuizTextAnswerEvaluator
 Bewertet Freitextantworten:
@@ -59,6 +78,7 @@ UI für:
 - Antwortbuttons anzeigen
 - Freitextfeld anzeigen
 - Ergebnis anzeigen
+- optionalen ProgressReporter informieren
 - Button: GeneratedQuestion übernehmen
 
 ### QuizQuestionPromoter

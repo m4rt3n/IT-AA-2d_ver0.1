@@ -1,11 +1,12 @@
 /*
  * Datei: SettingsUIController.cs
  * Zweck: Verbindet optionale UI-Steuerelemente mit dem zentralen SettingsManager.
- * Verantwortung: Liest UI-Werte, schreibt sie in SettingsData und aktualisiert die UI beim Oeffnen oder Reset.
+ * Verantwortung: Liest UI-Werte, schreibt sie in SettingsData, aktualisiert die UI beim Oeffnen oder Reset und meldet Close-Anfragen.
  * Abhaengigkeiten: SettingsManager, Unity UI, TextMeshPro.
  * Verwendung: Wird auf einem SettingsPanel oder Child-Objekt platziert und per Inspector mit Slidern, Toggles und Dropdowns verbunden.
  */
 
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -38,16 +39,20 @@ namespace ITAA.System.Settings
         [Header("Gameplay")]
         [SerializeField] private TMP_Dropdown textSpeedDropdown;
         [SerializeField] private Toggle showTutorialsToggle;
+        [SerializeField] private TMP_InputField languageInput;
+        [SerializeField] private TMP_InputField playerNameInput;
 
         [Header("Actions")]
         [SerializeField] private Button applyButton;
         [SerializeField] private Button resetButton;
+        [SerializeField] private Button closeButton;
 
         [Header("Behaviour")]
         [SerializeField] private bool applyChangesImmediately = true;
 
         private SettingsManager settingsManager;
         private bool isRefreshingUi;
+        private Action closeRequestedCallback;
 
         private void Awake()
         {
@@ -63,7 +68,7 @@ namespace ITAA.System.Settings
             if (settingsManager != null)
             {
                 settingsManager.SettingsChanged += HandleSettingsChanged;
-                RefreshUi(settingsManager.GetSettings());
+                RefreshFromManager();
             }
         }
 
@@ -110,16 +115,76 @@ namespace ITAA.System.Settings
 
             settings.TextSpeed = GetSelectedTextSpeed(settings.TextSpeed);
             settings.ShowTutorials = GetToggleValue(showTutorialsToggle, settings.ShowTutorials);
+            settings.Language = GetInputText(languageInput, settings.Language);
+            settings.PlayerName = GetInputText(playerNameInput, settings.PlayerName);
 
             settings.Sanitize();
             settingsManager.ApplySettings();
             settingsManager.SaveSettings();
+            RefreshUi(settings);
         }
 
         public void ResetToDefaults()
         {
             settingsManager ??= SettingsManager.GetOrCreate();
             settingsManager?.ResetToDefaults();
+        }
+
+        public void RefreshFromManager()
+        {
+            settingsManager ??= SettingsManager.GetOrCreate();
+            RefreshUi(settingsManager?.GetSettings());
+        }
+
+        public void SetCloseRequestedCallback(Action callback)
+        {
+            closeRequestedCallback = callback;
+        }
+
+        public void AssignControls(
+            Slider masterVolume,
+            Slider musicVolume,
+            Slider sfxVolume,
+            Toggle fullscreen,
+            TMP_Dropdown resolution,
+            Toggle vSync,
+            TMP_InputField interactKey,
+            TMP_InputField moveUpKey,
+            TMP_InputField moveDownKey,
+            TMP_InputField moveLeftKey,
+            TMP_InputField moveRightKey,
+            TMP_Dropdown textSpeed,
+            Toggle showTutorials,
+            TMP_InputField language,
+            TMP_InputField playerName,
+            Button apply,
+            Button reset,
+            Button close)
+        {
+            UnwireControls();
+
+            masterVolumeSlider = masterVolume;
+            musicVolumeSlider = musicVolume;
+            sfxVolumeSlider = sfxVolume;
+            fullscreenToggle = fullscreen;
+            resolutionDropdown = resolution;
+            vSyncToggle = vSync;
+            interactKeyInput = interactKey;
+            moveUpKeyInput = moveUpKey;
+            moveDownKeyInput = moveDownKey;
+            moveLeftKeyInput = moveLeftKey;
+            moveRightKeyInput = moveRightKey;
+            textSpeedDropdown = textSpeed;
+            showTutorialsToggle = showTutorials;
+            languageInput = language;
+            playerNameInput = playerName;
+            applyButton = apply;
+            resetButton = reset;
+            closeButton = close;
+
+            EnsureDropdownOptions();
+            WireControls();
+            RefreshFromManager();
         }
 
         private void WireControls()
@@ -137,6 +202,8 @@ namespace ITAA.System.Settings
             WireInput(moveDownKeyInput);
             WireInput(moveLeftKeyInput);
             WireInput(moveRightKeyInput);
+            WireInput(languageInput);
+            WireInput(playerNameInput);
 
             if (applyButton != null)
             {
@@ -148,6 +215,12 @@ namespace ITAA.System.Settings
             {
                 resetButton.onClick.RemoveListener(ResetToDefaults);
                 resetButton.onClick.AddListener(ResetToDefaults);
+            }
+
+            if (closeButton != null)
+            {
+                closeButton.onClick.RemoveListener(RequestClose);
+                closeButton.onClick.AddListener(RequestClose);
             }
         }
 
@@ -166,6 +239,8 @@ namespace ITAA.System.Settings
             UnwireInput(moveDownKeyInput);
             UnwireInput(moveLeftKeyInput);
             UnwireInput(moveRightKeyInput);
+            UnwireInput(languageInput);
+            UnwireInput(playerNameInput);
 
             if (applyButton != null)
             {
@@ -175,6 +250,11 @@ namespace ITAA.System.Settings
             if (resetButton != null)
             {
                 resetButton.onClick.RemoveListener(ResetToDefaults);
+            }
+
+            if (closeButton != null)
+            {
+                closeButton.onClick.RemoveListener(RequestClose);
             }
         }
 
@@ -208,8 +288,15 @@ namespace ITAA.System.Settings
 
             SetTextSpeedValue(settings.TextSpeed);
             SetToggleValue(showTutorialsToggle, settings.ShowTutorials);
+            SetInputText(languageInput, settings.Language);
+            SetInputText(playerNameInput, settings.PlayerName);
 
             isRefreshingUi = false;
+        }
+
+        private void RequestClose()
+        {
+            closeRequestedCallback?.Invoke();
         }
 
         private void HandleImmediateChange(float value)

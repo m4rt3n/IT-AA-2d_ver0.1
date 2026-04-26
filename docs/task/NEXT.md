@@ -53,15 +53,16 @@ Wenn keine aktiven Tasks mehr in `NEXT.md` stehen:
 
 ## Aktuelle Tasks
 
-### 1. Quiz Dynamic Difficulty (MEDIUM)
-- Ziel: Dynamische Schwierigkeit im Quiz-System vorbereiten
+### 1. Multiple Loesungswege (MEDIUM)
+- Ziel: Optionale multiple Loesungswege im Scenario-System vorbereiten
 - Task-Datei:
-  - docs/quiz/CODEX_TASK_DYNAMIC_DIFFICULTY.md
+  - docs/scenarios/CODEX_TASK_MULTIPLE_SOLUTION_PATHS.md
 - Feature-Doku:
-  - docs/quiz/QUIZ_FEATURE.md
+  - docs/scenarios/SCENARIO_SYSTEM_FEATURE.md
 - Abhängigkeiten:
-  - Bestehendes Quiz-System
-  - Multiple-Choice- und FreeText-Bewertung duerfen nicht gebrochen werden
+  - Bestehendes Scenario System
+  - Mehrstufige Szenarien
+  - Fehlerursachen und Zeitlimits spaeter optional kombinierbar
 - Status:
   - Not Started
 

@@ -2,12 +2,13 @@
  * Datei: HudController.cs
  * Zweck: Versorgt das HUD mit Laufzeitdaten.
  * Verantwortung: Liest optionale PlayerSession- und ProgressManager-Daten und aktualisiert die HudView.
- * Abhaengigkeiten: HudView, HudNotification, PlayerSession, ProgressManager.
+ * Abhaengigkeiten: HudView, HudNotification, PlayerSession, ProgressManager, QuizTopicProgressFormatter.
  * Verwendung: Wird als optionale Szenen-Komponente eingesetzt; fehlende Systeme werden defensiv behandelt.
  */
 
 using ITAA.Features.Progress;
 using ITAA.Player.Session;
+using ITAA.Quiz;
 using UnityEngine;
 
 namespace ITAA.Features.HUD
@@ -99,7 +100,7 @@ namespace ITAA.Features.HUD
 
             view.SetPlayerName(ResolvePlayerName());
             view.SetCurrentObjective(currentObjective);
-            view.SetTopic(currentTopic);
+            ApplyTopicProgress();
             ApplyQuizScore();
         }
 
@@ -200,6 +201,18 @@ namespace ITAA.Features.HUD
             }
 
             view.SetQuizScore(profile.CorrectQuizAnswers, profile.TotalQuizAnswers);
+        }
+
+        private void ApplyTopicProgress()
+        {
+            if (progressManager == null || progressManager.Profile == null)
+            {
+                view.SetTopic(currentTopic);
+                return;
+            }
+
+            TopicProgress topicProgress = progressManager.Profile.GetTopicProgress(currentTopic);
+            view.SetTopic(QuizTopicProgressFormatter.FormatTopicProgress(currentTopic, topicProgress));
         }
 
         #endregion

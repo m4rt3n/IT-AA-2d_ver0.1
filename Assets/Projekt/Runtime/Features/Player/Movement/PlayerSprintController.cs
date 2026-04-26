@@ -6,12 +6,13 @@
  *   - Bereitstellen eines Sprint-Multiplikators
  *
  * Abhängigkeiten:
- *   - Unity Input Manager
+ *   - Unity Input System
  *
  * Verwendet von:
  *   - PlayerController
  *   - PlayerMotor2D
  */
+using UnityEngine.InputSystem;
 using UnityEngine;
 
 namespace ITAA.Player.Movement
@@ -21,7 +22,7 @@ namespace ITAA.Player.Movement
         #region Inspector
 
         [Header("Sprint")]
-        [SerializeField] private KeyCode sprintKey = KeyCode.LeftShift;
+        [SerializeField] private Key sprintKey = Key.LeftShift;
         [SerializeField] private float sprintMultiplier = 1.5f;
 
         #endregion
@@ -38,7 +39,8 @@ namespace ITAA.Player.Movement
 
         private void Update()
         {
-            IsSprinting = Input.GetKey(sprintKey);
+            Keyboard keyboard = Keyboard.current;
+            IsSprinting = keyboard != null && keyboard[sprintKey].isPressed;
         }
 
         #endregion

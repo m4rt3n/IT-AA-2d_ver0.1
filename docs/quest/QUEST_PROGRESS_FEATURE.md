@@ -49,3 +49,8 @@ Meldet Quiz-Ergebnisse an ProgressManager.
 - Fortschritt nur im Speicher halten
 - Debug.Log-Ausgabe bei Fortschritt
 - JSON-Speicherung später vorbereiten
+
+## Aktueller Quiz-Themenfortschritt
+- `ProgressProfile.TopicProgress` sammelt Antworten und richtige Antworten pro Thema.
+- `QuizProgressReporter` kann von `QuizPanel` optional genutzt werden.
+- Das HUD kann den Fortschritt ueber `QuizTopicProgressFormatter` als kurzen Text anzeigen.

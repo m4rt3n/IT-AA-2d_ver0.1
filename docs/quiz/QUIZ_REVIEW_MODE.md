@@ -51,11 +51,12 @@ Für erste Umsetzung reicht:
 - Button "Übernehmen"
 - Button "Verwerfen"
 - keine vollständige Editierfunktion nötig
+- optionaler Qualitaetsbericht ueber `QuizQuestionQualityEvaluator`
 
 ## Spätere Erweiterung
 - echtes Bearbeiten im UI
 - JSON Export
 - JSON Import
 - Validierung doppelter IDs
-- Qualitätsprüfung
+- erweiterte Qualitätsprüfung
 - Themenfilter

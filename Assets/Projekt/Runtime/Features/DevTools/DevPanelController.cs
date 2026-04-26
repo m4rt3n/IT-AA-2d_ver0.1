@@ -9,6 +9,7 @@
 using System;
 using ITAA.Core.SceneManagement;
 using ITAA.Features.Achievements;
+using ITAA.Features.Dialogue;
 using ITAA.Features.Inventory;
 using ITAA.Features.Progress;
 using ITAA.Features.Scenarios;
@@ -189,6 +190,8 @@ namespace ITAA.DevTools
             SkillRuntimeManager skillRuntimeManager = FindAnyObjectByType<SkillRuntimeManager>(FindObjectsInactive.Include);
             RuntimeInventory runtimeInventory = FindAnyObjectByType<RuntimeInventory>(FindObjectsInactive.Include);
             ToolbeltController toolbeltController = FindAnyObjectByType<ToolbeltController>(FindObjectsInactive.Include);
+            DialogueManager dialogueManager = FindAnyObjectByType<DialogueManager>(FindObjectsInactive.Include);
+            SavegameRuntimeSession savegameRuntimeSession = FindAnyObjectByType<SavegameRuntimeSession>(FindObjectsInactive.Include);
             SettingsManager settingsManager = SettingsManager.GetOrCreate();
 
             Debug.Log(
@@ -199,7 +202,9 @@ namespace ITAA.DevTools
                 $"Achievements={(achievementManager != null ? achievementManager.GetAchievementDefinitions().Count.ToString() : "fehlt")}, " +
                 $"Skills={(skillRuntimeManager != null ? skillRuntimeManager.GetSkillDefinitions().Count.ToString() : "fehlt")}, " +
                 $"Inventory={(runtimeInventory != null ? runtimeInventory.Count.ToString() : "fehlt")}, " +
-                $"Toolbelt={(toolbeltController != null ? toolbeltController.SlotCount.ToString() : "fehlt")}",
+                $"Toolbelt={(toolbeltController != null ? toolbeltController.SlotCount.ToString() : "fehlt")}, " +
+                $"Dialogue={(dialogueManager != null ? "ok" : "fehlt")}, " +
+                $"SavegameSession={(savegameRuntimeSession != null ? "ok" : "fehlt")}",
                 this
             );
         }

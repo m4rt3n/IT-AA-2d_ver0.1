@@ -9,6 +9,7 @@ Die Knowledge Base ist ein internes IT-Lexikon fuer Support- und Netzwerkgrundla
 - `KnowledgeBaseRepository.cs` liefert Demo-Artikel und Suche.
 - `KnowledgeBasePanel.cs` zeigt Liste, Suche und Artikeldetails.
 - `KnowledgeArticleListItemUI.cs` stellt einen Listeneintrag dar.
+- `KnowledgeBaseHotkeyController.cs` oeffnet und schliesst das Panel per Hotkey.
 
 ## Demo-Artikel
 - DNS
@@ -18,13 +19,18 @@ Die Knowledge Base ist ein internes IT-Lexikon fuer Support- und Netzwerkgrundla
 - OSI-Modell
 
 ## Unity Setup
-1. Ein UI-GameObject in einem Canvas anlegen.
-2. `KnowledgeBasePanel` hinzufuegen.
-3. Optional Inspector-Referenzen setzen.
-4. Fuer MVP kann `Create Missing Ui` aktiv bleiben; dann erzeugt das Panel die benoetigte UI selbst.
+1. In der `StartScene` erzeugt `StartSceneFeatureBootstrap` den `KnowledgeBaseHotkeyController` automatisch.
+2. Standard-Hotkey: `K`.
+3. Wenn kein `KnowledgeBasePanel` vorhanden ist, erzeugt der Controller ein Runtime-Canvas mit Panel.
+4. Optional kann ein eigenes UI-GameObject in einem Canvas angelegt und mit `KnowledgeBasePanel` versehen werden.
+5. Fuer MVP kann `Create Missing Ui` aktiv bleiben; dann erzeugt das Panel die benoetigte UI selbst.
 
 ## Verhalten
 - Beim Start werden Demo-Artikel aus `KnowledgeBaseRepository` geladen.
+- Das Panel startet geschlossen.
+- `K` oeffnet und schliesst die Knowledge Base.
+- Der Close-Button schliesst ebenfalls.
+- Bei offenem Panel wird die Player-Bewegung ueber `PlayerController.SetMovementEnabled(false)` gesperrt und beim Schliessen wieder freigegeben.
 - Die Liste zeigt alle Artikel.
 - Suche filtert nach Titel.
 - Klick auf einen Artikel zeigt Details.
