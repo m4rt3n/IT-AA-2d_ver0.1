@@ -19,7 +19,7 @@ Die Knowledge Base ist ein internes IT-Lexikon fuer Support- und Netzwerkgrundla
 - OSI-Modell
 
 ## Unity Setup
-1. In der `StartScene` erzeugt `StartSceneFeatureBootstrap` den `KnowledgeBaseHotkeyController` automatisch.
+1. In der `StartScene` kann ein `KnowledgeBaseHotkeyController` manuell oder ueber einen spaeteren Bootstrapper gesetzt werden.
 2. Standard-Hotkey: `K`.
 3. Wenn kein `KnowledgeBasePanel` vorhanden ist, erzeugt der Controller ein Runtime-Canvas mit Panel.
 4. Optional kann ein eigenes UI-GameObject in einem Canvas angelegt und mit `KnowledgeBasePanel` versehen werden.

@@ -81,7 +81,7 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
   - Neues optionales Entwicklerwerkzeug unter `Assets/Projekt/Runtime/Features/DevTools/`
   - Runtime-Panel kann per `F12` geoeffnet werden
   - Bietet Debug-Aktionen fuer SaveSlots, Dummy-Saves, Settings, Quiz-Drafts, PlayerSession, aktuelle Szene und vorbereitete Feature-Manager
-  - `StartSceneFeatureBootstrap` erzeugt das DevPanel in der `StartScene` bei Bedarf automatisch
+  - `GameSystemsBootstrap` erzeugt das DevPanel in der `StartScene` bei Bedarf automatisch
   - Nutzt bestehende Systeme defensiv und meldet fehlende Abhaengigkeiten per `Debug.LogWarning`
 - 📚 **Knowledge Base (MVP)**
   - Neues Lexikon-Feature unter `Assets/Projekt/Runtime/Features/KnowledgeBase/`
@@ -95,7 +95,7 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
   - Dialogdaten liegen in `DialogueSequence` und `DialogueLine`
   - `DialogueManager` startet Dialoge und fuehrt optional einen Abschluss-Callback aus
   - `DialoguePanel` kann seine einfache MVP-UI selbst erzeugen
-  - `StartSceneFeatureBootstrap` stellt den `DialogueManager` in der `StartScene` bereit, ohne NPCs automatisch zu migrieren
+  - Bleibt optional und wird in der aktuellen StartScene-Integration nicht automatisch an NPCs migriert
   - Arthur/Bernd sind vorbereitet, aber noch nicht automatisch migriert
 - 📈 **Quest / Progress System (MVP)**
   - Neues Fortschritts-Feature unter `Assets/Projekt/Runtime/Features/Progress/`
@@ -151,7 +151,7 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
   - JSON-basiert
   - Slot-System
   - Dummy Save für Tests
-  - Dummy-Saves verweisen aktuell auf `StartScene`, da derzeit nur diese Laufzeit-Szene in den Build Settings aktiv ist
+  - Dummy-Saves verweisen aktuell auf `GameScene`; alte Dummy-Saves mit `StartScene` werden automatisch migriert
   - Vor Spielstart Prüfung und Initialisierung benötigter Dateien
   - Ladebalken mit Prozentanzeige vor Szenenstart
 - 🔁 **Runtime Session**
@@ -161,6 +161,11 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
   - Anzeige direkt über dem Player
 - 🎮 **Menü-Flow**
   - Arthur → StartMenu → LoadGamePanel → Scene Load
+- 🧪 **GameScene Testwelt**
+  - Neue spielbare Szene unter `Assets/Projekt/Content/Scenes/GameScene.unity`
+  - Wird ueber SaveSlot/LoadGamePanel geladen und ist in den Build Settings nach `StartScene` eingetragen
+  - Enthält Player, Arthur, Bernd, HUD, QuizPanel, TerminalPanel, Interaktionsprompt und Testwelt-Kollisionen
+  - Testpunkte: Bernd-Quiz, Diensthandy-Pickup, Netzwerk-Terminal, Achievement-Trigger
 
 ---
 
@@ -328,11 +333,32 @@ Assets/
 StartScene  
 → StartMenu wird automatisch geöffnet  
 
-Beim Laden der `StartScene` erzeugt `StartSceneFeatureBootstrap` bei Bedarf ein Runtime-Objekt `StartSceneRuntimeFeatures`.
-Darueber werden optionale MVP-Systeme initialisiert: `SettingsManager`, `SettingsHotkeyController`, `SavegameRuntimeSession`, `DialogueManager`, `KnowledgeBaseHotkeyController`, `ProgressManager`, `QuizProgressReporter`, `ScenarioManager`, `AchievementManager`, `SkillRuntimeManager`, `RuntimeInventory`, `ToolbeltController` und `DevPanelBootstrap`.
+Beim Laden der `StartScene` erzeugt `GameSystemsBootstrap` bei Bedarf ein persistentes Runtime-Objekt `GameSystems`.
+Darueber werden die zentral benoetigten Systeme initialisiert: `SettingsManager`, `SettingsHotkeyController`, `SavegameRuntimeSession`, `AchievementManager`, `SkillRuntimeManager`, `RuntimeInventory`, `ToolbeltController` und `DevPanelBootstrap`.
 Arthur, Bernd, bestehende UI-Inspector-Referenzen, Prefabs und Animator-Controller werden dadurch nicht umverdrahtet.
 
-Hinweis: Kurzfristig ist `StartScene` die zentrale Laufzeit-Szene für Menü und geladenen Dummy-Spielstand. Eine separate `GameScene` ist als späterer Portfolio-Ausbau vorgesehen.
+Hinweis: `StartScene` bleibt die Menü-/Ladeszene. Geladene Spielstände wechseln in `GameScene`, falls im SaveSlot kein anderer valider SceneName steht.
+
+---
+
+### GameScene Testwelt
+
+`GameScene` ist eine kleine spielbare MVP-Testwelt mit klarer Hierarchie:
+
+`_SceneRoot`, `_Bootstrap`, `_Systems`, `_UI`, `World`, `Characters`, `Cameras`, `Lighting`
+
+Enthalten:
+- Schnee-Boden, Straße, Häuser, Bäume, Mauern und Collider-Boundaries
+- Player mit vorhandenen Movement-Komponenten, Rigidbody2D, CapsuleCollider2D und InteractionDetector
+- Arthur als NPC-Präsenz
+- Bernd als Quiz-NPC mit `BerndQuizStarter`, `BerndInteractableAdapter` und `BerndIntroQuiz`
+- HUD, InteractionPrompt, QuizPanel, TerminalPanel und EventSystem
+- Testinteraktionen für Diensthandy-Pickup, Terminal-XP und Achievement-Auslösung
+
+Editor-Menüs:
+- `ITAA/Scenes/Rebuild GameScene`
+- `ITAA/Scenes/Open GameScene`
+- `ITAA/Validation/Validate GameScene`
 
 ---
 
@@ -409,9 +435,9 @@ save_slot_2.json
 - Score
 
 Aktueller Dummy-Stand:
-- `SceneName` wird zentral über `SceneNames.StartScene` gesetzt
-- Bereits vorhandene Dummy-Saves mit altem `GameScene`-Wert werden auf `StartScene` migriert
-- Dadurch bleiben Dummy-Save, Auth-Startszene und Build Settings kurzfristig synchron
+- `SceneName` wird zentral ueber `SceneNames.GameScene` gesetzt
+- Bereits vorhandene Dummy-Saves mit altem `StartScene`-Wert werden auf `GameScene` migriert
+- Dadurch bleiben Dummy-Save, Auth-Startszene und Build Settings synchron
 
 ---
 

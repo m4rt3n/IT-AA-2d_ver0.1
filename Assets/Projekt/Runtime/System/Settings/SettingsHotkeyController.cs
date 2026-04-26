@@ -3,7 +3,7 @@
  * Zweck: Macht das bestehende Settings-System in der StartScene per Hotkey nutzbar.
  * Verantwortung: Erzeugt bei Bedarf ein Runtime-Settings-Panel, toggelt es per Unity Input System und sperrt waehrenddessen die Player-Bewegung.
  * Abhaengigkeiten: SettingsManager, SettingsUIController, PlayerController, TextMeshPro, Unity UI, Unity Input System.
- * Verwendung: Wird vom StartSceneFeatureBootstrap optional erzeugt und kann alternativ manuell auf ein Scene-GameObject gelegt werden.
+ * Verwendung: Wird vom GameSystemsBootstrap optional erzeugt und kann alternativ manuell auf ein Scene-GameObject gelegt werden.
  */
 
 using ITAA.Player.Movement;

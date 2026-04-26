@@ -3,7 +3,7 @@
  * Zweck: Macht die Knowledge Base in der StartScene per Tastatur-Hotkey testbar.
  * Verantwortung: Erzeugt bei Bedarf ein Runtime-Panel, toggelt es per Unity Input System und sperrt waehrenddessen die Player-Bewegung.
  * Abhaengigkeiten: KnowledgeBasePanel, PlayerController, EventSystem, Unity Input System, Unity UI.
- * Verwendung: Wird vom StartSceneFeatureBootstrap optional erzeugt und kann alternativ manuell auf ein Scene-GameObject gelegt werden.
+ * Verwendung: Kann manuell auf ein Scene-GameObject gelegt oder spaeter ueber einen Bootstrapper erzeugt werden.
  */
 
 using ITAA.Player.Movement;

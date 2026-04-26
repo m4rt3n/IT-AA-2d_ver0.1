@@ -371,7 +371,7 @@ namespace ITAA.DevTools
                     SlotId = slotId,
                     DisplayName = displayName,
                     PlayerName = playerName,
-                    SceneName = SceneNames.StartScene,
+                    SceneName = SceneNames.GameScene,
                     SavedAtText = DateTime.Now.ToString("dd.MM.yyyy HH:mm"),
                     Level = level,
                     Score = score,
@@ -389,9 +389,9 @@ namespace ITAA.DevTools
             changed |= FillIfEmpty(ref saveData.PlayerName, playerName);
             changed |= FillIfEmpty(ref saveData.SavedAtText, DateTime.Now.ToString("dd.MM.yyyy HH:mm"));
 
-            if (string.IsNullOrWhiteSpace(saveData.SceneName) || saveData.SceneName == SceneNames.LegacyGameScene)
+            if (string.IsNullOrWhiteSpace(saveData.SceneName) || saveData.SceneName == SceneNames.StartScene)
             {
-                saveData.SceneName = SceneNames.StartScene;
+                saveData.SceneName = SceneNames.GameScene;
                 changed = true;
             }
 

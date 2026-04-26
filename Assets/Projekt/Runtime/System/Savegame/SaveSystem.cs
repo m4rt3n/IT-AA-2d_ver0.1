@@ -140,7 +140,7 @@ namespace ITAA.System.Savegame
                 SlotId = 1,
                 DisplayName = "Testslot Arthur",
                 PlayerName = "Martin",
-                SceneName = SceneNames.StartScene,
+                SceneName = SceneNames.GameScene,
                 SavedAtText = DateTime.Now.ToString("dd.MM.yyyy HH:mm"),
                 Level = 3,
                 Score = 1200,
@@ -163,17 +163,17 @@ namespace ITAA.System.Savegame
                 return;
             }
 
-            if (existing.SceneName == SceneNames.StartScene)
+            if (existing.SceneName == SceneNames.GameScene)
             {
                 return;
             }
 
-            if (!string.IsNullOrWhiteSpace(existing.SceneName) && existing.SceneName != SceneNames.LegacyGameScene)
+            if (!string.IsNullOrWhiteSpace(existing.SceneName) && existing.SceneName != SceneNames.StartScene)
             {
                 return;
             }
 
-            existing.SceneName = SceneNames.StartScene;
+            existing.SceneName = SceneNames.GameScene;
             Save(existing.SlotId > 0 ? existing.SlotId : 1, existing);
         }
 

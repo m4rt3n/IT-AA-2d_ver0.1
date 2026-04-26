@@ -485,12 +485,6 @@ namespace ITAA.UI.Panels
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(slot.SceneName))
-            {
-                Debug.LogWarning($"[{nameof(LoadGamePanel)}] Slot {slot.SlotId} hat keinen SceneName.", this);
-                return;
-            }
-
             SaveGameData loadedSave = saveSystem.Load(slot.SlotId);
             if (loadedSave == null)
             {
@@ -595,9 +589,9 @@ namespace ITAA.UI.Panels
                     changed = true;
                 }
 
-                if (string.IsNullOrWhiteSpace(existing.SceneName) || existing.SceneName == SceneNames.LegacyGameScene)
+                if (string.IsNullOrWhiteSpace(existing.SceneName) || existing.SceneName == SceneNames.StartScene)
                 {
-                    existing.SceneName = SceneNames.StartScene;
+                    existing.SceneName = SceneNames.GameScene;
                     changed = true;
                 }
 
@@ -620,7 +614,7 @@ namespace ITAA.UI.Panels
                 SlotId = slotId,
                 DisplayName = displayName,
                 PlayerName = playerName,
-                SceneName = SceneNames.StartScene,
+                SceneName = SceneNames.GameScene,
                 SavedAtText = DateTime.Now.ToString("dd.MM.yyyy HH:mm"),
                 Level = level,
                 Score = score,
@@ -657,12 +651,12 @@ namespace ITAA.UI.Panels
             if (enableDebugLogs)
             {
                 Debug.Log(
-                    $"[{nameof(LoadGamePanel)}] Lade Szene '{slot.SceneName}' für Slot {slot.SlotId} asynchron.",
+                    $"[{nameof(LoadGamePanel)}] Lade Szene '{ResolveTargetSceneName(slot)}' für Slot {slot.SlotId} asynchron.",
                     this
                 );
             }
 
-            AsyncOperation loadOperation = SceneManager.LoadSceneAsync(slot.SceneName);
+            AsyncOperation loadOperation = SceneManager.LoadSceneAsync(ResolveTargetSceneName(slot));
             if (loadOperation == null)
             {
                 Debug.LogWarning($"[{nameof(LoadGamePanel)}] Async Scene Load konnte nicht gestartet werden.", this);
@@ -780,6 +774,16 @@ namespace ITAA.UI.Panels
             {
                 loadingProgressFillImage.fillAmount = clampedProgress;
             }
+        }
+
+        private static string ResolveTargetSceneName(SaveSlotEntity slot)
+        {
+            if (slot == null || string.IsNullOrWhiteSpace(slot.SceneName) || slot.SceneName == "-")
+            {
+                return SceneNames.GameScene;
+            }
+
+            return slot.SceneName;
         }
 
         private static GameObject CreateUiObject(string objectName, Transform parent)

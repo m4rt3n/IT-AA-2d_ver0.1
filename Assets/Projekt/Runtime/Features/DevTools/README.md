@@ -21,7 +21,7 @@ Das DevPanel ist ein optionales Entwicklerwerkzeug fuer schnelle Debug- und Test
 
 ## Unity Setup
 Automatisch:
-1. `StartSceneFeatureBootstrap` erzeugt in der `StartScene` bei Bedarf ein Runtime-Objekt `StartSceneRuntimeFeatures`.
+1. `GameSystemsBootstrap` erzeugt in der `StartScene` bei Bedarf ein Runtime-Objekt `GameSystems`.
 2. Darauf wird `DevPanelBootstrap` hinzugefuegt, wenn noch kein DevPanel vorhanden ist.
 3. Play Mode starten und `F12` druecken.
 

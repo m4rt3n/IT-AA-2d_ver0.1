@@ -11,6 +11,7 @@ namespace ITAA.Core.SceneManagement
     public static class SceneNames
     {
         public const string StartScene = "StartScene";
-        public const string LegacyGameScene = "GameScene";
+        public const string GameScene = "GameScene";
+        public const string LegacyGameScene = GameScene;
     }
 }

@@ -66,7 +66,7 @@ namespace ITAA.System.Savegame
                 SlotId = 1,
                 DisplayName = "Testslot Arthur",
                 PlayerName = "Martin",
-                SceneName = SceneNames.StartScene,
+                SceneName = SceneNames.GameScene,
                 SavedAtText = DateTime.Now.ToString("dd.MM.yyyy HH:mm"),
                 Level = 3,
                 Score = 1200,
