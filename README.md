@@ -348,7 +348,9 @@ Hinweis: `StartScene` bleibt die Menü-/Ladeszene. Geladene Spielstände wechsel
 `_SceneRoot`, `_Bootstrap`, `_Systems`, `_UI`, `World`, `Characters`, `Cameras`, `Lighting`
 
 Enthalten:
-- Schnee-Boden, Straße, Häuser, Bäume, Mauern und Collider-Boundaries
+- Schnee-Boden und Wege als Tilemaps aus vorhandenen `cloud_tileset`-Tile-Assets
+- Häuser, Bäume, Blumen, Zäune und Interaktionspunkte aus vorhandenen Tileset-Sprites
+- Mauern/Zäune und Gebäude mit Collider-Boundaries
 - Player mit vorhandenen Movement-Komponenten, Rigidbody2D, CapsuleCollider2D und InteractionDetector
 - Arthur als NPC-Präsenz
 - Bernd als Quiz-NPC mit `BerndQuizStarter`, `BerndInteractableAdapter` und `BerndIntroQuiz`
@@ -357,6 +359,7 @@ Enthalten:
 
 Editor-Menüs:
 - `ITAA/Scenes/Rebuild GameScene`
+- `ITAA/Scenes/Rebuild GameScene Visual World`
 - `ITAA/Scenes/Open GameScene`
 - `ITAA/Validation/Validate GameScene`
 

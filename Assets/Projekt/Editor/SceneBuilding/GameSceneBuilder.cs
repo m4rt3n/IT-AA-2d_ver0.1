@@ -29,6 +29,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
+using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 
 namespace ITAA.EditorTools.SceneBuilding
@@ -39,6 +40,8 @@ namespace ITAA.EditorTools.SceneBuilding
         private const string StartScenePath = "Assets/Projekt/Content/Scenes/StartScene.unity";
         private const string GeneratedArtFolder = "Assets/Projekt/Content/Art/TestWorld";
         private const string SquareSpritePath = GeneratedArtFolder + "/testworld_square.png";
+        private const string TilesFolder = "Assets/Projekt/Content/Art/Tiles";
+        private const string TilesetPath = "Assets/Projekt/Content/Art/Floors/cloud_tileset.png";
 
         [MenuItem("ITAA/Scenes/Rebuild GameScene")]
         public static void BuildGameScene()
@@ -52,6 +55,7 @@ namespace ITAA.EditorTools.SceneBuilding
             Sprite playerSprite = LoadFirstSprite("Assets/Projekt/Content/Art/Player/character.png");
             Sprite arthurSprite = LoadFirstSprite("Assets/Projekt/Content/Art/Player/character blue.png");
             Sprite berndSprite = LoadFirstSprite("Assets/Projekt/Content/Art/Player/character green.png");
+            VisualAssetSet visualAssets = LoadVisualAssets(squareSprite);
 
             GameObject sceneRoot = CreateRoot("_SceneRoot");
             GameObject bootstrapRoot = CreateChild("_Bootstrap", sceneRoot.transform);
@@ -62,7 +66,7 @@ namespace ITAA.EditorTools.SceneBuilding
             GameObject camerasRoot = CreateChild("Cameras", sceneRoot.transform);
             GameObject lightingRoot = CreateChild("Lighting", sceneRoot.transform);
 
-            CreateWorld(worldRoot.transform, squareSprite);
+            CreateWorld(worldRoot.transform, visualAssets);
             CreateUi(uiRoot.transform);
             GameObject player = CreatePlayer(charactersRoot.transform, playerSprite, uiRoot.transform);
             CreateArthur(charactersRoot.transform, arthurSprite);
@@ -89,7 +93,66 @@ namespace ITAA.EditorTools.SceneBuilding
             EditorSceneManager.OpenScene(GameScenePath);
         }
 
-        private static void CreateWorld(Transform parent, Sprite squareSprite)
+        [MenuItem("ITAA/Scenes/Rebuild GameScene Visual World")]
+        public static void RebuildVisualWorld()
+        {
+            if (!File.Exists(GameScenePath))
+            {
+                Debug.LogError($"[SceneValidation] GameScene fehlt: {GameScenePath}");
+                return;
+            }
+
+            EnsureGeneratedArt();
+            EditorSceneManager.OpenScene(GameScenePath);
+
+            GameObject world = FindObjectByName("World");
+            if (world == null)
+            {
+                GameObject sceneRoot = FindObjectByName("_SceneRoot") ?? CreateRoot("_SceneRoot");
+                world = CreateChild("World", sceneRoot.transform);
+            }
+
+            ReplacePlaceholderSprites(world.transform);
+            EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log("[SceneValidation] GameScene Visual World neu aufgebaut.");
+        }
+
+        public static void ReplacePlaceholderSprites(Transform worldRoot)
+        {
+            if (worldRoot == null)
+            {
+                Debug.LogWarning("[SceneValidation] ReplacePlaceholderSprites ohne World-Root aufgerufen.");
+                return;
+            }
+
+            ClearChildren(worldRoot);
+            Sprite squareSprite = AssetDatabase.LoadAssetAtPath<Sprite>(SquareSpritePath);
+            CreateWorld(worldRoot, LoadVisualAssets(squareSprite));
+        }
+
+        public static bool ValidateWorldSprites()
+        {
+            SpriteRenderer[] renderers = Object.FindObjectsByType<SpriteRenderer>(FindObjectsInactive.Include);
+            bool isValid = true;
+
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                SpriteRenderer renderer = renderers[i];
+                if (renderer == null || renderer.sprite != null)
+                {
+                    continue;
+                }
+
+                isValid = false;
+                Debug.LogWarning($"[SceneValidation] SpriteRenderer ohne Sprite: {renderer.gameObject.name}", renderer);
+            }
+
+            return isValid;
+        }
+
+        private static void CreateWorld(Transform parent, VisualAssetSet assets)
         {
             Transform ground = CreateChild("Ground", parent).transform;
             Transform roads = CreateChild("Roads", parent).transform;
@@ -98,32 +161,34 @@ namespace ITAA.EditorTools.SceneBuilding
             Transform walls = CreateChild("Walls", parent).transform;
             Transform interactables = CreateChild("Interactables", parent).transform;
 
-            CreateVisualBlock("SnowGround", ground, squareSprite, new Vector2(34f, 22f), Vector2.zero, new Color(0.86f, 0.94f, 1f), false);
-            CreateVisualBlock("MainRoad", roads, squareSprite, new Vector2(30f, 2.2f), new Vector2(0f, -1.2f), new Color(0.56f, 0.6f, 0.64f), false);
-            CreateVisualBlock("NorthPath", roads, squareSprite, new Vector2(2.4f, 12f), new Vector2(-5f, 3.5f), new Color(0.6f, 0.64f, 0.68f), false);
+            CreateTilemap("SnowGround_Tilemap", ground, assets.SnowTile, new Vector2Int(34, 22), Vector2Int.zero, 0);
+            CreateRoads(roads, assets);
 
-            CreateVisualBlock("TestHouse_A", buildings, squareSprite, new Vector2(4f, 3f), new Vector2(-10f, 4f), new Color(0.56f, 0.72f, 0.9f), true);
-            CreateVisualBlock("TestHouse_B", buildings, squareSprite, new Vector2(5f, 3.2f), new Vector2(8f, 4.5f), new Color(0.78f, 0.58f, 0.48f), true);
-            CreateVisualBlock("Depot", buildings, squareSprite, new Vector2(4.5f, 2.5f), new Vector2(9f, -5f), new Color(0.62f, 0.66f, 0.74f), true);
+            CreateHouse(buildings, "BlueHouse", new Vector2(-10f, 4f), assets.BlueWall, assets.BlueRoof, assets.WallTop, assets.Door, 4);
+            CreateHouse(buildings, "OrangeHouse", new Vector2(8f, 4.5f), assets.OrangeWall, assets.OrangeRoof, assets.WallTop, assets.Door, 5);
+            CreateDepot(buildings, new Vector2(9f, -5f), assets);
 
             for (int i = 0; i < 8; i++)
             {
                 float x = -13f + i * 3.8f;
                 float y = i % 2 == 0 ? 7.5f : -7.5f;
-                CreateTree(nature, squareSprite, new Vector2(x, y));
+                CreateTree(nature, assets, new Vector2(x, y));
             }
 
-            CreateBoundary(walls, squareSprite, "NorthBoundary", new Vector2(34f, 0.6f), new Vector2(0f, 10.8f));
-            CreateBoundary(walls, squareSprite, "SouthBoundary", new Vector2(34f, 0.6f), new Vector2(0f, -10.8f));
-            CreateBoundary(walls, squareSprite, "WestBoundary", new Vector2(0.6f, 22f), new Vector2(-16.8f, 0f));
-            CreateBoundary(walls, squareSprite, "EastBoundary", new Vector2(0.6f, 22f), new Vector2(16.8f, 0f));
+            CreateFlowerPatch(nature, assets, new Vector2(-2f, 5.8f));
+            CreateFlowerPatch(nature, assets, new Vector2(12f, 2.3f));
+
+            CreateBoundary(walls, assets.FenceTile, "NorthFence", new Vector2(34f, 0.6f), new Vector2(0f, 10.8f));
+            CreateBoundary(walls, assets.FenceTile, "SouthFence", new Vector2(34f, 0.6f), new Vector2(0f, -10.8f));
+            CreateBoundary(walls, assets.FencePost, "WestFence", new Vector2(0.6f, 22f), new Vector2(-16.8f, 0f));
+            CreateBoundary(walls, assets.FencePost, "EastFence", new Vector2(0.6f, 22f), new Vector2(16.8f, 0f));
 
             PlayerSpawnPoint spawn = CreateChild("PlayerSpawn_Default", parent).AddComponent<PlayerSpawnPoint>();
             spawn.transform.position = new Vector3(-2f, -3.5f, 0f);
 
-            CreatePickup(interactables, squareSprite, new Vector2(-7f, -2f));
-            CreateTerminal(interactables, squareSprite, new Vector2(4f, -3.2f));
-            CreateAchievementTerminal(interactables, squareSprite, new Vector2(12f, -1.2f));
+            CreatePickup(interactables, assets.Phone, new Vector2(-7f, -2f));
+            CreateTerminal(interactables, assets.Terminal, new Vector2(4f, -3.2f));
+            CreateAchievementTerminal(interactables, assets.Marker, new Vector2(12f, -1.2f));
         }
 
         private static GameObject CreatePlayer(Transform parent, Sprite sprite, Transform uiRoot)
@@ -334,6 +399,105 @@ namespace ITAA.EditorTools.SceneBuilding
             return canvasObject;
         }
 
+        private static void CreateTilemap(
+            string name,
+            Transform parent,
+            TileBase tile,
+            Vector2Int size,
+            Vector2Int origin,
+            int sortingOrder)
+        {
+            GameObject gridObject = CreateChild(name + "_Grid", parent);
+            Grid grid = gridObject.AddComponent<Grid>();
+            grid.cellSize = Vector3.one;
+
+            GameObject tilemapObject = CreateChild(name, gridObject.transform);
+            Tilemap tilemap = tilemapObject.AddComponent<Tilemap>();
+            TilemapRenderer renderer = tilemapObject.AddComponent<TilemapRenderer>();
+            renderer.sortingOrder = sortingOrder;
+
+            if (tile == null)
+            {
+                Debug.LogWarning($"[SceneValidation] Tile fuer {name} fehlt.");
+                return;
+            }
+
+            int halfWidth = size.x / 2;
+            int halfHeight = size.y / 2;
+            for (int x = -halfWidth; x < halfWidth; x++)
+            {
+                for (int y = -halfHeight; y < halfHeight; y++)
+                {
+                    tilemap.SetTile(new Vector3Int(origin.x + x, origin.y + y, 0), tile);
+                }
+            }
+        }
+
+        private static void CreateRoads(Transform parent, VisualAssetSet assets)
+        {
+            CreateTilemap("MainRoad_Tilemap", parent, assets.RoadTile, new Vector2Int(30, 3), new Vector2Int(0, -1), 1);
+            CreateTilemap("NorthPath_Tilemap", parent, assets.PathTile, new Vector2Int(3, 12), new Vector2Int(-5, 3), 1);
+            CreateTilemap("NpcPlaza_Tilemap", parent, assets.PlazaTile, new Vector2Int(6, 4), new Vector2Int(3, 1), 1);
+        }
+
+        private static void CreateHouse(
+            Transform parent,
+            string name,
+            Vector2 position,
+            Sprite wall,
+            Sprite roof,
+            Sprite trim,
+            Sprite door,
+            int sortingOrder)
+        {
+            GameObject root = CreateChild(name, parent);
+            root.transform.position = position;
+
+            CreateSpriteChild("Roof", root.transform, roof, new Vector2(0f, 1.15f), new Vector2(4.8f, 1.8f), sortingOrder + 1, Color.white);
+            CreateSpriteChild("Walls", root.transform, wall, Vector2.zero, new Vector2(4.8f, 2.4f), sortingOrder, Color.white);
+            CreateSpriteChild("SnowTrim", root.transform, trim, new Vector2(0f, 1.28f), new Vector2(4.8f, 0.35f), sortingOrder + 2, Color.white);
+            CreateSpriteChild("Door", root.transform, door, new Vector2(0f, -0.75f), new Vector2(0.8f, 1.2f), sortingOrder + 3, Color.white);
+
+            BoxCollider2D collider = root.AddComponent<BoxCollider2D>();
+            collider.size = new Vector2(4.6f, 2.2f);
+            collider.offset = new Vector2(0f, -0.1f);
+        }
+
+        private static void CreateDepot(Transform parent, Vector2 position, VisualAssetSet assets)
+        {
+            GameObject root = CreateChild("Depot", parent);
+            root.transform.position = position;
+
+            CreateSpriteChild("Walls", root.transform, assets.StoneWall, Vector2.zero, new Vector2(4.6f, 2f), 5, Color.white);
+            CreateSpriteChild("Roof", root.transform, assets.BlueRoof, new Vector2(0f, 1.05f), new Vector2(4.6f, 1.4f), 6, Color.white);
+            CreateSpriteChild("Crates", root.transform, assets.Crate, new Vector2(-1.2f, -0.65f), new Vector2(1.2f, 0.7f), 7, Color.white);
+
+            BoxCollider2D collider = root.AddComponent<BoxCollider2D>();
+            collider.size = new Vector2(4.4f, 2f);
+            collider.offset = new Vector2(0f, -0.1f);
+        }
+
+        private static GameObject CreateSpriteChild(
+            string name,
+            Transform parent,
+            Sprite sprite,
+            Vector2 localPosition,
+            Vector2 size,
+            int sortingOrder,
+            Color color)
+        {
+            GameObject child = CreateChild(name, parent);
+            child.transform.localPosition = localPosition;
+            child.transform.localScale = Vector3.one;
+            SpriteRenderer renderer = child.AddComponent<SpriteRenderer>();
+            renderer.sprite = sprite;
+            renderer.drawMode = SpriteDrawMode.Sliced;
+            renderer.size = size;
+            renderer.sortingOrder = sortingOrder;
+            renderer.color = color;
+            return child;
+        }
+
         private static GameObject CreateVisualBlock(
             string name,
             Transform parent,
@@ -361,21 +525,34 @@ namespace ITAA.EditorTools.SceneBuilding
 
         private static void CreateBoundary(Transform parent, Sprite sprite, string name, Vector2 size, Vector2 position)
         {
-            GameObject boundary = CreateVisualBlock(name, parent, sprite, size, position, new Color(0.42f, 0.48f, 0.52f), true);
+            GameObject boundary = CreateVisualBlock(name, parent, sprite, size, position, Color.white, true);
             boundary.GetComponent<SpriteRenderer>().sortingOrder = 8;
         }
 
-        private static void CreateTree(Transform parent, Sprite sprite, Vector2 position)
+        private static void CreateTree(Transform parent, VisualAssetSet assets, Vector2 position)
         {
-            GameObject trunk = CreateVisualBlock("TreeTrunk", parent, sprite, new Vector2(0.45f, 1f), position, new Color(0.46f, 0.28f, 0.16f), true);
-            trunk.GetComponent<SpriteRenderer>().sortingOrder = 10;
-            GameObject crown = CreateVisualBlock("TreeCrown", parent, sprite, new Vector2(1.4f, 1.4f), position + Vector2.up * 0.85f, new Color(0.24f, 0.48f, 0.32f), false);
-            crown.GetComponent<SpriteRenderer>().sortingOrder = 11;
+            GameObject tree = CreateVisualBlock("SnowTree", parent, assets.Tree, new Vector2(1.8f, 2.3f), position, Color.white, true);
+            SpriteRenderer renderer = tree.GetComponent<SpriteRenderer>();
+            renderer.sortingOrder = 9;
+            BoxCollider2D collider = tree.GetComponent<BoxCollider2D>();
+            collider.size = new Vector2(0.55f, 0.65f);
+            collider.offset = new Vector2(0f, -0.75f);
+        }
+
+        private static void CreateFlowerPatch(Transform parent, VisualAssetSet assets, Vector2 position)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                Vector2 offset = new Vector2((i % 2) * 0.7f, (i / 2) * 0.45f);
+                GameObject flower = CreateVisualBlock("FlowerPatch", parent, assets.Flowers, new Vector2(0.8f, 0.5f), position + offset, Color.white, false);
+                flower.GetComponent<SpriteRenderer>().sortingOrder = 2;
+            }
         }
 
         private static void CreatePickup(Transform parent, Sprite sprite, Vector2 position)
         {
-            GameObject pickup = CreateVisualBlock("TestItem_Diensthandy", parent, sprite, new Vector2(0.55f, 0.35f), position, new Color(0.15f, 0.18f, 0.2f), false);
+            GameObject pickup = CreateVisualBlock("TestItem_Diensthandy", parent, sprite, new Vector2(0.7f, 0.7f), position, Color.white, false);
+            pickup.GetComponent<SpriteRenderer>().sortingOrder = 12;
             CircleCollider2D collider = pickup.AddComponent<CircleCollider2D>();
             collider.isTrigger = true;
             collider.radius = 0.8f;
@@ -388,7 +565,8 @@ namespace ITAA.EditorTools.SceneBuilding
 
         private static void CreateTerminal(Transform parent, Sprite sprite, Vector2 position)
         {
-            GameObject terminal = CreateVisualBlock("NetworkTerminal", parent, sprite, new Vector2(1.2f, 1f), position, new Color(0.08f, 0.16f, 0.13f), true);
+            GameObject terminal = CreateVisualBlock("NetworkTerminal", parent, sprite, new Vector2(1.2f, 1f), position, Color.white, true);
+            terminal.GetComponent<SpriteRenderer>().sortingOrder = 7;
             CircleCollider2D trigger = terminal.AddComponent<CircleCollider2D>();
             trigger.isTrigger = true;
             trigger.radius = 1.4f;
@@ -400,7 +578,8 @@ namespace ITAA.EditorTools.SceneBuilding
 
         private static void CreateAchievementTerminal(Transform parent, Sprite sprite, Vector2 position)
         {
-            GameObject marker = CreateVisualBlock("AchievementTrigger", parent, sprite, new Vector2(1f, 1f), position, new Color(0.95f, 0.75f, 0.22f), false);
+            GameObject marker = CreateVisualBlock("AchievementTrigger", parent, sprite, new Vector2(1f, 1f), position, Color.white, false);
+            marker.GetComponent<SpriteRenderer>().sortingOrder = 12;
             CircleCollider2D trigger = marker.AddComponent<CircleCollider2D>();
             trigger.isTrigger = true;
             trigger.radius = 1.1f;
@@ -409,6 +588,53 @@ namespace ITAA.EditorTools.SceneBuilding
             SetEnum(interactable, "interactionType", InteractionType.Hint);
             SetEnumByName(interactable, "action", "UnlockAchievement");
             SetString(interactable, "achievementId", "first_quiz");
+        }
+
+        private static VisualAssetSet LoadVisualAssets(Sprite fallbackSprite)
+        {
+            return new VisualAssetSet
+            {
+                FallbackSprite = fallbackSprite,
+                SnowTile = LoadTile("cloud_tileset_0"),
+                RoadTile = LoadTile("cloud_tileset_164"),
+                PathTile = LoadTile("cloud_tileset_177"),
+                PlazaTile = LoadTile("cloud_tileset_99"),
+                BlueWall = LoadSpriteFromTileset("cloud_tileset_207", fallbackSprite),
+                OrangeWall = LoadSpriteFromTileset("cloud_tileset_211", fallbackSprite),
+                StoneWall = LoadSpriteFromTileset("cloud_tileset_164", fallbackSprite),
+                BlueRoof = LoadSpriteFromTileset("cloud_tileset_187", fallbackSprite),
+                OrangeRoof = LoadSpriteFromTileset("cloud_tileset_191", fallbackSprite),
+                WallTop = LoadSpriteFromTileset("cloud_tileset_105", fallbackSprite),
+                Door = LoadSpriteFromTileset("cloud_tileset_238", fallbackSprite),
+                Tree = LoadSpriteFromTileset("cloud_tileset_72", fallbackSprite),
+                Flowers = LoadSpriteFromTileset("cloud_tileset_487", fallbackSprite),
+                FenceTile = LoadSpriteFromTileset("cloud_tileset_424", fallbackSprite),
+                FencePost = LoadSpriteFromTileset("cloud_tileset_422", fallbackSprite),
+                Phone = LoadSpriteFromTileset("cloud_tileset_474", fallbackSprite),
+                Terminal = LoadSpriteFromTileset("cloud_tileset_464", fallbackSprite),
+                Marker = LoadSpriteFromTileset("cloud_tileset_501", fallbackSprite),
+                Crate = LoadSpriteFromTileset("cloud_tileset_403", fallbackSprite)
+            };
+        }
+
+        private static TileBase LoadTile(string tileName)
+        {
+            return AssetDatabase.LoadAssetAtPath<TileBase>($"{TilesFolder}/{tileName}.asset");
+        }
+
+        private static Sprite LoadSpriteFromTileset(string spriteName, Sprite fallbackSprite)
+        {
+            Object[] assets = AssetDatabase.LoadAllAssetsAtPath(TilesetPath);
+            for (int i = 0; i < assets.Length; i++)
+            {
+                if (assets[i] is Sprite sprite && sprite.name == spriteName)
+                {
+                    return sprite;
+                }
+            }
+
+            Debug.LogWarning($"[SceneValidation] Sprite {spriteName} fehlt, nutze Platzhalter.");
+            return fallbackSprite;
         }
 
         private static void EnsureGeneratedArt()
@@ -587,6 +813,53 @@ namespace ITAA.EditorTools.SceneBuilding
 
                 serializedObject.ApplyModifiedPropertiesWithoutUndo();
             }
+        }
+
+        private static void ClearChildren(Transform parent)
+        {
+            for (int i = parent.childCount - 1; i >= 0; i--)
+            {
+                Object.DestroyImmediate(parent.GetChild(i).gameObject);
+            }
+        }
+
+        private static GameObject FindObjectByName(string objectName)
+        {
+            GameObject[] objects = Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include);
+
+            for (int i = 0; i < objects.Length; i++)
+            {
+                if (objects[i] != null && objects[i].name == objectName)
+                {
+                    return objects[i];
+                }
+            }
+
+            return null;
+        }
+
+        private sealed class VisualAssetSet
+        {
+            public Sprite FallbackSprite;
+            public TileBase SnowTile;
+            public TileBase RoadTile;
+            public TileBase PathTile;
+            public TileBase PlazaTile;
+            public Sprite BlueWall;
+            public Sprite OrangeWall;
+            public Sprite StoneWall;
+            public Sprite BlueRoof;
+            public Sprite OrangeRoof;
+            public Sprite WallTop;
+            public Sprite Door;
+            public Sprite Tree;
+            public Sprite Flowers;
+            public Sprite FenceTile;
+            public Sprite FencePost;
+            public Sprite Phone;
+            public Sprite Terminal;
+            public Sprite Marker;
+            public Sprite Crate;
         }
     }
 }
