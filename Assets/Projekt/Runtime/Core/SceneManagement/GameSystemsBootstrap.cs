@@ -3,7 +3,7 @@
  * Zweck: Initialisiert zentrale Runtime-Systeme defensiv auf einem gemeinsamen GameObject.
  * Verantwortung: Erzeugt fehlende Core-Manager, verhindert doppelte Manager-Instanzen und haelt GameSystems szenenuebergreifend aktiv.
  * Abhaengigkeiten: AchievementManager, SkillRuntimeManager, ProgressManager, ScenarioManager, SettingsManager, SettingsHotkeyController, RuntimeInventory, ToolbeltController, DevPanelBootstrap, SavegameRuntimeSession, Unity SceneManagement.
- * Verwendung: Laeuft automatisch nach dem Laden von StartScene oder GameScene und kann alternativ ueber EnsureForScene manuell angestossen werden.
+ * Verwendung: Laeuft automatisch nach dem Laden von StartScene und ist fuer eine spaetere neue GameScene vorbereitet.
  */
 
 using ITAA.DevTools;

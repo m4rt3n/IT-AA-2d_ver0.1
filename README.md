@@ -151,7 +151,7 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
   - JSON-basiert
   - Slot-System
   - Dummy Save für Tests
-  - Dummy-Saves verweisen aktuell auf `GameScene`; alte Dummy-Saves mit `StartScene` werden automatisch migriert
+  - Dummy-Saves verweisen aktuell bewusst auf `StartScene`, da `GameScene` fuer einen kompletten Neuaufbau entfernt wurde
   - Vor Spielstart Prüfung und Initialisierung benötigter Dateien
   - Ladebalken mit Prozentanzeige vor Szenenstart
 - 🔁 **Runtime Session**
@@ -161,11 +161,10 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
   - Anzeige direkt über dem Player
 - 🎮 **Menü-Flow**
   - Arthur → StartMenu → LoadGamePanel → Scene Load
-- 🧪 **GameScene Testwelt**
-  - Neue spielbare Szene unter `Assets/Projekt/Content/Scenes/GameScene.unity`
-  - Wird ueber SaveSlot/LoadGamePanel geladen und ist in den Build Settings nach `StartScene` eingetragen
-  - Enthält Player, Arthur, Bernd, HUD, QuizPanel, TerminalPanel, Interaktionsprompt und Testwelt-Kollisionen
-  - Testpunkte: Bernd-Quiz, Diensthandy-Pickup, Netzwerk-Terminal, Achievement-Trigger
+- 🧪 **GameScene Neuaufbau vorbereitet**
+  - Die alte `GameScene` und die generierten TestWorld-/Structured-Winter-Hub-Artefakte wurden bewusst entfernt
+  - `StartScene` bleibt der stabile Einstiegspunkt und die einzige aktive Szene in den Build Settings
+  - Die neue `GameScene` soll spaeter modular, coordinate-driven und ohne alte Testwelt-Abhaengigkeiten neu aufgebaut werden
 
 ---
 
@@ -337,41 +336,18 @@ Beim Laden der `StartScene` erzeugt `GameSystemsBootstrap` bei Bedarf ein persis
 Darueber werden die zentral benoetigten Systeme initialisiert: `SettingsManager`, `SettingsHotkeyController`, `SavegameRuntimeSession`, `AchievementManager`, `SkillRuntimeManager`, `RuntimeInventory`, `ToolbeltController` und `DevPanelBootstrap`.
 Arthur, Bernd, bestehende UI-Inspector-Referenzen, Prefabs und Animator-Controller werden dadurch nicht umverdrahtet.
 
-Hinweis: `StartScene` bleibt die Menü-/Ladeszene. Geladene Spielstände wechseln in `GameScene`, falls im SaveSlot kein anderer valider SceneName steht.
+Hinweis: `StartScene` bleibt die Menü-/Ladeszene und aktuell auch der sichere Fallback fuer SaveSlots. Die fruehere `GameScene` wurde bewusst entfernt und wird spaeter modular neu aufgebaut.
 
 ---
 
-### GameScene Testwelt
+### GameScene Neuaufbau
 
-`GameScene` ist eine kleine spielbare MVP-Testwelt mit klarer Hierarchie:
+Die bisherige `GameScene` wurde entfernt. Entfernt wurden auch die alten GameScene-/TestWorld-Editor-Werkzeuge und generierte TestWorld-Tiles.
 
-`_SceneRoot`, `_Bootstrap`, `_Systems`, `_UI`, `World`, `Characters`, `Cameras`, `Lighting`
-
-Enthalten:
-- 40x30 Winter-Hub mit festem Grid-Koordinatenlayout
-- Pflicht-Tilemaps: `Ground_Base`, `Ground_Details`, `Roads`, `Buildings`, `Roofs`, `Nature`, `Props`, `Interactables`, `Collision`
-- Zentraler Platz bei X 15-25 / Y 10-18, Kreuzweg bei X 20 und Y 14
-- Quiz-Zone oben, Inventory-Zone links, Skill-Zone rechts, Sued-Ausgang unten
-- Bereinigtes 32x32-Tileset: `Assets/Projekt/Content/Art/TestWorld/WinterTownTileset_Clean_32.png`
-- Benannte Tile-Assets und Mapping: `Assets/Projekt/Content/Tiles/TestWorld/`
-- Unity-ready Art-Atlas ohne Preview-Labels: `Assets/Projekt/Content/Art/Tiles/WinterTownTileset_Clean_32.png`
-- Art-Atlas-Mapping: `Assets/Projekt/Content/Art/Tiles/WinterTownTileset_Clean_32.mapping.json`
-- Separate grosse Testwelt-Props: `Assets/Projekt/Content/Art/Props/TestWorld/`
-- Blockierende Zellen gesammelt auf der `Collision`-Tilemap mit CompositeCollider2D
-- Player mit vorhandenen Movement-Komponenten, Rigidbody2D, CapsuleCollider2D und InteractionDetector
-- Arthur als NPC-Präsenz
-- Bernd als Quiz-NPC mit `BerndQuizStarter`, `BerndInteractableAdapter` und `BerndIntroQuiz`
-- HUD, InteractionPrompt, QuizPanel, TerminalPanel und EventSystem
-- Testinteraktionen für Diensthandy-Pickup, Terminal-XP und Achievement-Auslösung
-
-Editor-Menüs:
-- `ITAA/Scenes/Rebuild GameScene`
-- `ITAA/Scenes/Rebuild GameScene Visual World`
-- `ITAA/Scenes/Rebuild Structured Winter Hub`
-- `ITAA/Tilesets/Rebuild Clean Winter Town Tileset`
-- `ITAA/Tilesets/Create Clean 32x32 Winter Town Tileset`
-- `ITAA/Scenes/Open GameScene`
-- `ITAA/Validation/Validate GameScene`
+Naechster sinnvoller Schritt:
+- neue `GameScene` als modularen, coordinate-driven Aufbau planen
+- neue Map-Daten spaeter ueber `MapDefinition` oder einen neuen `GameSceneBuilder` erzeugen
+- StartScene-Funktionalitaet nicht als Teil der World-Szene duplizieren
 
 ---
 
@@ -448,9 +424,9 @@ save_slot_2.json
 - Score
 
 Aktueller Dummy-Stand:
-- `SceneName` wird zentral ueber `SceneNames.GameScene` gesetzt
-- Bereits vorhandene Dummy-Saves mit altem `StartScene`-Wert werden auf `GameScene` migriert
-- Dadurch bleiben Dummy-Save, Auth-Startszene und Build Settings synchron
+- `SceneName` wird aktuell ueber `SceneNames.StartScene` gesetzt
+- Alte Dummy-Saves mit `GameScene` werden beim Anzeigen/Laden auf `StartScene` zurueckgefuehrt
+- `SceneNames.GameScene` bleibt als Legacy-Konstante im Code, bis die neue GameScene modular neu erstellt wird
 
 ---
 

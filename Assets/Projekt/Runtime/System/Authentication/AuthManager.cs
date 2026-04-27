@@ -17,7 +17,7 @@ namespace ITAA.Authentication
     public class AuthManager : PersistentSingleton<AuthManager>
     {
         [Header("Scenes")]
-        [SerializeField] private string gameSceneName = SceneNames.GameScene;
+        [SerializeField] private string gameSceneName = SceneNames.StartScene;
 
         // --- LOGIN / REGISTER (aktuell deaktiviert) ---
 

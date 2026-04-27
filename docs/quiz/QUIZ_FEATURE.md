@@ -35,7 +35,7 @@ Das Quiz-System soll mehrere Fragetypen, Schwierigkeitsgrade und Quellen unterst
 - `QuizPanel` meldet Antworten und Quizabschluss optional an `QuizProgressReporter`, wenn dieser vorhanden ist.
 - `QuizTopicProgressFormatter` erstellt kurze HUD-/UI-Texte wie `DNS: 2 / 3 (67%)`.
 - `HudController` zeigt fuer das aktuelle Thema vorhandenen Fortschritt im bestehenden Topic-Feld an.
-- `GameSystemsBootstrap` erzeugt in `StartScene` und `GameScene` bei Bedarf einen `QuizProgressReporter`.
+- `GameSystemsBootstrap` erzeugt in `StartScene` bei Bedarf einen `QuizProgressReporter`; eine neue GameScene kann spaeter wieder angebunden werden.
 - Savegame-Persistenz und finale Themenfortschritts-UX bleiben offen.
 
 ## Aktueller Fragequalitaets-MVP

@@ -529,6 +529,11 @@ namespace ITAA.UI.Panels
 
                 if (source.HasData)
                 {
+                    if (source.SceneName == SceneNames.GameScene)
+                    {
+                        source.SceneName = SceneNames.StartScene;
+                    }
+
                     normalizedSlots.Add(source);
                     continue;
                 }
@@ -589,9 +594,9 @@ namespace ITAA.UI.Panels
                     changed = true;
                 }
 
-                if (string.IsNullOrWhiteSpace(existing.SceneName) || existing.SceneName == SceneNames.StartScene)
+                if (string.IsNullOrWhiteSpace(existing.SceneName) || existing.SceneName == SceneNames.GameScene)
                 {
-                    existing.SceneName = SceneNames.GameScene;
+                    existing.SceneName = SceneNames.StartScene;
                     changed = true;
                 }
 
@@ -614,7 +619,7 @@ namespace ITAA.UI.Panels
                 SlotId = slotId,
                 DisplayName = displayName,
                 PlayerName = playerName,
-                SceneName = SceneNames.GameScene,
+                SceneName = SceneNames.StartScene,
                 SavedAtText = DateTime.Now.ToString("dd.MM.yyyy HH:mm"),
                 Level = level,
                 Score = score,
@@ -778,9 +783,9 @@ namespace ITAA.UI.Panels
 
         private static string ResolveTargetSceneName(SaveSlotEntity slot)
         {
-            if (slot == null || string.IsNullOrWhiteSpace(slot.SceneName) || slot.SceneName == "-")
+            if (slot == null || string.IsNullOrWhiteSpace(slot.SceneName) || slot.SceneName == "-" || slot.SceneName == SceneNames.GameScene)
             {
-                return SceneNames.GameScene;
+                return SceneNames.StartScene;
             }
 
             return slot.SceneName;
