@@ -81,6 +81,7 @@ Das Projekt dient als **Framework + Lernplattform**, insbesondere für strukturi
   - Neues optionales Entwicklerwerkzeug unter `Assets/Projekt/Runtime/Features/DevTools/`
   - Runtime-Panel kann per `F12` geoeffnet werden
   - Bietet Debug-Aktionen fuer SaveSlots, Dummy-Saves, Settings, Quiz-Drafts, PlayerSession, aktuelle Szene und vorbereitete Feature-Manager
+  - Im `DevelopmentLevel` sind zusaetzliche Integrationstest-Aktionen vorbereitet: Demo-Item hinzufuegen, Demo-XP vergeben, Demo-Achievement freischalten und Demo-Quiz starten
   - `GameSystemsBootstrap` erzeugt das DevPanel in der `StartScene` bei Bedarf automatisch
   - Nutzt bestehende Systeme defensiv und meldet fehlende Abhaengigkeiten per `Debug.LogWarning`
 - 📚 **Knowledge Base (MVP)**
@@ -348,6 +349,19 @@ Naechster sinnvoller Schritt:
 - neue `GameScene` als modularen, coordinate-driven Aufbau planen
 - neue Map-Daten spaeter ueber `MapDefinition` oder einen neuen `GameSceneBuilder` erzeugen
 - StartScene-Funktionalitaet nicht als Teil der World-Szene duplizieren
+
+### DevelopmentLevel
+
+`Assets/Projekt/Content/Scenes/DevelopmentLevel.unity` ist als zentrale Integrations- und Testscene vorbereitet.
+Die Scene wird reproduzierbar ueber `Assets/Projekt/Editor/SceneBuilding/DevelopmentLevelBuilder.cs` erzeugt (`Tools/IT-AA/Build Development Level`).
+
+Enthaltene Integrationsziele:
+- sichtbarer `GameSystems`-Root mit Bootstrap und vorbereiteten Runtime-Managern
+- steuerbarer Player mit NameTag
+- Arthur mit NameTag und bestehender MenuManager-Anbindung
+- Bernd mit NameTag und Quiz-Anbindung an `BerndIntroQuiz`
+- UI-Testflaechen fuer MenuManager, LoadGamePanel, QuizPanel und DevPanel
+- Runtime-Systeme fuer Achievements, Skills, Inventory/Toolbelt, Progress, Scenario, Settings und Savegame defensiv initialisiert
 
 ---
 

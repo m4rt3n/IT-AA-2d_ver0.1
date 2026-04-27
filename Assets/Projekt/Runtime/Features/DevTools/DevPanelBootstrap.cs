@@ -113,8 +113,10 @@ namespace ITAA.DevTools
 
             Button reloadButton = CreateButton(panelObject.transform, "Reload SaveSlots");
             Button dummySavesButton = CreateButton(panelObject.transform, "Generate Dummy Saves");
+            Button addDemoItemButton = CreateButton(panelObject.transform, "Add Demo Item");
             Button resetSettingsButton = CreateButton(panelObject.transform, "Reset Settings");
             Button quizDraftButton = CreateButton(panelObject.transform, "Generate Dummy Quiz Draft");
+            Button startQuizButton = CreateButton(panelObject.transform, "Start Demo Quiz");
             Button printSessionButton = CreateButton(panelObject.transform, "Print Player Session");
             Button printSceneButton = CreateButton(panelObject.transform, "Print Current Scene");
             Button printFeatureManagersButton = CreateButton(panelObject.transform, "Print Feature Managers");
@@ -127,8 +129,10 @@ namespace ITAA.DevTools
             runtimeController.AssignButtons(
                 reloadButton,
                 dummySavesButton,
+                addDemoItemButton,
                 resetSettingsButton,
                 quizDraftButton,
+                startQuizButton,
                 printSessionButton,
                 printSceneButton,
                 printFeatureManagersButton,

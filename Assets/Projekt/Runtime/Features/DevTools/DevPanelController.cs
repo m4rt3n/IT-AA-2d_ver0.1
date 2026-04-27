@@ -1,8 +1,8 @@
 /*
  * Datei: DevPanelController.cs
  * Zweck: Stellt ein optionales Entwickler-Panel mit Debug- und Testaktionen bereit.
- * Verantwortung: Verdrahtet UI-Buttons mit bestehenden Systemen wie SaveSystem, LoadGamePanel, PlayerSession und Feature-Managern.
- * Abhaengigkeiten: SaveSystem, LoadGamePanel, PlayerSession, SettingsManager, Feature-Manager, Unity UI, SceneManager.
+ * Verantwortung: Verdrahtet UI-Buttons mit bestehenden Systemen wie SaveSystem, LoadGamePanel, PlayerSession, QuizPanel und Feature-Managern.
+ * Abhaengigkeiten: SaveSystem, LoadGamePanel, PlayerSession, SettingsManager, Feature-Manager, QuizSet, QuizPanel, Unity UI, SceneManager.
  * Verwendung: Wird auf ein DevPanel-GameObject gesetzt oder vom DevPanelBootstrap zur Laufzeit erzeugt.
  */
 
@@ -15,6 +15,7 @@ using ITAA.Features.Progress;
 using ITAA.Features.Scenarios;
 using ITAA.Features.Skills;
 using ITAA.Player.Session;
+using ITAA.Quiz;
 using ITAA.System.Savegame;
 using ITAA.System.Settings;
 using ITAA.UI.Panels;
@@ -35,12 +36,15 @@ namespace ITAA.DevTools
 
         [Header("Existing Systems")]
         [SerializeField] private LoadGamePanel loadGamePanel;
+        [SerializeField] private QuizPanel quizPanel;
 
         [Header("Buttons")]
         [SerializeField] private Button reloadSaveSlotsButton;
         [SerializeField] private Button generateDummySavesButton;
+        [SerializeField] private Button addDemoItemButton;
         [SerializeField] private Button resetSettingsButton;
         [SerializeField] private Button generateDummyQuizDraftButton;
+        [SerializeField] private Button startQuizButton;
         [SerializeField] private Button printPlayerSessionButton;
         [SerializeField] private Button printCurrentSceneButton;
         [SerializeField] private Button printFeatureManagersButton;
@@ -50,6 +54,9 @@ namespace ITAA.DevTools
 
         [Header("Debug")]
         [SerializeField] private bool enableDebugLogs = true;
+
+        [Header("Development Test Data")]
+        [SerializeField] private QuizSet demoQuizSet;
 
         #endregion
 
@@ -114,6 +121,30 @@ namespace ITAA.DevTools
             Log("SaveSlots neu geladen.");
         }
 
+        public void AddDemoItem()
+        {
+            RuntimeInventory runtimeInventory = FindAnyObjectByType<RuntimeInventory>(FindObjectsInactive.Include);
+
+            if (runtimeInventory == null)
+            {
+                Debug.LogWarning($"[{nameof(DevPanelController)}] RuntimeInventory fehlt.", this);
+                return;
+            }
+
+            InventoryItemData itemData = new InventoryItemData
+            {
+                ItemId = "dev_network_tool",
+                DisplayName = "Netzwerk-Tool",
+                Description = "Dev-Testitem fuer das DevelopmentLevel.",
+                Category = InventoryItemCategory.Tool,
+                IsStackable = true,
+                MaxStack = 9
+            };
+
+            bool added = runtimeInventory.AddItem(itemData, 1);
+            Log(added ? "Demo-Item 'dev_network_tool' hinzugefuegt." : "Demo-Item konnte nicht hinzugefuegt werden.");
+        }
+
         public void GenerateDummySaves()
         {
             EnsureSaveSystem();
@@ -140,6 +171,26 @@ namespace ITAA.DevTools
                 "Persistenz fuer Quiz-Drafts existiert noch nicht.",
                 this
             );
+        }
+
+        public void StartDemoQuiz()
+        {
+            ResolveReferences();
+
+            if (quizPanel == null)
+            {
+                Debug.LogWarning($"[{nameof(DevPanelController)}] QuizPanel fehlt. Quiz kann nicht gestartet werden.", this);
+                return;
+            }
+
+            if (demoQuizSet == null)
+            {
+                Debug.LogWarning($"[{nameof(DevPanelController)}] DemoQuizSet fehlt. Builder oder Inspector muss ein QuizSet zuweisen.", this);
+                return;
+            }
+
+            quizPanel.StartQuiz(demoQuizSet, null);
+            Log("Demo-Quiz gestartet.");
         }
 
         public void PrintPlayerSession()
@@ -240,8 +291,10 @@ namespace ITAA.DevTools
         public void AssignButtons(
             Button reloadSaveSlots,
             Button generateDummySaves,
+            Button addDemoItem,
             Button resetSettings,
             Button generateDummyQuizDraft,
+            Button startQuiz,
             Button printPlayerSession,
             Button printCurrentScene,
             Button printFeatureManagers,
@@ -253,8 +306,10 @@ namespace ITAA.DevTools
 
             reloadSaveSlotsButton = reloadSaveSlots;
             generateDummySavesButton = generateDummySaves;
+            addDemoItemButton = addDemoItem;
             resetSettingsButton = resetSettings;
             generateDummyQuizDraftButton = generateDummyQuizDraft;
+            startQuizButton = startQuiz;
             printPlayerSessionButton = printPlayerSession;
             printCurrentSceneButton = printCurrentScene;
             printFeatureManagersButton = printFeatureManagers;
@@ -268,6 +323,12 @@ namespace ITAA.DevTools
         public void AssignPanelRoot(GameObject root)
         {
             panelRoot = root;
+        }
+
+        public void AssignQuizTestTargets(QuizPanel panel, QuizSet quizSet)
+        {
+            quizPanel = panel;
+            demoQuizSet = quizSet;
         }
 
         #endregion
@@ -285,14 +346,21 @@ namespace ITAA.DevTools
             {
                 loadGamePanel = FindAnyObjectByType<LoadGamePanel>(FindObjectsInactive.Include);
             }
+
+            if (quizPanel == null)
+            {
+                quizPanel = FindAnyObjectByType<QuizPanel>(FindObjectsInactive.Include);
+            }
         }
 
         private void WireButtons()
         {
             WireButton(reloadSaveSlotsButton, ReloadSaveSlots);
             WireButton(generateDummySavesButton, GenerateDummySaves);
+            WireButton(addDemoItemButton, AddDemoItem);
             WireButton(resetSettingsButton, ResetSettings);
             WireButton(generateDummyQuizDraftButton, GenerateDummyQuizDraft);
+            WireButton(startQuizButton, StartDemoQuiz);
             WireButton(printPlayerSessionButton, PrintPlayerSession);
             WireButton(printCurrentSceneButton, PrintCurrentScene);
             WireButton(printFeatureManagersButton, PrintFeatureManagers);
@@ -305,8 +373,10 @@ namespace ITAA.DevTools
         {
             UnwireButton(reloadSaveSlotsButton, ReloadSaveSlots);
             UnwireButton(generateDummySavesButton, GenerateDummySaves);
+            UnwireButton(addDemoItemButton, AddDemoItem);
             UnwireButton(resetSettingsButton, ResetSettings);
             UnwireButton(generateDummyQuizDraftButton, GenerateDummyQuizDraft);
+            UnwireButton(startQuizButton, StartDemoQuiz);
             UnwireButton(printPlayerSessionButton, PrintPlayerSession);
             UnwireButton(printCurrentSceneButton, PrintCurrentScene);
             UnwireButton(printFeatureManagersButton, PrintFeatureManagers);
